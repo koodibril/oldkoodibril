@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { WindowMock } from '../mock/window.mock';
 
 const getWindow = (): Window => window;
 
