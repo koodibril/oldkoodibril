@@ -5,6 +5,7 @@ import {
   FreeCamera,
   Scene,
   Light,
+  MeshBuilder,
   Mesh,
   Color3,
   Color4,
@@ -13,6 +14,7 @@ import {
   StandardMaterial,
   Texture,
   DynamicTexture,
+  Animation,
   Space,
 } from '@babylonjs/core';
 
@@ -24,7 +26,8 @@ export class EngineService {
   private scene!: Scene;
   private light!: Light;
 
-  private sphere!: Mesh;
+  private branch!: Mesh;
+  private koodibril!: Mesh;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -48,22 +51,21 @@ export class EngineService {
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
 
-    // create a built-in "sphere" shape; its constructor takes 4 params: name, subdivisions, radius, scene
-    this.sphere = Mesh.CreateSphere('sphere1', 16, 2, this.scene);
+    // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
+    this.branch = MeshBuilder.CreateDisc('disc', { tessellation: 3 });
+    this.koodibril = MeshBuilder.CreateDisc('disc', { tessellation: 12, arc: 5 / 6, radius: 0.2 });
 
-    // create the material with its texture for the sphere and assign it to the sphere
-    const spherMaterial = new StandardMaterial('sun_surface', this.scene);
-    spherMaterial.diffuseTexture = new Texture('../../content/assets/textures/sun.jpg', this.scene);
-    this.sphere.material = spherMaterial;
-
-    // move the sphere upward 1/2 of its height
-    this.sphere.position.y = 1;
-    this.sphere.position.z = 0;
-
-    // simple rotation along the y axis
-    this.scene.registerAfterRender(() => {
-      this.sphere.rotate(new Vector3(0, 1, 0), 0.02, Space.LOCAL);
-    });
+    // create the material with its texture for the branch and assign it to the branch
+    const branchMaterial = new StandardMaterial('sun_surface', this.scene);
+    branchMaterial.diffuseTexture = new Texture('../../content/assets/textures/sun.jpg', this.scene);
+    this.branch.material = branchMaterial;
+    this.koodibril.material = branchMaterial;
+    this.koodibril.parent = this.branch;
+    // move the branch upward 1/2 of its height
+    this.branch.position.y = 0;
+    this.branch.position.z = 0;
+    this.koodibril.position.y = 3;
+    this.koodibril.position.z = 0;
   }
 
   public animate(): void {
@@ -85,7 +87,7 @@ export class EngineService {
       const offsetx = this.canvas.width / 200;
       const offsety = this.canvas.height / 200;
       this.canvas.addEventListener('mouseout', () => {
-        const translateVector = new Vector3(-this.sphere.position.x, -this.sphere.position.y, 0);
+        const translateVector = new Vector3(-this.branch.position.x, -this.branch.position.y, 0);
         const distance = translateVector.length();
 
         const direction = new Vector3(translateVector.x, translateVector.y, translateVector.z);
@@ -95,7 +97,7 @@ export class EngineService {
         let i = 0;
         this.scene.registerAfterRender(() => {
           if (i++ * deltaDistance <= distance) {
-            this.sphere.translate(direction, deltaDistance, Space.WORLD);
+            this.branch.translate(direction, deltaDistance, Space.WORLD);
           }
         });
       });
@@ -103,8 +105,9 @@ export class EngineService {
       this.canvas.addEventListener('mousemove', () => {
         const x = this.scene.pointerX / 100 - offsetx;
         const y = -this.scene.pointerY / 100 + offsety;
-        this.sphere.position.x = x;
-        this.sphere.position.y = y;
+        this.branch.position.x = x;
+        this.branch.position.y = y;
+        console.log('x: ' + this.scene.pointerX.toString(), 'y: ' + this.scene.pointerY.toString());
         console.log('x: ' + x.toString(), 'y: ' + y.toString());
       });
 
