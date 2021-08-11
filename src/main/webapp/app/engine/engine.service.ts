@@ -58,6 +58,7 @@ export class EngineService {
 
     // move the sphere upward 1/2 of its height
     this.sphere.position.y = 1;
+    this.sphere.position.z = 0;
 
     // simple rotation along the y axis
     this.scene.registerAfterRender(() => {
@@ -81,14 +82,29 @@ export class EngineService {
         });
       }
 
+      const offsetx = this.canvas.width / 200;
+      const offsety = this.canvas.height / 200;
+      this.canvas.addEventListener('mouseout', () => {
+        const translateVector = new Vector3(-this.sphere.position.x, -this.sphere.position.y, 0);
+        const distance = translateVector.length();
+
+        const direction = new Vector3(translateVector.x, translateVector.y, translateVector.z);
+        direction.normalize();
+        const deltaDistance = 0.1;
+
+        let i = 0;
+        this.scene.registerAfterRender(() => {
+          if (i++ * deltaDistance <= distance) {
+            this.sphere.translate(direction, deltaDistance, Space.WORLD);
+          }
+        });
+      });
+
       this.canvas.addEventListener('mousemove', () => {
-        const offsetx = this.canvas.width / 200;
-        const offsety = this.canvas.height / 200;
         const x = this.scene.pointerX / 100 - offsetx;
         const y = -this.scene.pointerY / 100 + offsety;
         this.sphere.position.x = x;
         this.sphere.position.y = y;
-        this.sphere.position.z = 0;
         console.log('x: ' + x.toString(), 'y: ' + y.toString());
       });
 
