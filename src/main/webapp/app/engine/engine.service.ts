@@ -40,13 +40,10 @@ export class EngineService {
     this.scene.clearColor = new Color4(0, 0, 0, 0);
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
-    this.camera = new FreeCamera('camera1', new Vector3(5, 10, -20), this.scene);
+    this.camera = new FreeCamera('camera1', new Vector3(0, 0, -10), this.scene);
 
     // target the camera to scene origin
     this.camera.setTarget(Vector3.Zero());
-
-    // attach the camera to the canvas
-    this.camera.attachControl(this.canvas, false);
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
@@ -66,9 +63,6 @@ export class EngineService {
     this.scene.registerAfterRender(() => {
       this.sphere.rotate(new Vector3(0, 1, 0), 0.02, Space.LOCAL);
     });
-
-    // generates the world x-y-z axis for better understanding
-    this.showWorldAxis(8);
   }
 
   public animate(): void {
@@ -86,6 +80,17 @@ export class EngineService {
           this.engine.runRenderLoop(rendererLoopCallback);
         });
       }
+
+      this.canvas.addEventListener('mousemove', () => {
+        const offsetx = this.canvas.width / 200;
+        const offsety = this.canvas.height / 200;
+        const x = this.scene.pointerX / 100 - offsetx;
+        const y = -this.scene.pointerY / 100 + offsety;
+        this.sphere.position.x = x;
+        this.sphere.position.y = y;
+        this.sphere.position.z = 0;
+        console.log('x: ' + x.toString(), 'y: ' + y.toString());
+      });
 
       this.windowRef.window.addEventListener('resize', () => {
         this.engine.resize();
