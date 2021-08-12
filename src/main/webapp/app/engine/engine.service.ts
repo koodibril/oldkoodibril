@@ -52,8 +52,9 @@ export class EngineService {
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
-    this.branch = MeshBuilder.CreateDisc('disc', { tessellation: 3 });
     this.koodibril = MeshBuilder.CreateDisc('disc', { tessellation: 12, arc: 5 / 6, radius: 0.2 });
+    //this.koodibril = MeshBuilder.CreateCylinder('disc', { tessellation: 12, height: 2, diameter: 0.2 });
+    this.branch = MeshBuilder.CreateDisc('disc', { tessellation: 3, radius: 0.1 });
 
     // create the material with its texture for the branch and assign it to the branch
     const branchMaterial = new StandardMaterial('sun_surface', this.scene);
@@ -64,8 +65,9 @@ export class EngineService {
     // move the branch upward 1/2 of its height
     this.branch.position.y = 0;
     this.branch.position.z = 0;
-    this.koodibril.position.y = 3;
+    this.koodibril.position.y = 1;
     this.koodibril.position.z = 0;
+    this.fly();
   }
 
   public animate(): void {
@@ -92,7 +94,7 @@ export class EngineService {
 
         const direction = new Vector3(translateVector.x, translateVector.y, translateVector.z);
         direction.normalize();
-        const deltaDistance = 0.1;
+        const deltaDistance = 0.2;
 
         let i = 0;
         this.scene.registerAfterRender(() => {
@@ -107,8 +109,6 @@ export class EngineService {
         const y = -this.scene.pointerY / 100 + offsety;
         this.branch.position.x = x;
         this.branch.position.y = y;
-        console.log('x: ' + this.scene.pointerX.toString(), 'y: ' + this.scene.pointerY.toString());
-        console.log('x: ' + x.toString(), 'y: ' + y.toString());
       });
 
       this.windowRef.window.addEventListener('resize', () => {
@@ -117,74 +117,67 @@ export class EngineService {
     });
   }
 
-  /**
-   * creates the world axes
-   *
-   * Source: https://doc.babylonjs.com/snippets/world_axes
-   *
-   * @param size number
-   */
-  public showWorldAxis(size: number): void {
-    const makeTextPlane = (text: string, color: string, textSize: number): Mesh => {
-      const dynamicTexture = new DynamicTexture('DynamicTexture', 50, this.scene, true);
-      dynamicTexture.hasAlpha = true;
-      dynamicTexture.drawText(text, 5, 40, 'bold 36px Arial', color, 'transparent', true);
-      const plane = Mesh.CreatePlane('TextPlane', textSize, this.scene, true);
-      const material = new StandardMaterial('TextPlaneMaterial', this.scene);
-      material.backFaceCulling = false;
-      material.specularColor = new Color3(0, 0, 0);
-      material.diffuseTexture = dynamicTexture;
-      plane.material = material;
+  public fly(): void {
+    const frameRate = 10;
+    const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
+    const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
+    const rotate = this.koodibril.position.x > xtravel ? true : false;
+    const deg = this.koodibril.position.x > xtravel ? -1 : 1;
+    console.log('random x: ' + xtravel.toString(), 'random y: ' + ytravel.toString());
+    const xkeyFrames = [
+      {
+        frame: 0,
+        value: this.koodibril.position.x,
+      },
+      {
+        frame: frameRate,
+        value: xtravel,
+      },
+      {
+        frame: 2 * frameRate,
+        value: xtravel,
+      },
+    ];
+    const ykeyFrames = [
+      {
+        frame: 0,
+        value: this.koodibril.position.y,
+      },
+      {
+        frame: frameRate,
+        value: ytravel,
+      },
+      {
+        frame: 2 * frameRate,
+        value: ytravel,
+      },
+    ];
+    const yRotateKeyFrames = [
+      {
+        frame: 0,
+        value: this.koodibril.rotation.y,
+      },
+      {
+        frame: frameRate,
+        value: rotate ? (Math.PI / 2) * deg : 0,
+      },
+      {
+        frame: 2 * frameRate,
+        value: rotate ? Math.PI * deg : 0,
+      },
+    ];
 
-      return plane;
-    };
+    const xSlide = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const ySlide = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    //const yRotate = new Animation("yRotate", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
-    const axisX = Mesh.CreateLines(
-      'axisX',
-      [
-        Vector3.Zero(),
-        new Vector3(size, 0, 0),
-        new Vector3(size * 0.95, 0.05 * size, 0),
-        new Vector3(size, 0, 0),
-        new Vector3(size * 0.95, -0.05 * size, 0),
-      ],
-      this.scene
-    );
-
-    axisX.color = new Color3(1, 0, 0);
-    const xChar = makeTextPlane('X', 'red', size / 10);
-    xChar.position = new Vector3(0.9 * size, -0.05 * size, 0);
-
-    const axisY = Mesh.CreateLines(
-      'axisY',
-      [
-        Vector3.Zero(),
-        new Vector3(0, size, 0),
-        new Vector3(-0.05 * size, size * 0.95, 0),
-        new Vector3(0, size, 0),
-        new Vector3(0.05 * size, size * 0.95, 0),
-      ],
-      this.scene
-    );
-
-    axisY.color = new Color3(0, 1, 0);
-    const yChar = makeTextPlane('Y', 'green', size / 10);
-    yChar.position = new Vector3(0, 0.9 * size, -0.05 * size);
-
-    const axisZ = Mesh.CreateLines(
-      'axisZ',
-      [
-        Vector3.Zero(),
-        new Vector3(0, 0, size),
-        new Vector3(0, -0.05 * size, size * 0.95),
-        new Vector3(0, 0, size),
-        new Vector3(0, 0.05 * size, size * 0.95),
-      ],
-      this.scene
-    );
-
-    axisZ.color = new Color3(0, 0, 1);
-    const zChar = makeTextPlane('Z', 'blue', size / 10);
-    zChar.position = new Vector3(0, 0.05 * size, 0.9 * size);
+    xSlide.setKeys(xkeyFrames);
+    ySlide.setKeys(ykeyFrames);
+    //yRotate.setKeys(yRotateKeyFrames);
+    const animations = [xSlide, ySlide];
+    const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, 2 * frameRate, false, 4);
+    flyAnimate.onAnimationEndObservable.add(() => {
+      this.fly();
+    });
   }
 }
