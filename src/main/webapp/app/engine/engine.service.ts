@@ -18,6 +18,7 @@ import {
   Animation,
   Space,
   AbstractMesh,
+  Layer,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
@@ -28,6 +29,7 @@ export class EngineService {
   private camera!: FreeCamera;
   private scene!: Scene;
   private light!: Light;
+  private layer!: Layer;
 
   private branch!: Mesh;
   private koodibril!: AbstractMesh;
@@ -53,6 +55,7 @@ export class EngineService {
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
+    this.layer = new Layer('', '../../content/images/jungle.jpg', this.scene, true);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.001 });
