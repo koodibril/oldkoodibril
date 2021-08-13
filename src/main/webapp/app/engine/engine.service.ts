@@ -55,17 +55,14 @@ export class EngineService {
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
-    //this.koodibril = MeshBuilder.CreateDisc('disc', { tessellation: 12, arc: 5 / 6, radius: 0.2 });
-    //this.koodibril = MeshBuilder.CreateCylinder('disc', { tessellation: 12, height: 2, diameter: 0.2 });
-    this.branch = MeshBuilder.CreateDisc('disc', { tessellation: 3, radius: 0.1 });
-    const imported = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'untitled.glb', this.scene);
-    const koodibrilAnim = this.scene.getAnimationGroupByName('metarig|metarig|metarigAction|metarig|metarigAction');
+    this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.001 });
+    const imported = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
+    const koodibrilAnim = this.scene.getAnimationGroupByName('fly');
     if (koodibrilAnim) {
       imported.animationGroups[0].stop();
       koodibrilAnim.start(true, 10.0, koodibrilAnim.from, koodibrilAnim.to, false);
     }
     this.koodibril = imported.meshes[0];
-    console.log(this.koodibril);
     // create the material with its texture for the branch and assign it to the branch
     const branchMaterial = new StandardMaterial('sun_surface', this.scene);
     branchMaterial.diffuseTexture = new Texture('../../content/assets/textures/sun.jpg', this.scene);
@@ -75,7 +72,7 @@ export class EngineService {
     // move the branch upward 1/2 of its height
     this.branch.position.y = 0;
     this.branch.position.z = 0;
-    this.koodibril.scaling.scaleInPlace(0.1);
+    this.koodibril.scaling.scaleInPlace(0.2);
     this.koodibril.position.y = 1;
     this.koodibril.position.z = 0;
     this.koodibril.parent = this.branch;
