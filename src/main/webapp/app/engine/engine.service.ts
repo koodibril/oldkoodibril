@@ -7,6 +7,7 @@ import {
   Light,
   MeshBuilder,
   Mesh,
+  SceneLoader,
   Color3,
   Color4,
   Vector3,
@@ -16,7 +17,9 @@ import {
   DynamicTexture,
   Animation,
   Space,
+  AbstractMesh,
 } from '@babylonjs/core';
+import '@babylonjs/loaders/glTF';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
@@ -27,11 +30,11 @@ export class EngineService {
   private light!: Light;
 
   private branch!: Mesh;
-  private koodibril!: Mesh;
+  private koodibril!: AbstractMesh;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
-  public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
     // The first step is to get the reference of the canvas element from our HTML document
     this.canvas = canvas.nativeElement;
 
@@ -52,21 +55,33 @@ export class EngineService {
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
-    this.koodibril = MeshBuilder.CreateDisc('disc', { tessellation: 12, arc: 5 / 6, radius: 0.2 });
+    //this.koodibril = MeshBuilder.CreateDisc('disc', { tessellation: 12, arc: 5 / 6, radius: 0.2 });
     //this.koodibril = MeshBuilder.CreateCylinder('disc', { tessellation: 12, height: 2, diameter: 0.2 });
     this.branch = MeshBuilder.CreateDisc('disc', { tessellation: 3, radius: 0.1 });
-
+    const imported = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'untitled.glb', this.scene);
+    const koodibrilAnim = this.scene.getAnimationGroupByName('metarig|metarig|metarigAction|metarig|metarigAction');
+    if (koodibrilAnim) {
+      imported.animationGroups[0].stop();
+      koodibrilAnim.start(true, 10.0, koodibrilAnim.from, koodibrilAnim.to, false);
+    }
+    this.koodibril = imported.meshes[0];
+    console.log(this.koodibril);
     // create the material with its texture for the branch and assign it to the branch
     const branchMaterial = new StandardMaterial('sun_surface', this.scene);
     branchMaterial.diffuseTexture = new Texture('../../content/assets/textures/sun.jpg', this.scene);
     this.branch.material = branchMaterial;
-    this.koodibril.material = branchMaterial;
-    this.koodibril.parent = this.branch;
+    //this.koodibril.material = branchMaterial;
+    //this.koodibril.parent = this.branch;
     // move the branch upward 1/2 of its height
     this.branch.position.y = 0;
     this.branch.position.z = 0;
+    this.koodibril.scaling.scaleInPlace(0.1);
     this.koodibril.position.y = 1;
     this.koodibril.position.z = 0;
+    this.koodibril.parent = this.branch;
+    console.log(this.koodibril.rotationQuaternion);
+    this.koodibril.rotate(new Vector3(0, 1, 0), 1.5 * Math.PI);
+    console.log(this.koodibril.rotationQuaternion);
     this.fly();
   }
 
@@ -121,9 +136,10 @@ export class EngineService {
     const frameRate = 10;
     const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
     const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const rotate = this.koodibril.position.x > xtravel ? true : false;
-    const deg = this.koodibril.position.x > xtravel ? -1 : 1;
-    console.log('random x: ' + xtravel.toString(), 'random y: ' + ytravel.toString());
+    const rotate =
+      this.koodibril.position.x > xtravel
+        ? this.koodibril.rotate(new Vector3(0, 1, 0), 1.5 * Math.PI)
+        : this.koodibril.rotate(new Vector3(0, 1, 0), -1.5 * Math.PI);
     const xkeyFrames = [
       {
         frame: 0,
@@ -152,28 +168,12 @@ export class EngineService {
         value: ytravel,
       },
     ];
-    const yRotateKeyFrames = [
-      {
-        frame: 0,
-        value: this.koodibril.rotation.y,
-      },
-      {
-        frame: frameRate,
-        value: rotate ? (Math.PI / 2) * deg : 0,
-      },
-      {
-        frame: 2 * frameRate,
-        value: rotate ? Math.PI * deg : 0,
-      },
-    ];
 
     const xSlide = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
     const ySlide = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-    //const yRotate = new Animation("yRotate", "rotation.y", frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
     xSlide.setKeys(xkeyFrames);
     ySlide.setKeys(ykeyFrames);
-    //yRotate.setKeys(yRotateKeyFrames);
     const animations = [xSlide, ySlide];
     const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, 2 * frameRate, false, 4);
     flyAnimate.onAnimationEndObservable.add(() => {
