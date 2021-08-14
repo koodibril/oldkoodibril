@@ -49,23 +49,28 @@ export class EngineService {
     this.scene.clearColor = new Color4(0, 0, 0, 0);
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
-    this.camera = new FlyCamera('camera1', new Vector3(0, 0, -10), this.scene);
-    this.camera.rotation.x = Math.PI / 2;
+    this.camera = new FlyCamera('camera1', new Vector3(0, 3, -20), this.scene);
 
     // target the camera to scene origin
     this.camera.setTarget(Vector3.Zero());
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
-    const abstractPlane = Plane.FromPositionAndNormal(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
-    const plane = MeshBuilder.CreatePlane('plane', { sourcePlane: abstractPlane });
-    plane.position.x = 0;
-    plane.position.y = 0;
-    plane.position.z = 0;
-    plane.rotation.x = 0;
-    plane.rotation.y = 0;
-    plane.rotation.z = 0;
-    //this.layer = new Layer('', '../../content/images/jungle.jpg', this.scene, true);
+    const linecolor = new Color3(0, 0, 0);
+    for (let x = -25; x <= 25; x++) {
+      const optionsx = {
+        points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)], //vec3 array,
+        updatable: false,
+      };
+      const linesx = MeshBuilder.CreateLines('lines', optionsx, this.scene);
+      linesx.color = linecolor;
+      const optionsz = {
+        points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)], //vec3 array,
+        updatable: false,
+      };
+      const linesz = MeshBuilder.CreateLines('lines', optionsz, this.scene);
+      linesz.color = linecolor;
+    }
 
     this.trees = [];
     for (let i = 1; i <= 9; i++) {
@@ -77,8 +82,8 @@ export class EngineService {
       tree.meshes[0].position.z = 0;
       this.trees.push(tree.meshes[0]);
     }
-    this.forest();
-    this.showWorldAxis(5);
+    //this.forest();
+    this.showWorldAxis(2);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.1 });
@@ -90,12 +95,6 @@ export class EngineService {
     }
     this.koodibril = colibri.meshes[0];
     // create the material with its texture for the branch and assign it to the branch
-    const branchMaterial = new StandardMaterial('sun_surface', this.scene);
-    branchMaterial.diffuseTexture = new Texture('../../content/assets/textures/sun.jpg', this.scene);
-    this.branch.material = branchMaterial;
-    //this.koodibril.material = branchMaterial;
-    //this.koodibril.parent = this.branch;
-    // move the branch upward 1/2 of its height
     this.branch.position.y = 0;
     this.branch.position.z = 0;
     this.koodibril.scaling.scaleInPlace(0.2);
@@ -145,6 +144,12 @@ export class EngineService {
         const y = -this.scene.pointerY / 100 + offsety;
         this.branch.position.x = x;
         this.branch.position.y = y;
+      });
+
+      this.canvas.addEventListener('wheel', event => {
+        const delta = Math.sign(event.deltaY);
+        this.camera.position.z = this.camera.position.z - delta;
+        console.log(event);
       });
 
       this.windowRef.window.addEventListener('resize', () => {
