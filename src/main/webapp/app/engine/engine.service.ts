@@ -10,15 +10,12 @@ import {
   Color4,
   Vector3,
   HemisphericLight,
-  StandardMaterial,
-  Texture,
   Animation,
   Space,
   AbstractMesh,
   Layer,
   Color3,
   FlyCamera,
-  Plane,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
@@ -49,10 +46,10 @@ export class EngineService {
     this.scene.clearColor = new Color4(0, 0, 0, 0);
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
-    this.camera = new FlyCamera('camera1', new Vector3(0, 3, -20), this.scene);
+    this.camera = new FlyCamera('camera1', new Vector3(0, 3, -10), this.scene);
 
     // target the camera to scene origin
-    this.camera.setTarget(Vector3.Zero());
+    this.camera.setTarget(new Vector3(0, 2, 0));
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
@@ -82,7 +79,7 @@ export class EngineService {
       tree.meshes[0].position.z = 0;
       this.trees.push(tree.meshes[0]);
     }
-    //this.forest();
+    this.forest();
     this.showWorldAxis(2);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
@@ -208,19 +205,41 @@ export class EngineService {
   }
 
   public forest(): void {
-    const treeFront1 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeFront2 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle1 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle2 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle3 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack1 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack2 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack3 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack4 = this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    treeFront1.position.x = -5;
-    treeFront1.position.y = 0;
+    const treeFront1 = this.trees[3]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeFront2 = this.trees[1]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeMiddle1 = this.trees[4]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeMiddle2 = this.trees[0]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeMiddle3 = this.trees[2]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeBack1 = this.trees[8]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeBack2 = this.trees[6]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeBack3 = this.trees[7]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    const treeBack4 = this.trees[5]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
+    treeFront1.position.x = -4;
+    treeFront1.position.z = 0;
+
     treeFront2.position.x = 5;
-    treeFront2.position.y = 0;
+    treeFront2.position.z = 0;
+
+    treeMiddle1.position.x = -7;
+    treeMiddle1.position.z = 4;
+
+    treeMiddle2.position.x = 3;
+    treeMiddle2.position.z = 4;
+
+    treeMiddle3.position.x = 6;
+    treeMiddle3.position.z = 4;
+
+    treeBack1.position.x = -4;
+    treeBack1.position.z = 8;
+
+    treeBack2.position.x = -3;
+    treeBack2.position.z = 8;
+
+    treeBack3.position.x = 2;
+    treeBack3.position.z = 8;
+
+    treeBack4.position.x = 5;
+    treeBack4.position.z = 8;
   }
 
   public showWorldAxis(size: number): void {
