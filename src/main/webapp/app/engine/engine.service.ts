@@ -81,7 +81,7 @@ export class EngineService {
       this.trees.push(tree.meshes[0]);
       if (i <= 4) {
         const bush = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'bush' + i.toString() + '.glb', this.scene);
-        bush.meshes[0].scaling.scaleInPlace(3);
+        bush.meshes[0].scaling.scaleInPlace(2.5);
         bush.meshes[0].rotate(new Vector3(0, 1, 0), 1.5 * Math.PI);
         this.bushes.push(bush.meshes[0]);
       }
@@ -256,14 +256,6 @@ export class EngineService {
     const treeBack2 = this.trees[6];
     const treeBack3 = this.trees[7];
     const treeBack4 = this.trees[8];
-    const bushFront1 = this.bushes[0]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-    const bushFront2 = this.bushes[1]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-    const bushFront3 = this.bushes[2]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-    const bushFront4 = this.bushes[3]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-    bushFront1.position.x = -5;
-    bushFront2.position.x = 1;
-    bushFront3.position.x = -1;
-    bushFront4.position.x = 5;
 
     treeFront1.position.x = -3;
     treeFront1.position.z = 0;
@@ -291,5 +283,45 @@ export class EngineService {
 
     treeBack4.position.x = 5;
     treeBack4.position.z = 8;
+
+    for (let i = this.bushes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.bushes[i], this.bushes[j]] = [this.bushes[j], this.bushes[i]];
+    }
+    const bushFront1 = this.bushes[0]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront2 = this.bushes[1]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront3 = this.bushes[2]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront4 = this.bushes[3]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    bushFront1.position.x = -5;
+    bushFront1.position.z = 0;
+    bushFront2.position.x = 1;
+    bushFront2.position.z = 0;
+    bushFront3.position.x = -1;
+    bushFront3.position.z = 0;
+    bushFront4.position.x = 5;
+    bushFront4.position.z = 0;
+
+    for (let z = 4; z <= 8; z = z + 4) {
+      for (let i = this.bushes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.bushes[i], this.bushes[j]] = [this.bushes[j], this.bushes[i]];
+      }
+      const cloneBush1 = this.bushes[0].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+      this.bushes.push(cloneBush1!);
+      const cloneBush2 = this.bushes[1].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+      this.bushes.push(cloneBush2!);
+      const cloneBush3 = this.bushes[2].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+      this.bushes.push(cloneBush3!);
+      const cloneBush4 = this.bushes[3].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+      this.bushes.push(cloneBush4!);
+      cloneBush1!.position.x = -5;
+      cloneBush1!.position.z = z;
+      cloneBush2!.position.x = 1;
+      cloneBush2!.position.z = z;
+      cloneBush3!.position.x = -1;
+      cloneBush3!.position.z = z;
+      cloneBush4!.position.x = 5;
+      cloneBush4!.position.z = z;
+    }
   }
 }
