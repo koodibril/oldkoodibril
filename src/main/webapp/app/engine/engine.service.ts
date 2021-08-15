@@ -27,16 +27,19 @@ export class EngineService {
   private scene!: Scene;
   private light!: Light;
   private layer!: Layer;
+  private move!: boolean;
 
   private branch!: Mesh;
   private koodibril!: AbstractMesh;
   private trees!: AbstractMesh[];
+  private bushes!: AbstractMesh[];
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
   public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
     // The first step is to get the reference of the canvas element from our HTML document
     this.canvas = canvas.nativeElement;
+    this.move = false;
 
     // Then, load the Babylon 3D engine:
     this.engine = new Engine(this.canvas, true);
@@ -46,7 +49,7 @@ export class EngineService {
     this.scene.clearColor = new Color4(0, 0, 0, 0);
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
-    this.camera = new FlyCamera('camera1', new Vector3(0, 3, -10), this.scene);
+    this.camera = new FlyCamera('camera1', new Vector3(0, 3, -5), this.scene);
 
     // target the camera to scene origin
     this.camera.setTarget(new Vector3(0, 2, 0));
@@ -56,13 +59,13 @@ export class EngineService {
     const linecolor = new Color3(0, 0, 0);
     for (let x = -25; x <= 25; x++) {
       const optionsx = {
-        points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)], //vec3 array,
+        points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)],
         updatable: false,
       };
       const linesx = MeshBuilder.CreateLines('lines', optionsx, this.scene);
       linesx.color = linecolor;
       const optionsz = {
-        points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)], //vec3 array,
+        points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)],
         updatable: false,
       };
       const linesz = MeshBuilder.CreateLines('lines', optionsz, this.scene);
@@ -70,17 +73,20 @@ export class EngineService {
     }
 
     this.trees = [];
+    this.bushes = [];
     for (let i = 1; i <= 9; i++) {
       const tree = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + i.toString() + '.glb', this.scene);
-      tree.meshes[0].scaling.scaleInPlace(3);
+      tree.meshes[0].scaling.scaleInPlace(2.5);
       tree.meshes[0].rotate(new Vector3(0, 1, 0), 1.5 * Math.PI);
-      tree.meshes[0].position.x = 0;
-      tree.meshes[0].position.y = 0;
-      tree.meshes[0].position.z = 0;
       this.trees.push(tree.meshes[0]);
+      if (i <= 4) {
+        const bush = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'bush' + i.toString() + '.glb', this.scene);
+        bush.meshes[0].scaling.scaleInPlace(3);
+        bush.meshes[0].rotate(new Vector3(0, 1, 0), 1.5 * Math.PI);
+        this.bushes.push(bush.meshes[0]);
+      }
     }
     this.forest();
-    this.showWorldAxis(2);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.1 });
@@ -145,8 +151,44 @@ export class EngineService {
 
       this.canvas.addEventListener('wheel', event => {
         const delta = Math.sign(event.deltaY);
-        this.camera.position.z = this.camera.position.z - delta;
-        console.log(event);
+        if (!this.move) {
+          this.move = true;
+          this.trees.forEach(element => {
+            const frameRate = 10;
+            const zkeyFrames = [
+              {
+                frame: 0,
+                value: element.position.z,
+              },
+              {
+                frame: frameRate,
+                value: element.position.z + 5 * delta,
+              },
+            ];
+            const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+            zSlide.setKeys(zkeyFrames);
+            this.scene.beginDirectAnimation(element, [zSlide], 0, 2 * frameRate, false, 2);
+          });
+          this.bushes.forEach(element => {
+            const frameRate = 10;
+            const zkeyFrames = [
+              {
+                frame: 0,
+                value: element.position.z,
+              },
+              {
+                frame: frameRate,
+                value: element.position.z + 5 * delta,
+              },
+            ];
+            const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+            zSlide.setKeys(zkeyFrames);
+            const rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, 2 * frameRate, false, 2);
+            rollOver.onAnimationEndObservable.add(() => {
+              this.move = false;
+            });
+          });
+        }
       });
 
       this.windowRef.window.addEventListener('resize', () => {
@@ -159,10 +201,6 @@ export class EngineService {
     const frameRate = 10;
     const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
     const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const rotate =
-      this.koodibril.position.x > xtravel
-        ? this.koodibril.rotate(new Vector3(0, 1, 0), 1.5 * Math.PI)
-        : this.koodibril.rotate(new Vector3(0, 1, 0), -1.5 * Math.PI);
     const xkeyFrames = [
       {
         frame: 0,
@@ -205,28 +243,41 @@ export class EngineService {
   }
 
   public forest(): void {
-    const treeFront1 = this.trees[3]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeFront2 = this.trees[1]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle1 = this.trees[4]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle2 = this.trees[0]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeMiddle3 = this.trees[2]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack1 = this.trees[8]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack2 = this.trees[6]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack3 = this.trees[7]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    const treeBack4 = this.trees[5]; //this.trees[Math.floor(Math.random() * (9 - 1) + 1)];
-    treeFront1.position.x = -4;
+    for (let i = this.trees.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.trees[i], this.trees[j]] = [this.trees[j], this.trees[i]];
+    }
+    const treeFront1 = this.trees[0];
+    const treeFront2 = this.trees[1];
+    const treeMiddle1 = this.trees[2];
+    const treeMiddle2 = this.trees[3];
+    const treeMiddle3 = this.trees[4];
+    const treeBack1 = this.trees[5];
+    const treeBack2 = this.trees[6];
+    const treeBack3 = this.trees[7];
+    const treeBack4 = this.trees[8];
+    const bushFront1 = this.bushes[0]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront2 = this.bushes[1]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront3 = this.bushes[2]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    const bushFront4 = this.bushes[3]; // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+    bushFront1.position.x = -5;
+    bushFront2.position.x = 1;
+    bushFront3.position.x = -1;
+    bushFront4.position.x = 5;
+
+    treeFront1.position.x = -3;
     treeFront1.position.z = 0;
 
-    treeFront2.position.x = 5;
+    treeFront2.position.x = 4;
     treeFront2.position.z = 0;
 
-    treeMiddle1.position.x = -7;
+    treeMiddle1.position.x = -6;
     treeMiddle1.position.z = 4;
 
     treeMiddle2.position.x = 3;
     treeMiddle2.position.z = 4;
 
-    treeMiddle3.position.x = 6;
+    treeMiddle3.position.x = 5;
     treeMiddle3.position.z = 4;
 
     treeBack1.position.x = -4;
@@ -240,55 +291,5 @@ export class EngineService {
 
     treeBack4.position.x = 5;
     treeBack4.position.z = 8;
-  }
-
-  public showWorldAxis(size: number): void {
-    // var makeTextPlane = function(text, color, size) {
-    //     var dynamicTexture = new DynamicTexture("DynamicTexture", 50, scene, true);
-    //     dynamicTexture.hasAlpha = true;
-    //     dynamicTexture.drawText(text, 5, 40, "bold 36px Arial", color , "transparent", true);
-    //     var plane = Mesh.CreatePlane("TextPlane", size, scene, true);
-    //     plane.material = new StandardMaterial("TextPlaneMaterial", scene);
-    //     plane.material.backFaceCulling = false;
-    //     plane.material.specularColor = new Color3(0, 0, 0);
-    //     plane.material.diffuseTexture = dynamicTexture;
-    // return plane;
-    //  };
-    const axisX = Mesh.CreateLines(
-      'axisX',
-      [
-        Vector3.Zero(),
-        new Vector3(size, 0, 0),
-        new Vector3(size * 0.95, 0.05 * size, 0),
-        new Vector3(size, 0, 0),
-        new Vector3(size * 0.95, -0.05 * size, 0),
-      ],
-      this.scene
-    );
-    axisX.color = new Color3(1, 0, 0);
-    const axisY = Mesh.CreateLines(
-      'axisY',
-      [
-        Vector3.Zero(),
-        new Vector3(0, size, 0),
-        new Vector3(-0.05 * size, size * 0.95, 0),
-        new Vector3(0, size, 0),
-        new Vector3(0.05 * size, size * 0.95, 0),
-      ],
-      this.scene
-    );
-    axisY.color = new Color3(0, 1, 0);
-    const axisZ = Mesh.CreateLines(
-      'axisZ',
-      [
-        Vector3.Zero(),
-        new Vector3(0, 0, size),
-        new Vector3(0, -0.05 * size, size * 0.95),
-        new Vector3(0, 0, size),
-        new Vector3(0, 0.05 * size, size * 0.95),
-      ],
-      this.scene
-    );
-    axisZ.color = new Color3(0, 0, 1);
   }
 }
