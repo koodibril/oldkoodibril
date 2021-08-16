@@ -16,11 +16,12 @@ import {
   Layer,
   Color3,
   FlyCamera,
-  StandardMaterial,
-  AnimationGroup,
   ISceneLoaderAsyncResult,
+  ParticleHelper,
+  IParticleSystem,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
+import { GridMaterial } from '@babylonjs/materials';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
@@ -40,6 +41,9 @@ export class EngineService {
   private forest!: AbstractMesh[];
   private leftoright!: boolean;
   private timeout!: boolean;
+  private flowers!: any[];
+  private open!: boolean;
+  private particle!: IParticleSystem;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -63,25 +67,35 @@ export class EngineService {
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
-    const linecolor = new Color3(0, 0, 0);
-    for (let x = -25; x <= 25; x++) {
-      const optionsx = {
-        points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)],
-        updatable: false,
-      };
-      const linesx = MeshBuilder.CreateLines('lines', optionsx, this.scene);
-      linesx.color = linecolor;
-      const optionsz = {
-        points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)],
-        updatable: false,
-      };
-      const linesz = MeshBuilder.CreateLines('lines', optionsz, this.scene);
-      linesz.color = linecolor;
-    }
+    // const linecolor = new Color3(0, 0, 0);
+    // for (let x = -25; x <= 25; x++) {
+    //   const optionsx = {
+    //     points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)],
+    //     updatable: false,
+    //   };
+    //   const linesx = MeshBuilder.CreateLines('lines', optionsx, this.scene);
+    //   linesx.color = linecolor;
+    //   const optionsz = {
+    //     points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)],
+    //     updatable: false,
+    //   };
+    //   const linesz = MeshBuilder.CreateLines('lines', optionsz, this.scene);
+    //   linesz.color = linecolor;
+    // }
+
+    const ground = MeshBuilder.CreateGround('ground', { width: 30, height: 30 });
+    const grid = new GridMaterial('groundMat', this.scene);
+    grid.majorUnitFrequency = 20;
+    grid.gridOffset = new Vector3(0, 0, 4);
+    grid.mainColor = new Color3(1, 1, 1);
+    grid.lineColor = new Color3(0, 0, 0);
+    ground.material = grid;
+    ground.material.backFaceCulling = false;
 
     this.trees = [];
     this.bushes = [];
     this.forest = [];
+    this.flowers = [];
     for (let i = 1; i <= 9; i++) {
       const tree = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + i.toString() + '.glb', this.scene);
       tree.meshes[0].scaling.scaleInPlace(2.5);
@@ -116,6 +130,7 @@ export class EngineService {
     this.nofly = false;
     this.leftoright = true;
     this.timeout = false;
+    this.open = false;
     this.fly();
   }
 
@@ -151,7 +166,7 @@ export class EngineService {
         });
       });
 
-      this.canvas.addEventListener('mousemove', e => {
+      this.canvas.addEventListener('mousemove', () => {
         this.nofly = true;
         const offsetCanvasx = this.canvas.width / 200;
         const offsetCanvasy = this.canvas.height / 200;
@@ -165,6 +180,7 @@ export class EngineService {
           this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
           this.leftoright = false;
         }
+        this.opener(x, y);
         this.branch.position.x = x;
         this.branch.position.y = y;
         if (!this.timeout) {
@@ -178,6 +194,10 @@ export class EngineService {
       });
 
       this.canvas.addEventListener('wheel', event => {
+        if (this.open) {
+          this.opener(0, 0);
+        }
+        this.open = false;
         if (!this.move) {
           this.move = true;
           (async () => {
@@ -198,11 +218,12 @@ export class EngineService {
               ];
               const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
               zSlide.setKeys(zkeyFrames);
-              rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, 2 * frameRate, false, 2);
+              rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
             });
             rollOver!.onAnimationEndObservable.add(() => {
               this.move = false;
               this.deleteRow(delta);
+              this.opener(this.branch.position.x, this.branch.position.y);
             });
           })();
         }
@@ -214,9 +235,19 @@ export class EngineService {
     });
   }
 
-  public goToCenter(): void {
-    this.koodibril.position.x = 0;
-    this.koodibril.position.y = 0;
+  public opener(x: number, y: number): void {
+    const flowerPos = this.flowers[0][1][0].position;
+    if (flowerPos.x >= x - 0.4 && flowerPos.x <= x + 0.4 && flowerPos.y >= y - 0.4 && flowerPos.y <= y + 0.4 && !this.open) {
+      this.open = true;
+      this.flowers[0][0][1].start(false, 0.5);
+      this.particle = ParticleHelper.CreateDefault(flowerPos);
+      this.particle.start();
+    }
+    if ((flowerPos.x <= x - 0.4 || flowerPos.x >= x + 0.4 || flowerPos.y <= y - 0.4 || flowerPos.y >= y + 0.4) && this.open) {
+      this.open = false;
+      this.particle.stop();
+      this.flowers[0][0][0].start(false, 0.5);
+    }
   }
 
   public fly(): void {
@@ -265,7 +296,7 @@ export class EngineService {
     }
   }
 
-  public seed(): void {
+  public async seed(): Promise<void> {
     this.shuffleMesh(this.trees);
     const treeFront1 = this.trees[0].clone('', null);
     const treeFront2 = this.trees[1].clone('', null);
@@ -320,7 +351,7 @@ export class EngineService {
       const cloneBush2 = this.bushes[1].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush3 = this.bushes[2].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush4 = this.bushes[3].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-      this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, z));
+      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, z), false);
       cloneBush1!.position.x = -5;
       cloneBush1!.position.z = z;
       cloneBush2!.position.x = 1;
@@ -368,7 +399,7 @@ export class EngineService {
     const cloneBush2 = this.bushes[1].clone('', null);
     const cloneBush3 = this.bushes[2].clone('', null);
     const cloneBush4 = this.bushes[3].clone('', null);
-    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, delta === -1 ? 12 : -4));
+    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, delta === -1 ? 12 : -4), delta === -1 ? false : true);
     cloneBush1!.position.x = -5;
     cloneBush1!.position.z = delta === -1 ? 12 : -4;
     cloneBush2!.position.x = 1;
@@ -384,41 +415,27 @@ export class EngineService {
   }
 
   public deleteRow(delta: number): void {
-    this.forest.forEach(element => {
-      if ((element.position.z >= 12 && delta === 1) || (element.position.z <= -4 && delta === -1)) {
-        // const frameRate = 10;
-        // console.log(element.material!.alpha);
-        // const alphakeyFrames = [
-        //   {
-        //     frame: 0,
-        //     value: element.material!.alpha,
-        //   },
-        //   {
-        //     frame: frameRate,
-        //     value: 0,
-        //   }
-        // ];
-        // const alphaDown = new Animation('alphaDown', 'material.alpha', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-
-        // alphaDown.setKeys(alphakeyFrames);
-        // const animations = [alphaDown];
-        // const goDown = this.scene.beginDirectAnimation(element, animations, 0, frameRate, false, 1);
-        // goDown.onAnimationEndObservable.add(() => {
-        //   console.log(element.material!.alpha);
-        //   element.dispose();
-        // });
-        element.dispose();
+    for (let i = 0; i < this.forest.length; i++) {
+      if ((this.forest[i].position.z >= 11 && delta === 1) || (this.forest[i].position.z <= -3 && delta === -1)) {
+        if (this.forest[i].name === 'flower') {
+          delta === -1 ? this.flowers.splice(0, 1) : this.flowers.splice(3, 1);
+        }
+        this.forest[i].dispose();
+        this.forest.splice(i, 1);
+        i = 0;
       }
-    });
+    }
   }
 
-  public async addflower(position: Vector3): Promise<ISceneLoaderAsyncResult> {
+  public async addflower(position: Vector3, back: boolean): Promise<ISceneLoaderAsyncResult> {
     const flower = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
     flower.animationGroups[0].stop();
     flower.animationGroups[0].start(false, 10.0);
     flower.meshes[0].scaling.scaleInPlace(0.2);
     flower.meshes[0].rotate(new Vector3(1, 0, 0), Math.PI);
     flower.meshes[0].position = position;
+    flower.meshes[0].name = 'flower';
+    back ? this.flowers.unshift([flower.animationGroups, flower.meshes]) : this.flowers.push([flower.animationGroups, flower.meshes]);
     this.forest.push(flower.meshes[0]);
     return flower;
   }
