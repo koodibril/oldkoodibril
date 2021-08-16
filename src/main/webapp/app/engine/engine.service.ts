@@ -180,9 +180,9 @@ export class EngineService {
           this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
           this.leftoright = false;
         }
-        this.opener(x, y);
         this.branch.position.x = x;
         this.branch.position.y = y;
+        this.opener(x, y);
         if (!this.timeout) {
           this.timeout = true;
           setTimeout(() => {
@@ -195,9 +195,9 @@ export class EngineService {
 
       this.canvas.addEventListener('wheel', event => {
         if (this.open) {
-          this.opener(0, 0);
+          this.particle.stop();
+          this.flowers[0][0][0].start(false, 0.5);
         }
-        this.open = false;
         if (!this.move) {
           this.move = true;
           (async () => {
@@ -222,6 +222,7 @@ export class EngineService {
             });
             rollOver!.onAnimationEndObservable.add(() => {
               this.move = false;
+              this.open = false;
               this.deleteRow(delta);
               this.opener(this.branch.position.x, this.branch.position.y);
             });
@@ -238,15 +239,16 @@ export class EngineService {
   public opener(x: number, y: number): void {
     const flowerPos = this.flowers[0][1][0].position;
     if (flowerPos.x >= x - 0.4 && flowerPos.x <= x + 0.4 && flowerPos.y >= y - 0.4 && flowerPos.y <= y + 0.4 && !this.open) {
+      console.log('open');
       this.open = true;
       this.flowers[0][0][1].start(false, 0.5);
       this.particle = ParticleHelper.CreateDefault(flowerPos);
       this.particle.start();
-    }
-    if ((flowerPos.x <= x - 0.4 || flowerPos.x >= x + 0.4 || flowerPos.y <= y - 0.4 || flowerPos.y >= y + 0.4) && this.open) {
-      this.open = false;
+    } else if ((flowerPos.x <= x - 0.4 || flowerPos.x >= x + 0.4 || flowerPos.y <= y - 0.4 || flowerPos.y >= y + 0.4) && this.open) {
+      console.log('close');
       this.particle.stop();
       this.flowers[0][0][0].start(false, 0.5);
+      this.open = false;
     }
   }
 
