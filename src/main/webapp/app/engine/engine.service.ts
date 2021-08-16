@@ -29,12 +29,15 @@ export class EngineService {
   private light!: Light;
   private layer!: Layer;
   private move!: boolean;
+  private nofly!: boolean;
 
   private branch!: Mesh;
   private koodibril!: AbstractMesh;
   private trees!: AbstractMesh[];
   private bushes!: AbstractMesh[];
   private forest!: AbstractMesh[];
+  private leftoright!: boolean;
+  private timeout!: boolean;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -105,11 +108,14 @@ export class EngineService {
     // create the material with its texture for the branch and assign it to the branch
     this.branch.position.y = 2;
     this.branch.position.z = 0;
-    this.koodibril.scaling.scaleInPlace(0.2);
+    this.koodibril.scaling.scaleInPlace(0.13);
     this.koodibril.position.y = 1;
     this.koodibril.position.z = 0;
     this.koodibril.parent = this.branch;
     this.koodibril.rotate(new Vector3(0, 1, 0), 1.5 * Math.PI);
+    this.nofly = false;
+    this.leftoright = true;
+    this.timeout = false;
     this.fly();
   }
 
@@ -145,13 +151,35 @@ export class EngineService {
         });
       });
 
-      this.canvas.addEventListener('mousemove', () => {
+      this.canvas.addEventListener('mousemove', e => {
+        this.nofly = true;
         const offsetCanvasx = this.canvas.width / 200;
         const offsetCanvasy = this.canvas.height / 200;
         const x = (this.scene.pointerX / 100 - offsetCanvasx) / 2;
         const y = (-this.scene.pointerY / 100 + offsetCanvasy + 3) / 1.5;
+        if (this.branch.position.x > x && !this.leftoright) {
+          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+          this.leftoright = true;
+        }
+        if (this.branch.position.x < x && this.leftoright) {
+          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+          this.leftoright = false;
+        }
         this.branch.position.x = x;
         this.branch.position.y = y;
+        if (!this.timeout) {
+          this.timeout = true;
+          setTimeout(() => {
+            this.nofly = false;
+            this.fly();
+            this.timeout = false;
+          }, 2000);
+        }
+      });
+
+      this.canvas.addEventListener('click', () => {
+        console.log('click');
+        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
       });
 
       this.canvas.addEventListener('wheel', event => {
@@ -189,49 +217,55 @@ export class EngineService {
     });
   }
 
+  public goToCenter(): void {
+    this.koodibril.position.x = 0;
+    this.koodibril.position.y = 0;
+  }
+
   public fly(): void {
-    const frameRate = 10;
-    const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const xkeyFrames = [
-      {
-        frame: 0,
-        value: this.koodibril.position.x,
-      },
-      {
-        frame: frameRate,
-        value: xtravel,
-      },
-      {
-        frame: 2 * frameRate,
-        value: xtravel,
-      },
-    ];
-    const ykeyFrames = [
-      {
-        frame: 0,
-        value: this.koodibril.position.y,
-      },
-      {
-        frame: frameRate,
-        value: ytravel,
-      },
-      {
-        frame: 2 * frameRate,
-        value: ytravel,
-      },
-    ];
+    if (!this.nofly) {
+      const frameRate = 10;
+      const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
+      const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
+      if (this.branch.position.x > xtravel && !this.leftoright) {
+        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+        this.leftoright = true;
+      } else if (this.branch.position.x < xtravel && this.leftoright) {
+        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+        this.leftoright = false;
+      }
+      const xkeyFrames = [
+        {
+          frame: 0,
+          value: this.koodibril.position.x,
+        },
+        {
+          frame: frameRate,
+          value: xtravel,
+        },
+      ];
+      const ykeyFrames = [
+        {
+          frame: 0,
+          value: this.koodibril.position.y,
+        },
+        {
+          frame: frameRate,
+          value: ytravel,
+        },
+      ];
 
-    const xSlide = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-    const ySlide = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+      const xSlide = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+      const ySlide = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
 
-    xSlide.setKeys(xkeyFrames);
-    ySlide.setKeys(ykeyFrames);
-    const animations = [xSlide, ySlide];
-    const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, 2 * frameRate, false, 4);
-    flyAnimate.onAnimationEndObservable.add(() => {
-      this.fly();
-    });
+      xSlide.setKeys(xkeyFrames);
+      ySlide.setKeys(ykeyFrames);
+      const animations = [xSlide, ySlide];
+      const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, frameRate, false, 2);
+      flyAnimate.onAnimationEndObservable.add(() => {
+        this.fly();
+      });
+    }
   }
 
   public seed(): void {
