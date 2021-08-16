@@ -17,6 +17,8 @@ import {
   Color3,
   FlyCamera,
   StandardMaterial,
+  AnimationGroup,
+  ISceneLoaderAsyncResult,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
@@ -100,10 +102,8 @@ export class EngineService {
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.1 });
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
     const koodibrilAnim = this.scene.getAnimationGroupByName('fly');
-    if (koodibrilAnim) {
-      colibri.animationGroups[0].stop();
-      koodibrilAnim.start(true, 10.0, koodibrilAnim.from, koodibrilAnim.to, false);
-    }
+    colibri.animationGroups[0].stop();
+    koodibrilAnim!.start(true, 10.0, koodibrilAnim!.from, koodibrilAnim!.to, false);
     this.koodibril = colibri.meshes[0];
     // create the material with its texture for the branch and assign it to the branch
     this.branch.position.y = 2;
@@ -177,37 +177,34 @@ export class EngineService {
         }
       });
 
-      this.canvas.addEventListener('click', () => {
-        console.log('click');
-        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-      });
-
       this.canvas.addEventListener('wheel', event => {
-        const delta = Math.sign(event.deltaY);
         if (!this.move) {
-          this.addRow(delta);
           this.move = true;
-          let rollOver: any;
-          this.forest.forEach(element => {
-            const frameRate = 10;
-            const zkeyFrames = [
-              {
-                frame: 0,
-                value: element.position.z,
-              },
-              {
-                frame: frameRate,
-                value: element.position.z + 4 * delta,
-              },
-            ];
-            const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-            zSlide.setKeys(zkeyFrames);
-            rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, 2 * frameRate, false, 2);
-          });
-          rollOver!.onAnimationEndObservable.add(() => {
-            this.move = false;
-            this.deleteRow(delta);
-          });
+          (async () => {
+            const delta = Math.sign(event.deltaY);
+            await this.addRow(delta);
+            let rollOver: any;
+            this.forest.forEach(element => {
+              const frameRate = 10;
+              const zkeyFrames = [
+                {
+                  frame: 0,
+                  value: element.position.z,
+                },
+                {
+                  frame: frameRate,
+                  value: element.position.z + 4 * delta,
+                },
+              ];
+              const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              zSlide.setKeys(zkeyFrames);
+              rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, 2 * frameRate, false, 2);
+            });
+            rollOver!.onAnimationEndObservable.add(() => {
+              this.move = false;
+              this.deleteRow(delta);
+            });
+          })();
         }
       });
 
@@ -323,6 +320,7 @@ export class EngineService {
       const cloneBush2 = this.bushes[1].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush3 = this.bushes[2].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush4 = this.bushes[3].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
+      this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, z));
       cloneBush1!.position.x = -5;
       cloneBush1!.position.z = z;
       cloneBush2!.position.x = 1;
@@ -354,14 +352,14 @@ export class EngineService {
     return array;
   }
 
-  public addRow(delta: number): void {
+  public async addRow(delta: number): Promise<void> {
     this.shuffleMesh(this.trees);
     const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
-    const tree_positon = [-3, 4, -6, 3, 5, 2];
-    const position = this.shuffleArray(tree_positon);
+    const tree_position = [-3, 4, -6, 3, 5, 2];
+    const position = this.shuffleArray(tree_position);
     for (let i = 0; i < newTrees; i++) {
       const newTree = this.trees[i].clone('', null);
-      newTree!.position.x = tree_positon[i];
+      newTree!.position.x = position[i];
       newTree!.position.z = delta === -1 ? 12 : -4;
       this.forest.push(newTree!);
     }
@@ -370,6 +368,7 @@ export class EngineService {
     const cloneBush2 = this.bushes[1].clone('', null);
     const cloneBush3 = this.bushes[2].clone('', null);
     const cloneBush4 = this.bushes[3].clone('', null);
+    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, delta === -1 ? 12 : -4));
     cloneBush1!.position.x = -5;
     cloneBush1!.position.z = delta === -1 ? 12 : -4;
     cloneBush2!.position.x = 1;
@@ -386,7 +385,7 @@ export class EngineService {
 
   public deleteRow(delta: number): void {
     this.forest.forEach(element => {
-      if ((element.position.z === 12 && delta === 1) || (element.position.z === -4 && delta === -1)) {
+      if ((element.position.z >= 12 && delta === 1) || (element.position.z <= -4 && delta === -1)) {
         // const frameRate = 10;
         // console.log(element.material!.alpha);
         // const alphakeyFrames = [
@@ -411,5 +410,16 @@ export class EngineService {
         element.dispose();
       }
     });
+  }
+
+  public async addflower(position: Vector3): Promise<ISceneLoaderAsyncResult> {
+    const flower = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
+    flower.animationGroups[0].stop();
+    flower.animationGroups[0].start(false, 10.0);
+    flower.meshes[0].scaling.scaleInPlace(0.2);
+    flower.meshes[0].rotate(new Vector3(1, 0, 0), Math.PI);
+    flower.meshes[0].position = position;
+    this.forest.push(flower.meshes[0]);
+    return flower;
   }
 }
