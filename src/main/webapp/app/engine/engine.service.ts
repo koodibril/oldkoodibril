@@ -17,9 +17,11 @@ import {
   Color3,
   FlyCamera,
   ISceneLoaderAsyncResult,
-  ParticleHelper,
   IParticleSystem,
   AnimationGroup,
+  ParticleSystem,
+  Texture,
+  Material,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -34,6 +36,7 @@ export class EngineService {
   private layer!: Layer;
   private move!: boolean;
   private nofly!: boolean;
+  private material!: Material;
 
   private branch!: Mesh;
   private koodibril!: AbstractMesh;
@@ -69,21 +72,6 @@ export class EngineService {
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
-    // const linecolor = new Color3(0, 0, 0);
-    // for (let x = -25; x <= 25; x++) {
-    //   const optionsx = {
-    //     points: [new Vector3(x, 0, -25), new Vector3(x, 0, 25)],
-    //     updatable: false,
-    //   };
-    //   const linesx = MeshBuilder.CreateLines('lines', optionsx, this.scene);
-    //   linesx.color = linecolor;
-    //   const optionsz = {
-    //     points: [new Vector3(-25, 0, x), new Vector3(25, 0, x)],
-    //     updatable: false,
-    //   };
-    //   const linesz = MeshBuilder.CreateLines('lines', optionsz, this.scene);
-    //   linesz.color = linecolor;
-    // }
 
     const ground = MeshBuilder.CreateGround('ground', { width: 30, height: 30 });
     const grid = new GridMaterial('groundMat', this.scene);
@@ -202,6 +190,7 @@ export class EngineService {
       this.canvas.addEventListener('wheel', event => {
         if (this.open) {
           this.particle.stop();
+          this.fly();
           this.flowers[0][0][0].start(false, 0.5);
           this.koodibrilAnim[1].stop();
           this.koodibrilAnim[0].start(true, 10);
@@ -244,23 +233,76 @@ export class EngineService {
     });
   }
 
+  public goToCenter(): void {
+    if (this.nofly) {
+      const frameRate = 10;
+      const xkeyFrames = [
+        {
+          frame: 0,
+          value: this.koodibril.position.x,
+        },
+        {
+          frame: frameRate,
+          value: 0,
+        },
+      ];
+      const ykeyFrames = [
+        {
+          frame: 0,
+          value: this.koodibril.position.y,
+        },
+        {
+          frame: frameRate,
+          value: 0,
+        },
+      ];
+
+      const xSlide = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+      const ySlide = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+      xSlide.setKeys(xkeyFrames);
+      ySlide.setKeys(ykeyFrames);
+      const animations = [xSlide, ySlide];
+      this.scene.beginDirectAnimation(this.koodibril, animations, 0, frameRate, false, 2);
+    }
+  }
+
   public opener(x: number, y: number): void {
     const flowerPos = this.flowers[0][1][0].position;
-    if (flowerPos.x >= x - 1 && flowerPos.x <= x + 1 && flowerPos.y >= y - 1 && flowerPos.y <= y + 1 && !this.open) {
-      console.log('open');
+    const xOffsetr = flowerPos.x < 0 ? 0.5 : 0.1;
+    const xOffsetl = flowerPos.x < 0 ? 0.1 : 0.5;
+    if (flowerPos.x >= x - xOffsetr && flowerPos.x <= x + xOffsetl && flowerPos.y >= y - 0.5 && flowerPos.y <= y + 1 && !this.open) {
       this.open = true;
       this.goToFlower();
       this.flowers[0][0][1].start(false, 0.5);
-      this.particle = ParticleHelper.CreateDefault(flowerPos);
-      this.particle.start();
-    } else if ((flowerPos.x <= x - 1 || flowerPos.x >= x + 1 || flowerPos.y <= y - 1 || flowerPos.y >= y + 1) && this.open) {
-      console.log('close');
+      this.createParticle();
+    } else if (
+      (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
+      this.open
+    ) {
       this.particle.stop();
       this.flowers[0][0][0].start(false, 0.5);
       this.open = false;
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
     }
+  }
+
+  public createParticle(): void {
+    this.particle = new ParticleSystem('particles', 10000, this.scene);
+    this.particle.particleTexture = new Texture('../../content/assets/textures/flare.png', this.scene);
+    this.particle.emitter = this.flowers[0][1][0];
+    this.particle.minSize = 0.05;
+    this.particle.maxSize = 0.1;
+    this.particle.minLifeTime = 4.0;
+    this.particle.maxLifeTime = 4.0;
+    this.particle.emitRate = 500;
+    this.particle.blendMode = ParticleSystem.BLENDMODE_ONEONE;
+    this.particle.gravity = new Vector3(0, -10, 0);
+    this.particle.minEmitPower = 1;
+    this.particle.maxEmitPower = 4;
+    this.particle.updateSpeed = 1 / 60;
+    this.particle.start();
   }
 
   public goToFlower(): void {
@@ -319,6 +361,8 @@ export class EngineService {
     const animationsBranch = [xSlideBranch, ySlideBranch];
     this.scene.beginDirectAnimation(this.branch, animationsBranch, 0, frameRate, false, 2);
     const gotoflower = this.scene.beginDirectAnimation(this.koodibril, animationsKooli, 0, frameRate, false, 2);
+    this.koodibrilAnim[0].stop();
+    this.koodibrilAnim[1].start(true, 10);
     gotoflower.onAnimationEndObservable.add(() => {
       if (flowerPos.x < 0 && !this.leftoright) {
         this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
@@ -328,8 +372,6 @@ export class EngineService {
         this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
         this.leftoright = false;
       }
-      this.koodibrilAnim[0].stop();
-      this.koodibrilAnim[1].start(true, 10);
     });
   }
 
