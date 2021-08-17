@@ -19,6 +19,7 @@ import {
   ISceneLoaderAsyncResult,
   ParticleHelper,
   IParticleSystem,
+  AnimationGroup,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -44,6 +45,7 @@ export class EngineService {
   private flowers!: any[];
   private open!: boolean;
   private particle!: IParticleSystem;
+  private koodibrilAnim!: AnimationGroup[];
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -115,10 +117,10 @@ export class EngineService {
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.1 });
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
-    const koodibrilAnim = this.scene.getAnimationGroupByName('fly');
     colibri.animationGroups[0].stop();
-    koodibrilAnim!.start(true, 10.0, koodibrilAnim!.from, koodibrilAnim!.to, false);
+    colibri.animationGroups[0].start(true, 10.0);
     this.koodibril = colibri.meshes[0];
+    this.koodibrilAnim = colibri.animationGroups;
     // create the material with its texture for the branch and assign it to the branch
     this.branch.position.y = 2;
     this.branch.position.z = 0;
@@ -172,22 +174,26 @@ export class EngineService {
         const offsetCanvasy = this.canvas.height / 200;
         const x = (this.scene.pointerX / 100 - offsetCanvasx) / 2;
         const y = (-this.scene.pointerY / 100 + offsetCanvasy + 3) / 1.5;
-        if (this.branch.position.x > x && !this.leftoright) {
-          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-          this.leftoright = true;
-        }
-        if (this.branch.position.x < x && this.leftoright) {
-          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-          this.leftoright = false;
-        }
-        this.branch.position.x = x;
-        this.branch.position.y = y;
         this.opener(x, y);
+        if (!this.open) {
+          if (this.branch.position.x > x && !this.leftoright) {
+            this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+            this.leftoright = true;
+          }
+          if (this.branch.position.x < x && this.leftoright) {
+            this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+            this.leftoright = false;
+          }
+          this.branch.position.x = x;
+          this.branch.position.y = y;
+        }
         if (!this.timeout) {
           this.timeout = true;
           setTimeout(() => {
-            this.nofly = false;
-            this.fly();
+            if (!this.open) {
+              this.nofly = false;
+              this.fly();
+            }
             this.timeout = false;
           }, 2000);
         }
@@ -197,6 +203,8 @@ export class EngineService {
         if (this.open) {
           this.particle.stop();
           this.flowers[0][0][0].start(false, 0.5);
+          this.koodibrilAnim[1].stop();
+          this.koodibrilAnim[0].start(true, 10);
         }
         if (!this.move) {
           this.move = true;
@@ -238,18 +246,91 @@ export class EngineService {
 
   public opener(x: number, y: number): void {
     const flowerPos = this.flowers[0][1][0].position;
-    if (flowerPos.x >= x - 0.4 && flowerPos.x <= x + 0.4 && flowerPos.y >= y - 0.4 && flowerPos.y <= y + 0.4 && !this.open) {
+    if (flowerPos.x >= x - 1 && flowerPos.x <= x + 1 && flowerPos.y >= y - 1 && flowerPos.y <= y + 1 && !this.open) {
       console.log('open');
       this.open = true;
+      this.goToFlower();
       this.flowers[0][0][1].start(false, 0.5);
       this.particle = ParticleHelper.CreateDefault(flowerPos);
       this.particle.start();
-    } else if ((flowerPos.x <= x - 0.4 || flowerPos.x >= x + 0.4 || flowerPos.y <= y - 0.4 || flowerPos.y >= y + 0.4) && this.open) {
+    } else if ((flowerPos.x <= x - 1 || flowerPos.x >= x + 1 || flowerPos.y <= y - 1 || flowerPos.y >= y + 1) && this.open) {
       console.log('close');
       this.particle.stop();
       this.flowers[0][0][0].start(false, 0.5);
       this.open = false;
+      this.koodibrilAnim[1].stop();
+      this.koodibrilAnim[0].start(true, 10);
     }
+  }
+
+  public goToFlower(): void {
+    const frameRate = 10;
+    const flowerPos = this.flowers[0][1][0].position;
+    const xkeyFramesKooli = [
+      {
+        frame: 0,
+        value: this.koodibril.position.x,
+      },
+      {
+        frame: frameRate,
+        value: flowerPos.x < 0 ? 0.7 : -0.7,
+      },
+    ];
+    const ykeyFramesKooli = [
+      {
+        frame: 0,
+        value: this.koodibril.position.y,
+      },
+      {
+        frame: frameRate,
+        value: 0.7,
+      },
+    ];
+    const xkeyFramesBranch = [
+      {
+        frame: 0,
+        value: this.branch.position.x,
+      },
+      {
+        frame: frameRate,
+        value: flowerPos.x,
+      },
+    ];
+    const ykeyFramesBranch = [
+      {
+        frame: 0,
+        value: this.branch.position.y,
+      },
+      {
+        frame: flowerPos.y,
+        value: 1,
+      },
+    ];
+    const xSlideKooli = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const ySlideKooli = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const xSlideBranch = new Animation('xSlide', 'position.x', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const ySlideBranch = new Animation('ySlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    xSlideKooli.setKeys(xkeyFramesKooli);
+    ySlideKooli.setKeys(ykeyFramesKooli);
+    xSlideBranch.setKeys(xkeyFramesBranch);
+    ySlideBranch.setKeys(ykeyFramesBranch);
+    const animationsKooli = [xSlideKooli, ySlideKooli];
+    const animationsBranch = [xSlideBranch, ySlideBranch];
+    this.scene.beginDirectAnimation(this.branch, animationsBranch, 0, frameRate, false, 2);
+    const gotoflower = this.scene.beginDirectAnimation(this.koodibril, animationsKooli, 0, frameRate, false, 2);
+    gotoflower.onAnimationEndObservable.add(() => {
+      if (flowerPos.x < 0 && !this.leftoright) {
+        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+        this.leftoright = true;
+      }
+      if (flowerPos.x > 0 && this.leftoright) {
+        this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+        this.leftoright = false;
+      }
+      this.koodibrilAnim[0].stop();
+      this.koodibrilAnim[1].start(true, 10);
+    });
   }
 
   public fly(): void {
@@ -353,7 +434,7 @@ export class EngineService {
       const cloneBush2 = this.bushes[1].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush3 = this.bushes[2].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
       const cloneBush4 = this.bushes[3].clone('', null); // this.bushes[Math.floor(Math.random() * (4 - 1) + 1)];
-      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, z), false);
+      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, z), false);
       cloneBush1!.position.x = -5;
       cloneBush1!.position.z = z;
       cloneBush2!.position.x = 1;
@@ -401,7 +482,7 @@ export class EngineService {
     const cloneBush2 = this.bushes[1].clone('', null);
     const cloneBush3 = this.bushes[2].clone('', null);
     const cloneBush4 = this.bushes[3].clone('', null);
-    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1, delta === -1 ? 12 : -4), delta === -1 ? false : true);
+    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, delta === -1 ? 12 : -4), delta === -1 ? false : true);
     cloneBush1!.position.x = -5;
     cloneBush1!.position.z = delta === -1 ? 12 : -4;
     cloneBush2!.position.x = 1;
@@ -434,7 +515,7 @@ export class EngineService {
     flower.animationGroups[0].stop();
     flower.animationGroups[0].start(false, 10.0);
     flower.meshes[0].scaling.scaleInPlace(0.2);
-    flower.meshes[0].rotate(new Vector3(1, 0, 0), Math.PI);
+    flower.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
     flower.meshes[0].position = position;
     flower.meshes[0].name = 'flower';
     back ? this.flowers.unshift([flower.animationGroups, flower.meshes]) : this.flowers.push([flower.animationGroups, flower.meshes]);
