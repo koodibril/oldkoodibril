@@ -145,7 +145,6 @@ export class EngineService {
 
       this.canvas.addEventListener('mousemove', () => {
         if (!this.loading) {
-          console.log(this.loading);
           this.nofly = true;
           const offsetCanvasx = this.canvas.width / 200;
           const offsetCanvasy = this.canvas.height / 200;
@@ -207,9 +206,39 @@ export class EngineService {
                   value: element.position.z + 4 * delta,
                 },
               ];
+              const ykeyFramesOut = [
+                {
+                  frame: 0,
+                  value: element.position.y,
+                },
+                {
+                  frame: frameRate,
+                  value: -5,
+                },
+              ];
+              const ykeyFramesIn = [
+                {
+                  frame: 0,
+                  value: element.position.y,
+                },
+                {
+                  frame: frameRate,
+                  value: element.name === 'flower' ? 1.5 : 0,
+                },
+              ];
               const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              const ySlideOut = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              const ySlideIn = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
               zSlide.setKeys(zkeyFrames);
-              rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
+              ySlideOut.setKeys(ykeyFramesOut);
+              ySlideIn.setKeys(ykeyFramesIn);
+              if (element.position.z === 8 && delta === 1) {
+                rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideOut], 0, frameRate, false, 2);
+              } else if (element.position.z === 12 && delta === -1) {
+                rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideIn], 0, frameRate, false, 2);
+              } else {
+                rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
+              }
             });
             rollOver!.onAnimationEndObservable.add(() => {
               this.move = false;
@@ -269,7 +298,10 @@ export class EngineService {
       this.open = true;
       this.loading = true;
       this.goToFlower();
-      this.flowers[0][0][1].start(false, 0.5);
+      this.flowers[0][0][1].start(false, 0.5).onAnimationEndObservable.add(() => {
+        this.flowers[0][0][4].start(false, 0.5);
+        this.flowers[0][0][6].start(false, 0.5);
+      });
       this.bushes[0][0][0].start(false, 0.05);
       this.bushes[1][0][0].start(false, 0.05);
       this.bushes[2][0][0].start(false, 0.05);
@@ -280,7 +312,10 @@ export class EngineService {
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
     ) {
-      this.flowers[0][0][0].start(false, 0.5);
+      this.flowers[0][0][5].start(false, 0.5);
+      this.flowers[0][0][3].start(false, 0.5).onAnimationEndObservable.add(() => {
+        this.flowers[0][0][0].start(false, 0.5);
+      });
       this.bushes[0][0][0].stop();
       this.bushes[1][0][0].stop();
       this.bushes[2][0][0].stop();
@@ -454,14 +489,21 @@ export class EngineService {
     const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
     const position = this.shuffleArray([-3, 4, -6, 3, 5, 2]);
     for (let i = 0; i < newTrees; i++) {
-      await this.addtree(new Vector3(position[i], 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random_tree[0]);
+      await this.addtree(
+        new Vector3(position[i], delta === -1 ? -5 : 0, delta === -1 ? 12 : -4),
+        delta === -1 ? false : true,
+        random_tree[0]
+      );
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
-    await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, delta === -1 ? 12 : -4), delta === -1 ? false : true);
-    await this.addbush(new Vector3(-5, 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[0]);
-    await this.addbush(new Vector3(1, 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[1]);
-    await this.addbush(new Vector3(-1, 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[2]);
-    await this.addbush(new Vector3(5, 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[3]);
+    await this.addflower(
+      new Vector3(Math.random() * (1.5 - -1) + -1, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
+      delta === -1 ? false : true
+    );
+    await this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[0]);
+    await this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[1]);
+    await this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[2]);
+    await this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[3]);
   }
 
   public deleteRow(delta: number): void {
@@ -487,10 +529,13 @@ export class EngineService {
     const flower = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
     flower.animationGroups[0].stop();
     flower.animationGroups[0].start(false, 10.0);
+    flower.animationGroups[5].start(false, 10.0);
+    flower.animationGroups[3].start(false, 10.0);
     flower.meshes[0].scaling.scaleInPlace(0.2);
     flower.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
     flower.meshes[0].position = position;
     flower.meshes[0].name = 'flower';
+    console.log(flower.animationGroups);
     back ? this.flowers.unshift([flower.animationGroups, flower.meshes]) : this.flowers.push([flower.animationGroups, flower.meshes]);
     this.forest.push(flower.meshes[0]);
     return flower;
