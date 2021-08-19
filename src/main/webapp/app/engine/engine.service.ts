@@ -19,6 +19,7 @@ import {
   ISceneLoaderAsyncResult,
   AnimationGroup,
   Material,
+  PointerEventTypes,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -56,6 +57,7 @@ export class EngineService {
 
     // Then, load the Babylon 3D engine:
     this.engine = new Engine(this.canvas, true);
+    this.engine.displayLoadingUI();
 
     // create a basic BJS Scene object
     this.scene = new Scene(this.engine);
@@ -83,7 +85,7 @@ export class EngineService {
     this.forest = [];
     this.flowers = [];
     this.bushes = [];
-    this.seed();
+    await this.seed();
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.001 });
@@ -107,6 +109,7 @@ export class EngineService {
     this.open = false;
     this.loading = false;
     this.fly();
+    this.engine.hideLoadingUI();
   }
 
   public animate(): void {
@@ -125,135 +128,175 @@ export class EngineService {
         });
       }
 
+      this.scene.onPointerObservable.add(pointerInfo => {
+        console.log(pointerInfo.type);
+        switch (pointerInfo.type) {
+          case PointerEventTypes.POINTERDOWN:
+            console.log('POINTER DOWN');
+            break;
+          case PointerEventTypes.POINTERUP:
+            console.log('POINTER UP');
+            break;
+          case PointerEventTypes.POINTERMOVE:
+            this.onMove();
+            break;
+          case PointerEventTypes.POINTERWHEEL:
+            this.wheel(pointerInfo.event);
+            break;
+          case PointerEventTypes.POINTERPICK:
+            console.log('POINTER PICK');
+            break;
+          case PointerEventTypes.POINTERTAP:
+            this.opener(this.flowers[0][1][0].position.x, this.flowers[0][1][0].position.y);
+            break;
+          case PointerEventTypes.POINTERDOUBLETAP:
+            this.opener(0, 0);
+            break;
+        }
+      });
+
       this.canvas.addEventListener('mouseout', () => {
-        if (!this.loading) {
-          const translateVector = new Vector3(-this.branch.position.x, -this.branch.position.y + 2, 0);
-          const distance = translateVector.length();
-
-          const direction = new Vector3(translateVector.x, translateVector.y, translateVector.z);
-          direction.normalize();
-          const deltaDistance = 0.2;
-
-          let i = 0;
-          this.scene.registerAfterRender(() => {
-            if (i++ * deltaDistance <= distance) {
-              this.branch.translate(direction, deltaDistance, Space.WORLD);
-            }
-          });
-        }
-      });
-
-      this.canvas.addEventListener('mousemove', () => {
-        if (!this.loading) {
-          this.nofly = true;
-          const offsetCanvasx = this.canvas.width / 200;
-          const offsetCanvasy = this.canvas.height / 200;
-          const x = (this.scene.pointerX / 100 - offsetCanvasx) / 2;
-          const y = (-this.scene.pointerY / 100 + offsetCanvasy + 3) / 1.5;
-          this.opener(x, y);
-          if (!this.open) {
-            if (this.branch.position.x > x && !this.leftoright) {
-              this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-              this.leftoright = true;
-            }
-            if (this.branch.position.x < x && this.leftoright) {
-              this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-              this.leftoright = false;
-            }
-            this.branch.position.x = x;
-            this.branch.position.y = y;
-          }
-          if (!this.timeout) {
-            this.timeout = true;
-            setTimeout(() => {
-              if (!this.open) {
-                this.nofly = false;
-                this.fly();
-              }
-              this.timeout = false;
-            }, 2000);
-          }
-        }
-      });
-
-      this.canvas.addEventListener('wheel', event => {
-        if (this.open) {
-          this.loading = true;
-          this.fly();
-          this.flowers[0][0][0].start(false, 0.5);
-          this.bushes[0][0][1].start(false, 0.5);
-          this.bushes[1][0][1].start(false, 0.5);
-          this.bushes[2][0][1].start(false, 0.5);
-          this.bushes[3][0][1].start(false, 0.5);
-          this.koodibrilAnim[1].stop();
-          this.koodibrilAnim[0].start(true, 10);
-        }
-        if (!this.move) {
-          this.move = true;
-          (async () => {
-            const delta = Math.sign(event.deltaY);
-            await this.addRow(delta);
-            let rollOver: any;
-            this.forest.forEach(element => {
-              const frameRate = 10;
-              const zkeyFrames = [
-                {
-                  frame: 0,
-                  value: element.position.z,
-                },
-                {
-                  frame: frameRate,
-                  value: element.position.z + 4 * delta,
-                },
-              ];
-              const ykeyFramesOut = [
-                {
-                  frame: 0,
-                  value: element.position.y,
-                },
-                {
-                  frame: frameRate,
-                  value: -5,
-                },
-              ];
-              const ykeyFramesIn = [
-                {
-                  frame: 0,
-                  value: element.position.y,
-                },
-                {
-                  frame: frameRate,
-                  value: element.name === 'flower' ? 1.5 : 0,
-                },
-              ];
-              const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-              const ySlideOut = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-              const ySlideIn = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-              zSlide.setKeys(zkeyFrames);
-              ySlideOut.setKeys(ykeyFramesOut);
-              ySlideIn.setKeys(ykeyFramesIn);
-              if (element.position.z === 8 && delta === 1) {
-                rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideOut], 0, frameRate, false, 2);
-              } else if (element.position.z === 12 && delta === -1) {
-                rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideIn], 0, frameRate, false, 2);
-              } else {
-                rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
-              }
-            });
-            rollOver!.onAnimationEndObservable.add(() => {
-              this.move = false;
-              this.open = false;
-              this.deleteRow(delta);
-              this.opener(this.branch.position.x, this.branch.position.y);
-            });
-          })();
-        }
+        this.reset();
       });
 
       this.windowRef.window.addEventListener('resize', () => {
         this.engine.resize();
       });
+      this.windowRef.window.addEventListener('orientationchange', () => {
+        this.engine.resize();
+      });
     });
+  }
+
+  public reset(): void {
+    if (!this.loading) {
+      const translateVector = new Vector3(-this.branch.position.x, -this.branch.position.y + 2, 0);
+      const distance = translateVector.length();
+
+      const direction = new Vector3(translateVector.x, translateVector.y, translateVector.z);
+      direction.normalize();
+      const deltaDistance = 0.2;
+
+      let i = 0;
+      this.scene.registerAfterRender(() => {
+        if (i++ * deltaDistance <= distance) {
+          this.branch.translate(direction, deltaDistance, Space.WORLD);
+        }
+      });
+    }
+  }
+
+  public onMove(): void {
+    if (!this.loading) {
+      this.nofly = true;
+      const offsetCanvasx = this.canvas.width / 200;
+      const offsetCanvasy = this.canvas.height / 200;
+      const x = (this.scene.pointerX / 100 - offsetCanvasx) / 2;
+      const y = (-this.scene.pointerY / 100 + offsetCanvasy + 3) / 1.5;
+      this.opener(x, y);
+      if (!this.open) {
+        if (this.branch.position.x > x && !this.leftoright) {
+          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+          this.leftoright = true;
+        }
+        if (this.branch.position.x < x && this.leftoright) {
+          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+          this.leftoright = false;
+        }
+        this.branch.position.x = x;
+        this.branch.position.y = y;
+      }
+      if (!this.timeout) {
+        this.timeout = true;
+        setTimeout(() => {
+          if (!this.open) {
+            this.nofly = false;
+            this.fly();
+          }
+          this.timeout = false;
+        }, 2000);
+      }
+    }
+  }
+
+  public wheel(event: any): void {
+    if (this.open) {
+      this.loading = true;
+      this.fly();
+      this.bushes[0][0][0].stop();
+      this.bushes[1][0][0].stop();
+      this.bushes[2][0][0].stop();
+      this.bushes[3][0][0].stop();
+      this.bushes[0][0][1].start(false, 0.5);
+      this.bushes[1][0][1].start(false, 0.5);
+      this.bushes[2][0][1].start(false, 0.5);
+      this.bushes[3][0][1].start(false, 0.5);
+      this.koodibrilAnim[1].stop();
+      this.koodibrilAnim[0].start(true, 10);
+      this.flowers[0][0][5].start(false, 0.5);
+      this.flowers[0][0][3].start(false, 0.5);
+      this.flowers[0][0][0].start(false, 0.5);
+    }
+    if (!this.move) {
+      this.move = true;
+      (async () => {
+        const delta = Math.sign(event.deltaY);
+        await this.addRow(delta);
+        let rollOver: any;
+        this.forest.forEach(element => {
+          const frameRate = 10;
+          const zkeyFrames = [
+            {
+              frame: 0,
+              value: element.position.z,
+            },
+            {
+              frame: frameRate,
+              value: element.position.z + 4 * delta,
+            },
+          ];
+          const ykeyFramesOut = [
+            {
+              frame: 0,
+              value: element.position.y,
+            },
+            {
+              frame: frameRate,
+              value: -5,
+            },
+          ];
+          const ykeyFramesIn = [
+            {
+              frame: 0,
+              value: element.position.y,
+            },
+            {
+              frame: frameRate,
+              value: element.name === 'flower' ? 1.5 : 0,
+            },
+          ];
+          const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+          const ySlideOut = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+          const ySlideIn = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+          zSlide.setKeys(zkeyFrames);
+          ySlideOut.setKeys(ykeyFramesOut);
+          ySlideIn.setKeys(ykeyFramesIn);
+          if (element.position.z === 8 && delta === 1) {
+            rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideOut], 0, frameRate, false, 2);
+          } else if (element.position.z === 12 && delta === -1) {
+            rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideIn], 0, frameRate, false, 2);
+          } else {
+            rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
+          }
+        });
+        rollOver!.onAnimationEndObservable.add(() => {
+          this.move = false;
+          this.open = false;
+          this.deleteRow(delta);
+          this.opener(this.branch.position.x, this.branch.position.y);
+        });
+      })();
+    }
   }
 
   public goToCenter(): void {
@@ -295,6 +338,7 @@ export class EngineService {
     const xOffsetr = flowerPos.x < 0 ? 0.5 : 0.1;
     const xOffsetl = flowerPos.x < 0 ? 0.1 : 0.5;
     if (flowerPos.x >= x - xOffsetr && flowerPos.x <= x + xOffsetl && flowerPos.y >= y - 0.5 && flowerPos.y <= y + 1 && !this.open) {
+      this.nofly = true;
       this.open = true;
       this.loading = true;
       this.goToFlower();
@@ -327,6 +371,8 @@ export class EngineService {
       this.open = false;
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
+      this.nofly = false;
+      this.fly();
     }
   }
 
@@ -535,7 +581,6 @@ export class EngineService {
     flower.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
     flower.meshes[0].position = position;
     flower.meshes[0].name = 'flower';
-    console.log(flower.animationGroups);
     back ? this.flowers.unshift([flower.animationGroups, flower.meshes]) : this.flowers.push([flower.animationGroups, flower.meshes]);
     this.forest.push(flower.meshes[0]);
     return flower;
