@@ -20,6 +20,7 @@ import {
   AnimationGroup,
   Material,
   PointerEventTypes,
+  LensRenderingPipeline,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -87,6 +88,19 @@ export class EngineService {
     this.bushes = [];
     await this.seed();
 
+    // const lensEffect = new LensRenderingPipeline('lens', {
+    //   edge_blur: 1.0,
+    //   chromatic_aberration: 1.0,
+    //   distortion: 1.0,
+    //   dof_focus_distance: 1,
+    //   dof_aperture: 6.0,			// set this very high for tilt-shift effect
+    //   grain_amount: 1.0,
+    //   dof_pentagon: true,
+    //   dof_gain: 1.0,
+    //   dof_threshold: 1.0,
+    //   dof_darken: 0.25
+    // }, this.scene, 1.0);
+
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.001 });
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
@@ -129,7 +143,7 @@ export class EngineService {
       }
 
       this.scene.onPointerObservable.add(pointerInfo => {
-        console.log(pointerInfo.type);
+        console.log(this.loading);
         switch (pointerInfo.type) {
           case PointerEventTypes.POINTERDOWN:
             console.log('POINTER DOWN');
@@ -222,15 +236,9 @@ export class EngineService {
   public wheel(event: any): void {
     if (this.open) {
       this.loading = true;
+      this.retract_tree();
       this.fly();
-      this.bushes[0][0][0].stop();
-      this.bushes[1][0][0].stop();
-      this.bushes[2][0][0].stop();
-      this.bushes[3][0][0].stop();
-      this.bushes[0][0][1].start(false, 0.5);
-      this.bushes[1][0][1].start(false, 0.5);
-      this.bushes[2][0][1].start(false, 0.5);
-      this.bushes[3][0][1].start(false, 0.5);
+      this.retract_bush();
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
       this.flowers[0][0][5].start(false, 0.5);
@@ -346,12 +354,8 @@ export class EngineService {
         this.flowers[0][0][4].start(false, 0.5);
         this.flowers[0][0][6].start(false, 0.5);
       });
-      this.bushes[0][0][0].start(false, 0.05);
-      this.bushes[1][0][0].start(false, 0.05);
-      this.bushes[2][0][0].start(false, 0.05);
-      this.bushes[3][0][0].start(false, 0.05).onAnimationEndObservable.add(() => {
-        this.loading = false;
-      });
+      this.deploy_bush();
+      this.deploy_tree();
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
@@ -360,20 +364,62 @@ export class EngineService {
       this.flowers[0][0][3].start(false, 0.5).onAnimationEndObservable.add(() => {
         this.flowers[0][0][0].start(false, 0.5);
       });
-      this.bushes[0][0][0].stop();
-      this.bushes[1][0][0].stop();
-      this.bushes[2][0][0].stop();
-      this.bushes[3][0][0].stop();
-      this.bushes[0][0][1].start(false, 0.5);
-      this.bushes[1][0][1].start(false, 0.5);
-      this.bushes[2][0][1].start(false, 0.5);
-      this.bushes[3][0][1].start(false, 0.5);
+      this.retract_tree();
+      this.retract_bush();
       this.open = false;
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
       this.nofly = false;
       this.fly();
     }
+  }
+
+  public deploy_tree(): void {
+    let trees = 0;
+    for (let i = 0; i < this.forest.length; i++) {
+      if (this.forest[i].position.z === 0 && this.forest[i].name === 'tree') {
+        trees++;
+      }
+    }
+    for (let i = 0; i < trees; i++) {
+      this.trees[i][0][0].start(false, 0.1);
+      this.trees[i][0][2].start(false, 0.1);
+    }
+  }
+
+  public retract_tree(): void {
+    let trees = 0;
+    for (let i = 0; i < this.forest.length; i++) {
+      if (this.forest[i].position.z === 0 && this.forest[i].name === 'tree') {
+        trees++;
+      }
+    }
+    for (let i = 0; i < trees; i++) {
+      this.trees[i][0][0].stop();
+      this.trees[i][0][2].stop();
+      this.trees[i][0][1].start(false, 0.5);
+      this.trees[i][0][3].start(false, 0.5);
+    }
+  }
+
+  public deploy_bush(): void {
+    this.bushes[0][0][0].start(false, 0.1);
+    this.bushes[1][0][0].start(false, 0.1);
+    this.bushes[2][0][0].start(false, 0.1);
+    this.bushes[3][0][0].start(false, 0.1).onAnimationEndObservable.add(() => {
+      this.loading = false;
+    });
+  }
+
+  public retract_bush(): void {
+    this.bushes[0][0][0].stop();
+    this.bushes[1][0][0].stop();
+    this.bushes[2][0][0].stop();
+    this.bushes[3][0][0].stop();
+    this.bushes[0][0][1].start(false, 0.5);
+    this.bushes[1][0][1].start(false, 0.5);
+    this.bushes[2][0][1].start(false, 0.5);
+    this.bushes[3][0][1].start(false, 0.5);
   }
 
   public goToFlower(): void {
@@ -533,12 +579,12 @@ export class EngineService {
   public async addRow(delta: number): Promise<void> {
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
-    const position = this.shuffleArray([-3, 4, -6, 3, 5, 2]);
+    const position = this.shuffleArray([-3, -6, 3, 5]);
     for (let i = 0; i < newTrees; i++) {
       await this.addtree(
-        new Vector3(position[i], delta === -1 ? -5 : 0, delta === -1 ? 12 : -4),
+        new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
         delta === -1 ? false : true,
-        random_tree[0]
+        random_tree[i]
       );
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
@@ -591,7 +637,7 @@ export class EngineService {
     bush.animationGroups[0].goToFrame(0);
     bush.animationGroups[0].stop();
     bush.meshes[0].scaling.scaleInPlace(2.5);
-    bush.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
+    bush.meshes[0].rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
     bush.meshes[0].position = position;
     bush.meshes[0].name = 'bush';
     back ? this.bushes.unshift([bush.animationGroups, bush.meshes]) : this.bushes.push([bush.animationGroups, bush.meshes]);
@@ -601,10 +647,13 @@ export class EngineService {
 
   public async addtree(position: Vector3, back: boolean, mesh: number): Promise<ISceneLoaderAsyncResult> {
     const tree = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + mesh.toString() + '.glb', this.scene);
-    // tree.animationGroups[0].goToFrame(0);
-    // tree.animationGroups[0].stop();
+    tree.animationGroups[0].goToFrame(0);
+    tree.animationGroups[0].stop();
+    tree.animationGroups.sort();
+    tree.animationGroups[1].start(false, 10.0);
+    tree.animationGroups[3].start(false, 10.0);
     tree.meshes[0].scaling.scaleInPlace(2.5);
-    tree.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
+    tree.meshes[0].rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
     tree.meshes[0].position = position;
     tree.meshes[0].name = 'tree';
     back ? this.trees.unshift([tree.animationGroups, tree.meshes]) : this.trees.push([tree.animationGroups, tree.meshes]);
