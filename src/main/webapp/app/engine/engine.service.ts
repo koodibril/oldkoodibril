@@ -25,6 +25,51 @@ import {
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 
+interface Flower {
+  animations: AnimationGroup[],
+  meshe: AbstractMesh,
+  position: number
+}
+
+interface Bush {
+  animations: AnimationGroup[],
+  meshe: AbstractMesh,
+  position: number
+}
+
+interface Tree {
+  animations: AnimationGroup[],
+  meshe: AbstractMesh,
+  position: number
+}
+
+interface Trees {
+  front: Tree[],
+  middle: Tree[],
+  back: Tree[],
+  delete: Tree[]
+}
+
+interface Bushes {
+  front: Bush[],
+  middle: Bush[],
+  back: Bush[],
+  delete: Bush[]
+}
+
+interface Flowers {
+  front: Flower,
+  middle: Flower,
+  back: Flower,
+  delete: Flower
+}
+
+interface Forest {
+  trees: Trees,
+  flowers: Flowers,
+  bushes: Bushes,
+}
+
 @Injectable({ providedIn: 'root' })
 export class EngineService {
   private canvas!: HTMLCanvasElement;
@@ -39,12 +84,9 @@ export class EngineService {
 
   private branch!: Mesh;
   private koodibril!: AbstractMesh;
-  private forest!: AbstractMesh[];
+  private forest!: Forest;
   private leftoright!: boolean;
   private timeout!: boolean;
-  private flowers!: any[];
-  private bushes!: any[];
-  private trees!: any[];
   private open!: boolean;
   private koodibrilAnim!: AnimationGroup[];
   private loading!: boolean;
@@ -82,11 +124,25 @@ export class EngineService {
     ground.material = grid;
     ground.material.backFaceCulling = false;
 
-    this.trees = [];
-    this.forest = [];
-    this.flowers = [];
-    this.bushes = [];
+    this.forest = <Forest>{};
+    this.forest.trees = <Trees>{};
+    this.forest.bushes = <Bushes>{};
+    this.forest.flowers = <Flowers>{};
+    
+    this.forest.trees.front = [];
+    this.forest.trees.middle = [];
+    this.forest.trees.back = [];
+    this.forest.trees.delete = [];
+    this.forest.bushes.front = [];
+    this.forest.bushes.middle = [];
+    this.forest.bushes.back = [];
+    this.forest.bushes.delete = [];
+    this.forest.flowers.front = <Flower>{};
+    this.forest.flowers.middle = <Flower>{};
+    this.forest.flowers.back = <Flower>{};
+    this.forest.flowers.delete = <Flower>{};
     await this.seed();
+    console.log(this.forest);
 
     // const lensEffect = new LensRenderingPipeline('lens', {
     //   edge_blur: 1.0,
@@ -143,7 +199,6 @@ export class EngineService {
       }
 
       this.scene.onPointerObservable.add(pointerInfo => {
-        console.log(this.loading);
         switch (pointerInfo.type) {
           case PointerEventTypes.POINTERDOWN:
             console.log('POINTER DOWN');
@@ -161,7 +216,7 @@ export class EngineService {
             console.log('POINTER PICK');
             break;
           case PointerEventTypes.POINTERTAP:
-            this.opener(this.flowers[0][1][0].position.x, this.flowers[0][1][0].position.y);
+            // this.opener(this.forest.flowers[0][1][0].position.x, this.flowers[0][1][0].position.y);
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
             this.opener(0, 0);
@@ -234,74 +289,113 @@ export class EngineService {
   }
 
   public wheel(event: any): void {
+    const delta = Math.sign(event.deltaY);
     if (this.open) {
-      this.loading = true;
+      this.loading = false;
+      this.retract_fast_flower();
       this.retract_tree();
-      this.fly();
       this.retract_bush();
+      this.fly();
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
-      this.flowers[0][0][5].start(false, 0.5);
-      this.flowers[0][0][3].start(false, 0.5);
-      this.flowers[0][0][0].start(false, 0.5);
     }
     if (!this.move) {
       this.move = true;
       (async () => {
-        const delta = Math.sign(event.deltaY);
         await this.addRow(delta);
         let rollOver: any;
-        this.forest.forEach(element => {
-          const frameRate = 10;
-          const zkeyFrames = [
-            {
-              frame: 0,
-              value: element.position.z,
-            },
-            {
-              frame: frameRate,
-              value: element.position.z + 4 * delta,
-            },
-          ];
-          const ykeyFramesOut = [
-            {
-              frame: 0,
-              value: element.position.y,
-            },
-            {
-              frame: frameRate,
-              value: -5,
-            },
-          ];
-          const ykeyFramesIn = [
-            {
-              frame: 0,
-              value: element.position.y,
-            },
-            {
-              frame: frameRate,
-              value: element.name === 'flower' ? 1.5 : 0,
-            },
-          ];
-          const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-          const ySlideOut = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-          const ySlideIn = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-          zSlide.setKeys(zkeyFrames);
-          ySlideOut.setKeys(ykeyFramesOut);
-          ySlideIn.setKeys(ykeyFramesIn);
-          if (element.position.z === 8 && delta === 1) {
-            rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideOut], 0, frameRate, false, 2);
-          } else if (element.position.z === 12 && delta === -1) {
-            rollOver = this.scene.beginDirectAnimation(element, [zSlide, ySlideIn], 0, frameRate, false, 2);
-          } else {
-            rollOver = this.scene.beginDirectAnimation(element, [zSlide], 0, frameRate, false, 2);
+        let toMove: any;
+        for (let i = 0; i < 12; i++) {
+          switch (i) {
+            case 0:
+              toMove = this.forest.trees.front;
+              break;
+            case 1:
+              toMove = this.forest.trees.middle;
+              break;
+            case 2:
+              toMove = this.forest.trees.back;
+              break;
+            case 3:
+              toMove = this.forest.trees.delete;
+              break;
+            case 4:
+              toMove = this.forest.bushes.front;
+              break;
+            case 5:
+              toMove = this.forest.bushes.middle;
+              break;
+            case 6:
+              toMove = this.forest.bushes.back;
+              break;
+            case 7:
+              toMove = this.forest.bushes.delete;
+              break;
+            case 8:
+              toMove = [this.forest.flowers.front];
+              break;
+            case 9:
+              toMove = [this.forest.flowers.middle];
+              break;
+            case 10:
+              toMove = [this.forest.flowers.back];
+              break;
+            case 11:
+              toMove = [this.forest.flowers.delete];
+              break;
           }
-        });
+          toMove.forEach((element: any) => {
+              const frameRate = 10;
+              const zkeyFrames = [
+                {
+                  frame: 0,
+                  value: element.meshe.position.z,
+                },
+                {
+                  frame: frameRate,
+                  value: element.meshe.position.z as number + 4 * delta,
+                },
+              ];
+              const ykeyFramesOut = [
+                {
+                  frame: 0,
+                  value: element.meshe.position.y,
+                },
+                {
+                  frame: frameRate,
+                  value: -5,
+                },
+              ];
+              const ykeyFramesIn = [
+                {
+                  frame: 0,
+                  value: element.meshe.position.y,
+                },
+                {
+                  frame: frameRate,
+                  value: element.meshe.name === 'flower' ? 1.5 : 0,
+                },
+              ];
+              const zSlide = new Animation('zSlide', 'position.z', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              const ySlideOut = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              const ySlideIn = new Animation('zSlide', 'position.y', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+              zSlide.setKeys(zkeyFrames);
+              ySlideOut.setKeys(ykeyFramesOut);
+              ySlideIn.setKeys(ykeyFramesIn);
+              if (element.meshe.position.z === 8 && delta === 1) {
+                rollOver = this.scene.beginDirectAnimation(element.meshe, [zSlide, ySlideOut], 0, frameRate, false, 2);
+              } else if (element.meshe.position.z === 12 && delta === -1) {
+                rollOver = this.scene.beginDirectAnimation(element.meshe, [zSlide, ySlideIn], 0, frameRate, false, 2);
+              } else {
+                rollOver = this.scene.beginDirectAnimation(element.meshe, [zSlide], 0, frameRate, false, 2);
+              }
+            });
+        }
         rollOver!.onAnimationEndObservable.add(() => {
           this.move = false;
           this.open = false;
-          this.deleteRow(delta);
           this.opener(this.branch.position.x, this.branch.position.y);
+          this.deleteRow();
         });
       })();
     }
@@ -342,7 +436,7 @@ export class EngineService {
   }
 
   public opener(x: number, y: number): void {
-    const flowerPos = this.flowers[0][1][0].position;
+    const flowerPos = this.forest.flowers.front.meshe.position;
     const xOffsetr = flowerPos.x < 0 ? 0.5 : 0.1;
     const xOffsetl = flowerPos.x < 0 ? 0.1 : 0.5;
     if (flowerPos.x >= x - xOffsetr && flowerPos.x <= x + xOffsetl && flowerPos.y >= y - 0.5 && flowerPos.y <= y + 1 && !this.open) {
@@ -350,20 +444,14 @@ export class EngineService {
       this.open = true;
       this.loading = true;
       this.goToFlower();
-      this.flowers[0][0][1].start(false, 0.5).onAnimationEndObservable.add(() => {
-        this.flowers[0][0][4].start(false, 0.5);
-        this.flowers[0][0][6].start(false, 0.5);
-      });
+      this.deploy_flower();
       this.deploy_bush();
       this.deploy_tree();
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
     ) {
-      this.flowers[0][0][5].start(false, 0.5);
-      this.flowers[0][0][3].start(false, 0.5).onAnimationEndObservable.add(() => {
-        this.flowers[0][0][0].start(false, 0.5);
-      });
+      this.retract_flower();
       this.retract_tree();
       this.retract_bush();
       this.open = false;
@@ -374,57 +462,88 @@ export class EngineService {
     }
   }
 
+  public stop_flower(): void {
+    this.forest.flowers.front.animations.forEach(element => {
+      element.stop();
+    });
+  }
+
+  public deploy_flower(): void {
+    this.stop_flower();
+    this.forest.flowers.front.animations[2].start(false, 1).onAnimationEndObservable.add(() => {
+      this.forest.flowers.front.animations[4].start(false, 1);
+      this.forest.flowers.front.animations[6].start(false, 1);
+    });
+  }
+
+  public retract_flower(): void {
+    this.stop_flower()
+    this.forest.flowers.front.animations[5].start(false, 1);
+    this.forest.flowers.front.animations[3].start(false, 1).onAnimationEndObservable.add(() => {
+      this.forest.flowers.front.animations[0].start(false, 1);
+    });
+  }
+
+  public retract_fast_flower(): void {
+    this.forest.flowers.front.animations[5].start(false, 0.5);
+    this.forest.flowers.front.animations[3].start(false, 0.5);
+    this.forest.flowers.front.animations[0].start(false, 0.5);
+  }
+
+  public stop_tree(): void {
+    this.forest.trees.front.forEach(element => {
+      element.animations.forEach(element2 => {
+        element2.stop();
+      });
+    })
+  }
+
   public deploy_tree(): void {
-    let trees = 0;
-    for (let i = 0; i < this.forest.length; i++) {
-      if (this.forest[i].position.z === 0 && this.forest[i].name === 'tree') {
-        trees++;
-      }
-    }
-    for (let i = 0; i < trees; i++) {
-      this.trees[i][0][0].start(false, 0.1);
-      this.trees[i][0][2].start(false, 0.1);
+    this.stop_tree();
+    for (let i = 0; i < this.forest.trees.front.length; i++) {
+      this.forest.trees.front[i].animations[0].start(false, 0.3);
+      this.forest.trees.front[i].animations[2].start(false, 0.3);
     }
   }
 
   public retract_tree(): void {
-    let trees = 0;
-    for (let i = 0; i < this.forest.length; i++) {
-      if (this.forest[i].position.z === 0 && this.forest[i].name === 'tree') {
-        trees++;
-      }
-    }
-    for (let i = 0; i < trees; i++) {
-      this.trees[i][0][0].stop();
-      this.trees[i][0][2].stop();
-      this.trees[i][0][1].start(false, 0.5);
-      this.trees[i][0][3].start(false, 0.5);
+    this.stop_tree();
+    for (let i = 0; i < this.forest.trees.front.length; i++) {
+      this.forest.trees.front[i].animations[0].stop();
+      this.forest.trees.front[i].animations[2].stop();
+      this.forest.trees.front[i].animations[1].start(false, 0.5);
+      this.forest.trees.front[i].animations[3].start(false, 0.5);
     }
   }
 
+  public stop_bush(): void {
+    this.forest.bushes.front.forEach(element => {
+      element.animations.forEach(element2 => {
+        element2.stop();
+      });
+    })
+  }
+
   public deploy_bush(): void {
-    this.bushes[0][0][0].start(false, 0.1);
-    this.bushes[1][0][0].start(false, 0.1);
-    this.bushes[2][0][0].start(false, 0.1);
-    this.bushes[3][0][0].start(false, 0.1).onAnimationEndObservable.add(() => {
-      this.loading = false;
+    this.stop_bush();
+    this.forest.bushes.front.forEach(element => {
+      element.animations[0].start(false, 0.3).onAnimationEndObservable.add(() => {
+        this.loading = false;
+      });
     });
   }
 
   public retract_bush(): void {
-    this.bushes[0][0][0].stop();
-    this.bushes[1][0][0].stop();
-    this.bushes[2][0][0].stop();
-    this.bushes[3][0][0].stop();
-    this.bushes[0][0][1].start(false, 0.5);
-    this.bushes[1][0][1].start(false, 0.5);
-    this.bushes[2][0][1].start(false, 0.5);
-    this.bushes[3][0][1].start(false, 0.5);
+    this.stop_bush();
+    this.forest.bushes.front.forEach(element => {
+      element.animations[0].stop();
+      element.animations[1].start(false, 0.5);
+    });
   }
 
   public goToFlower(): void {
     const frameRate = 10;
-    const flowerPos = this.flowers[0][1][0].position;
+    const flowerPos = this.forest.flowers.front.meshe.position;
     const xkeyFramesKooli = [
       {
         frame: 0,
@@ -540,23 +659,23 @@ export class EngineService {
 
   public async seed(): Promise<void> {
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    await this.addtree(new Vector3(-3, 0, 0), false, random_tree[0]);
-    await this.addtree(new Vector3(4, 0, 0), false, random_tree[1]);
-    await this.addtree(new Vector3(-6, 0, 4), false, random_tree[2]);
-    await this.addtree(new Vector3(3, 0, 4), false, random_tree[3]);
-    await this.addtree(new Vector3(5, 0, 4), false, random_tree[4]);
-    await this.addtree(new Vector3(-4, 0, 8), false, random_tree[5]);
-    await this.addtree(new Vector3(-3, 0, 8), false, random_tree[6]);
-    await this.addtree(new Vector3(2, 0, 8), false, random_tree[7]);
-    await this.addtree(new Vector3(5, 0, 8), false, random_tree[8]);
+    await this.addtree(new Vector3(-3, 0, 0), 0, random_tree[0]);
+    await this.addtree(new Vector3(4, 0, 0), 0, random_tree[1]);
+    await this.addtree(new Vector3(-6, 0, 4), 1, random_tree[2]);
+    await this.addtree(new Vector3(3, 0, 4), 1, random_tree[3]);
+    await this.addtree(new Vector3(5, 0, 4), 1, random_tree[4]);
+    await this.addtree(new Vector3(-4, 0, 8), 2, random_tree[5]);
+    await this.addtree(new Vector3(-3, 0, 8), 2, random_tree[6]);
+    await this.addtree(new Vector3(2, 0, 8), 2, random_tree[7]);
+    await this.addtree(new Vector3(5, 0, 8), 2, random_tree[8]);
 
     for (let z = 0; z <= 8; z = z + 4) {
       const random = this.shuffleArray([1, 2, 3, 4]);
-      await this.addbush(new Vector3(-5, 0, z), false, random[0]);
-      await this.addbush(new Vector3(1, 0, z), false, random[1]);
-      await this.addbush(new Vector3(-1, 0, z), false, random[2]);
-      await this.addbush(new Vector3(5, 0, z), false, random[3]);
-      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, z), false);
+      await this.addbush(new Vector3(-5, 0, z), z / 4, random[0]);
+      await this.addbush(new Vector3(1, 0, z), z / 4, random[1]);
+      await this.addbush(new Vector3(-1, 0, z), z / 4, random[2]);
+      await this.addbush(new Vector3(5, 0, z), z / 4, random[3]);
+      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, z), z / 4);
     }
   }
 
@@ -577,87 +696,157 @@ export class EngineService {
   }
 
   public async addRow(delta: number): Promise<void> {
+    console.log(delta);
+    if (delta === 1) {
+      this.forest.bushes.delete = this.forest.bushes.back;
+      this.forest.bushes.back = this.forest.bushes.middle;
+      this.forest.bushes.middle = this.forest.bushes.front;
+      this.forest.bushes.front = [];
+
+      this.forest.flowers.delete = this.forest.flowers.back;
+      this.forest.flowers.back = this.forest.flowers.middle;
+      this.forest.flowers.middle = this.forest.flowers.front;
+      this.forest.flowers.front = <Flower>{};
+
+      this.forest.trees.delete = this.forest.trees.back;
+      this.forest.trees.back = this.forest.trees.middle;
+      this.forest.trees.middle = this.forest.trees.front;
+      this.forest.trees.front = [];
+    } else {
+      this.forest.bushes.delete = this.forest.bushes.front;
+      this.forest.bushes.front = this.forest.bushes.middle;
+      this.forest.bushes.middle = this.forest.bushes.back;
+      this.forest.bushes.back = [];
+
+      this.forest.flowers.delete = this.forest.flowers.front;
+      this.forest.flowers.front = this.forest.flowers.middle;
+      this.forest.flowers.middle = this.forest.flowers.back;
+      this.forest.flowers.back = <Flower>{};
+
+      this.forest.trees.delete = this.forest.trees.front;
+      this.forest.trees.front = this.forest.trees.middle;
+      this.forest.trees.middle = this.forest.trees.back;
+      this.forest.trees.back = [];
+    }
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
     const position = this.shuffleArray([-3, -6, 3, 5]);
     for (let i = 0; i < newTrees; i++) {
       await this.addtree(
         new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
-        delta === -1 ? false : true,
+        delta === -1 ? 2 : 0,
         random_tree[i]
       );
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
     await this.addflower(
       new Vector3(Math.random() * (1.5 - -1) + -1, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
-      delta === -1 ? false : true
+      delta === -1 ? 2 : 0
     );
-    await this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[0]);
-    await this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[1]);
-    await this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[2]);
-    await this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? false : true, random[3]);
+    await this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
+    await this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[1]);
+    await this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[2]);
+    await this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[3]);
   }
 
-  public deleteRow(delta: number): void {
-    for (let i = 0; i < this.forest.length; i++) {
-      if ((this.forest[i].position.z >= 11 && delta === 1) || (this.forest[i].position.z <= -3 && delta === -1)) {
-        if (this.forest[i].name === 'flower') {
-          delta === -1 ? this.flowers.splice(0, 1) : this.flowers.splice(3, 1);
+  public deleteRow(): void {
+    for (let i = 0; i < 3; i++) {
+      if (i === 0) {
+        for (let j = 0; j < this.forest.trees.delete.length; j++) {
+          this.forest.trees.delete[j].meshe.dispose();
+          this.forest.trees.delete.shift();
+          j = -1;
         }
-        if (this.forest[i].name === 'bush') {
-          delta === -1 ? this.bushes.splice(0, 1) : this.bushes.splice(9, 1);
+      }
+      if (i === 1) {
+        for (let j = 0; j < this.forest.bushes.delete.length; j++) {
+          this.forest.bushes.delete[j].meshe.dispose();
+          this.forest.bushes.delete.shift();
+          j = -1;
         }
-        if (this.forest[i].name === 'tree') {
-          delta === -1 ? this.trees.splice(0, 1) : this.trees.splice(this.trees.length, 1);
-        }
-        this.forest[i].dispose();
-        this.forest.splice(i, 1);
-        i = 0;
+      }
+      if (i === 2) {
+        this.forest.flowers.delete.meshe.dispose();
+        this.forest.flowers.delete = <Flower>{};
       }
     }
   }
 
-  public async addflower(position: Vector3, back: boolean): Promise<ISceneLoaderAsyncResult> {
-    const flower = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
-    flower.animationGroups[0].stop();
-    flower.animationGroups[0].start(false, 10.0);
-    flower.animationGroups[5].start(false, 10.0);
-    flower.animationGroups[3].start(false, 10.0);
-    flower.meshes[0].scaling.scaleInPlace(0.2);
-    flower.meshes[0].rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
-    flower.meshes[0].position = position;
-    flower.meshes[0].name = 'flower';
-    back ? this.flowers.unshift([flower.animationGroups, flower.meshes]) : this.flowers.push([flower.animationGroups, flower.meshes]);
-    this.forest.push(flower.meshes[0]);
-    return flower;
+  public async addflower(position: Vector3, row: number): Promise<void> {
+    const flowerImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
+    const flower = <Flower>{};
+    flower.animations = flowerImport.animationGroups,
+    flower.meshe = flowerImport.meshes[0]
+    flower.animations[0].stop();
+    flower.animations[0].start(false, 10.0);
+    flower.animations[5].start(false, 10.0);
+    flower.animations[3].start(false, 10.0);
+    flower.meshe.scaling.scaleInPlace(0.2);
+    flower.meshe.rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
+    flower.meshe.position = position;
+    flower.meshe.name = 'flower';
+    switch (row) {
+      case 0:
+        this.forest.flowers.front = flower;
+        break;
+      case 1:
+        this.forest.flowers.middle = flower;
+        break;
+      case 2:
+        this.forest.flowers.back = flower;
+        break;
+      }
+      console.log(flower);
+      console.log(this.forest.flowers.back);
   }
 
-  public async addbush(position: Vector3, back: boolean, mesh: number): Promise<ISceneLoaderAsyncResult> {
-    const bush = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'bush' + mesh.toString() + '.glb', this.scene);
-    bush.animationGroups[0].goToFrame(0);
-    bush.animationGroups[0].stop();
-    bush.meshes[0].scaling.scaleInPlace(2.5);
-    bush.meshes[0].rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
-    bush.meshes[0].position = position;
-    bush.meshes[0].name = 'bush';
-    back ? this.bushes.unshift([bush.animationGroups, bush.meshes]) : this.bushes.push([bush.animationGroups, bush.meshes]);
-    this.forest.push(bush.meshes[0]);
-    return bush;
+  public async addbush(position: Vector3, row: number, mesh: number): Promise<void> {
+    const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'bush' + mesh.toString() + '.glb', this.scene);
+    const bush = <Bush>{};
+    bush.animations = bushImport.animationGroups,
+    bush.meshe = bushImport.meshes[0]
+    bush.animations[0].goToFrame(0);
+    bush.animations[0].stop();
+    bush.meshe.scaling.scaleInPlace(2.5);
+    bush.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
+    bush.meshe.position = position;
+    switch (row) {
+      case 0:
+        this.forest.bushes.front.push(bush);
+        break;
+      case 1:
+        this.forest.bushes.middle.push(bush);
+        break;
+      case 2:
+        this.forest.bushes.back.push(bush);
+        break;
+    }
   }
 
-  public async addtree(position: Vector3, back: boolean, mesh: number): Promise<ISceneLoaderAsyncResult> {
-    const tree = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + mesh.toString() + '.glb', this.scene);
-    tree.animationGroups[0].goToFrame(0);
-    tree.animationGroups[0].stop();
-    tree.animationGroups.sort();
-    tree.animationGroups[1].start(false, 10.0);
-    tree.animationGroups[3].start(false, 10.0);
-    tree.meshes[0].scaling.scaleInPlace(2.5);
-    tree.meshes[0].rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
-    tree.meshes[0].position = position;
-    tree.meshes[0].name = 'tree';
-    back ? this.trees.unshift([tree.animationGroups, tree.meshes]) : this.trees.push([tree.animationGroups, tree.meshes]);
-    this.forest.push(tree.meshes[0]);
-    return tree;
+  public async addtree(position: Vector3, row: number, mesh: number): Promise<void> {
+    const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + mesh.toString() + '.glb', this.scene);
+    const tree = <Tree>{};
+    tree.animations = treeImport.animationGroups,
+    tree.meshe = treeImport.meshes[0]
+    tree.animations[0].goToFrame(0);
+    tree.animations[0].stop();
+    tree.animations.sort();
+    tree.animations[1].start(false, 10.0);
+    tree.animations[3].start(false, 10.0);
+    tree.meshe.scaling.scaleInPlace(2.5);
+    tree.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
+    tree.meshe.position = position;
+    tree.meshe.name = 'tree';
+    switch (row) {
+      case 0:
+        this.forest.trees.front.push(tree);
+        break;
+      case 1:
+        this.forest.trees.middle.push(tree);
+        break;
+      case 2:
+        this.forest.trees.back.push(tree);
+        break;
+    }
   }
 }
