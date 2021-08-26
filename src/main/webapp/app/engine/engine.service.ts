@@ -202,10 +202,10 @@ export class EngineService {
             this.wheel(pointerInfo.event);
             break;
           case PointerEventTypes.POINTERTAP:
-            this.open ? this.reset() : this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
+            ;
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
-            this.opener(0, 0);
+            this.open ? this.reset() : this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
             break;
         }
       });
@@ -248,6 +248,7 @@ export class EngineService {
       this.retract_fast_flower();
       this.retract_tree();
       this.retract_bush();
+      this.open = false;
       this.fly();
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
@@ -305,7 +306,7 @@ export class EngineService {
     if (this.open) {
       this.reset();
     }
-    if (!this.move) {
+    if (!this.move && !this.loading) {
       this.move = true;
       (async () => {
         await this.addRow(delta);
