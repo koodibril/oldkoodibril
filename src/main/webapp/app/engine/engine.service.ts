@@ -205,7 +205,12 @@ export class EngineService {
             ;
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
-            this.open ? this.reset() : this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
+            if (this.open) {
+              this.opener(0, 0);
+              this.reset();
+            } else {
+              this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
+            }
             break;
         }
       });
@@ -242,6 +247,9 @@ export class EngineService {
   }
 
   public reset(): void {
+    if (!this.nofly) {
+      this.fly();
+    }
     if (!this.loading) {
       this.loading = false;
       this.nofly = false;
@@ -251,7 +259,6 @@ export class EngineService {
         this.retract_bush();
         this.open = false;
       }
-      this.fly();
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
       const translateVector = new Vector3(-this.branch.position.x, -this.branch.position.y + 2, 0);
@@ -622,9 +629,11 @@ export class EngineService {
 
   public fly(): void {
     if (!this.nofly) {
-      const frameRate = 10;
-      const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-      const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
+      const frameRate = 20;
+      const offsetCanvasx = (this.canvas.width / 200) - 1;
+      const offsetCanvasy = (this.canvas.height / 200) - 1;
+      const xtravel = Math.floor(Math.random() * (offsetCanvasx - -offsetCanvasx) + -offsetCanvasx) / Math.floor(Math.random() * 3 + 2);
+      const ytravel = Math.floor(Math.random() * (offsetCanvasy - -1) + -1) / Math.floor(Math.random() * 3 + 2);
       if (this.branch.position.x > xtravel && !this.leftoright) {
         this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
         this.leftoright = true;
@@ -638,7 +647,11 @@ export class EngineService {
           value: this.koodibril.position.x,
         },
         {
-          frame: frameRate,
+          frame: 10,
+          value: xtravel,
+        },
+        {
+          frame: 20,
           value: xtravel,
         },
       ];
@@ -648,7 +661,11 @@ export class EngineService {
           value: this.koodibril.position.y,
         },
         {
-          frame: frameRate,
+          frame: 10,
+          value: ytravel,
+        },
+        {
+          frame: 20,
           value: ytravel,
         },
       ];
@@ -659,9 +676,12 @@ export class EngineService {
       xSlide.setKeys(xkeyFrames);
       ySlide.setKeys(ykeyFrames);
       const animations = [xSlide, ySlide];
-      const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, frameRate, false, 2);
+      const flyAnimate = this.scene.beginDirectAnimation(this.koodibril, animations, 0, frameRate, false, 1);
+      console.log(xtravel, ytravel);
       flyAnimate.onAnimationEndObservable.add(() => {
-        this.fly();
+        if (!this.nofly) {
+          this.fly();
+        }
       });
     }
   }
