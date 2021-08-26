@@ -16,11 +16,9 @@ import {
   Layer,
   Color3,
   FlyCamera,
-  ISceneLoaderAsyncResult,
   AnimationGroup,
   Material,
-  PointerEventTypes,
-  LensRenderingPipeline,
+  PointerEventTypes
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -105,6 +103,11 @@ export class EngineService {
     // create a basic BJS Scene object
     this.scene = new Scene(this.engine);
     this.scene.clearColor = new Color4(0, 0, 0, 0);
+    this.scene.fogMode = Scene.FOGMODE_LINEAR;
+    this.scene.fogStart = 4.0;
+    this.scene.fogEnd = 20.0;
+    this.scene.fogColor = new Color3(0.9, 0.9, 0.85);
+    this.scene.fogDensity = 0.15;
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
     this.camera = new FlyCamera('camera1', new Vector3(0, 3, -5), this.scene);
@@ -142,20 +145,6 @@ export class EngineService {
     this.forest.flowers.back = <Flower>{};
     this.forest.flowers.delete = <Flower>{};
     await this.seed();
-    console.log(this.forest);
-
-    // const lensEffect = new LensRenderingPipeline('lens', {
-    //   edge_blur: 1.0,
-    //   chromatic_aberration: 1.0,
-    //   distortion: 1.0,
-    //   dof_focus_distance: 1,
-    //   dof_aperture: 6.0,			// set this very high for tilt-shift effect
-    //   grain_amount: 1.0,
-    //   dof_pentagon: true,
-    //   dof_gain: 1.0,
-    //   dof_threshold: 1.0,
-    //   dof_darken: 0.25
-    // }, this.scene, 1.0);
 
     // create a built-in "branch" shape; its constructor takes 4 params: name, subdivisions, radius, scene
     this.branch = MeshBuilder.CreateDisc('disc', { radius: 0.001 });
