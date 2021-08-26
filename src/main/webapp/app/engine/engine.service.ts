@@ -245,10 +245,12 @@ export class EngineService {
     if (!this.loading) {
       this.loading = false;
       this.nofly = false;
-      this.retract_fast_flower();
-      this.retract_tree();
-      this.retract_bush();
-      this.open = false;
+      if (this.open) {
+        this.retract_fast_flower();
+        this.retract_tree();
+        this.retract_bush();
+        this.open = false;
+      }
       this.fly();
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
