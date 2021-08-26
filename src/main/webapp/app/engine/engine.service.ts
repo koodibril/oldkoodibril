@@ -219,10 +219,10 @@ export class EngineService {
       this.canvas.addEventListener('touchend', (event) => {
         const test = <any>{};
         const currentY = event.changedTouches[0].clientY;
-        if (currentY > this.touchY){
+        if (currentY > this.touchY && ((currentY - this.touchY) > 50)){
           test.deltaY = -1;
           this.wheel(test);
-        } else if(currentY < this.touchY){
+        } else if(currentY < this.touchY && ((currentY - this.touchY) < -50)){
           test.deltaY = 1;
           this.wheel(test);
         }
