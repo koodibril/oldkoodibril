@@ -18,7 +18,8 @@ import {
   FlyCamera,
   AnimationGroup,
   Material,
-  PointerEventTypes
+  PointerEventTypes,
+  DeviceSourceManager
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -88,6 +89,8 @@ export class EngineService {
   private open!: boolean;
   private koodibrilAnim!: AnimationGroup[];
   private loading!: boolean;
+  private touchY!: number;
+  private device!: number;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -169,6 +172,9 @@ export class EngineService {
     this.loading = false;
     this.fly();
     this.engine.hideLoadingUI();
+    new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add((device) => {
+      this.device = device.deviceType;
+    });
   }
 
   public animate(): void {
@@ -189,27 +195,36 @@ export class EngineService {
 
       this.scene.onPointerObservable.add(pointerInfo => {
         switch (pointerInfo.type) {
-          case PointerEventTypes.POINTERDOWN:
-            console.log('POINTER DOWN');
-            break;
-          case PointerEventTypes.POINTERUP:
-            console.log('POINTER UP');
-            break;
           case PointerEventTypes.POINTERMOVE:
-            this.onMove();
+            this.device === 2 ? this.onMove() : null;
             break;
           case PointerEventTypes.POINTERWHEEL:
             this.wheel(pointerInfo.event);
             break;
-          case PointerEventTypes.POINTERPICK:
-            console.log('POINTER PICK');
-            break;
           case PointerEventTypes.POINTERTAP:
-            // this.opener(this.forest.flowers[0][1][0].position.x, this.flowers[0][1][0].position.y);
+            this.open ? this.reset() : this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
             this.opener(0, 0);
             break;
+        }
+      });
+
+
+
+      this.canvas.addEventListener('touchstart', (event) => {
+        this.touchY = event.touches[0].clientY;
+      });
+
+      this.canvas.addEventListener('touchend', (event) => {
+        const test = <any>{};
+        const currentY = event.changedTouches[0].clientY;
+        if (currentY > this.touchY){
+          test.deltaY = -1;
+          this.wheel(test);
+        } else if(currentY < this.touchY){
+          test.deltaY = 1;
+          this.wheel(test);
         }
       });
 
@@ -228,6 +243,14 @@ export class EngineService {
 
   public reset(): void {
     if (!this.loading) {
+      this.loading = false;
+      this.nofly = false;
+      this.retract_fast_flower();
+      this.retract_tree();
+      this.retract_bush();
+      this.fly();
+      this.koodibrilAnim[1].stop();
+      this.koodibrilAnim[0].start(true, 10);
       const translateVector = new Vector3(-this.branch.position.x, -this.branch.position.y + 2, 0);
       const distance = translateVector.length();
 
@@ -280,13 +303,7 @@ export class EngineService {
   public wheel(event: any): void {
     const delta = Math.sign(event.deltaY);
     if (this.open) {
-      this.loading = false;
-      this.retract_fast_flower();
-      this.retract_tree();
-      this.retract_bush();
-      this.fly();
-      this.koodibrilAnim[1].stop();
-      this.koodibrilAnim[0].start(true, 10);
+      this.reset();
     }
     if (!this.move) {
       this.move = true;
@@ -383,7 +400,7 @@ export class EngineService {
         rollOver!.onAnimationEndObservable.add(() => {
           this.move = false;
           this.open = false;
-          this.opener(this.branch.position.x, this.branch.position.y);
+          this.device === 2 ? this.opener(this.branch.position.x, this.branch.position.y) : null;
           this.deleteRow();
         });
       })();
@@ -685,7 +702,6 @@ export class EngineService {
   }
 
   public async addRow(delta: number): Promise<void> {
-    console.log(delta);
     if (delta === 1) {
       this.forest.bushes.delete = this.forest.bushes.back;
       this.forest.bushes.back = this.forest.bushes.middle;
@@ -785,8 +801,6 @@ export class EngineService {
         this.forest.flowers.back = flower;
         break;
       }
-      console.log(flower);
-      console.log(this.forest.flowers.back);
   }
 
   public async addbush(position: Vector3, row: number, mesh: number): Promise<void> {
