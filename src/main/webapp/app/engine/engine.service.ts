@@ -19,7 +19,9 @@ import {
   AnimationGroup,
   Material,
   PointerEventTypes,
-  DeviceSourceManager
+  DeviceSourceManager,
+  SceneOptimizer,
+  AssetContainer
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -92,6 +94,9 @@ export class EngineService {
   private touchY!: number;
   private device!: number;
   private lastFly!: Animatable;
+  private flower!: AssetContainer;
+  private trees!: AssetContainer[];
+  private bushes!: AssetContainer[];
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -152,7 +157,8 @@ export class EngineService {
     this.forest.flowers.middle = <Flower>{};
     this.forest.flowers.back = <Flower>{};
     this.forest.flowers.delete = <Flower>{};
-    await this.seed();
+    await this.importforest();
+    this.seed();
 
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
     console.log(colibri.animationGroups);
@@ -171,6 +177,7 @@ export class EngineService {
     this.open = false;
     this.loading = false;
     this.fly();
+    SceneOptimizer.OptimizeAsync(this.scene),
     this.engine.hideLoadingUI();
     new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add((device) => {
       this.device = device.deviceType;
@@ -311,8 +318,7 @@ export class EngineService {
     }
     if (!this.move && !this.loading) {
       this.move = true;
-      (async () => {
-        await this.addRow(delta);
+        this.addRow(delta);
         let rollOver: any;
         let toMove: any;
         for (let i = 0; i < 12; i++) {
@@ -407,7 +413,6 @@ export class EngineService {
           this.device === 2 ? this.opener(this.koodibril.position.x, this.koodibril.position.y) : null;
           this.deleteRow();
         });
-      })();
     }
   }
 
@@ -649,25 +654,25 @@ export class EngineService {
     });
   }
 
-  public async seed(): Promise<void> {
+  public seed(): void {
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    await this.addtree(new Vector3(-3, 0, 0), 0, random_tree[0]);
-    await this.addtree(new Vector3(4, 0, 0), 0, random_tree[1]);
-    await this.addtree(new Vector3(-6, 0, 4), 1, random_tree[2]);
-    await this.addtree(new Vector3(3, 0, 4), 1, random_tree[3]);
-    await this.addtree(new Vector3(5, 0, 4), 1, random_tree[4]);
-    await this.addtree(new Vector3(-4, 0, 8), 2, random_tree[5]);
-    await this.addtree(new Vector3(-3, 0, 8), 2, random_tree[6]);
-    await this.addtree(new Vector3(2, 0, 8), 2, random_tree[7]);
-    await this.addtree(new Vector3(5, 0, 8), 2, random_tree[8]);
+    this.addtree(new Vector3(-3, 0, 0), 0, random_tree[0]);
+    this.addtree(new Vector3(4, 0, 0), 0, random_tree[1]);
+    this.addtree(new Vector3(-6, 0, 4), 1, random_tree[2]);
+    this.addtree(new Vector3(3, 0, 4), 1, random_tree[3]);
+    this.addtree(new Vector3(5, 0, 4), 1, random_tree[4]);
+    this.addtree(new Vector3(-4, 0, 8), 2, random_tree[5]);
+    this.addtree(new Vector3(-3, 0, 8), 2, random_tree[6]);
+    this.addtree(new Vector3(2, 0, 8), 2, random_tree[7]);
+    this.addtree(new Vector3(5, 0, 8), 2, random_tree[8]);
 
     for (let z = 0; z <= 8; z = z + 4) {
       const random = this.shuffleArray([1, 2, 3, 4]);
-      await this.addbush(new Vector3(-5, 0, z), z / 4, random[0]);
-      await this.addbush(new Vector3(1, 0, z), z / 4, random[1]);
-      await this.addbush(new Vector3(-1, 0, z), z / 4, random[2]);
-      await this.addbush(new Vector3(5, 0, z), z / 4, random[3]);
-      await this.addflower(new Vector3(Math.random() * (2 - -2) + -2, 1.5, z), z / 4);
+      this.addbush(new Vector3(-5, 0, z), z / 4, random[0]);
+      this.addbush(new Vector3(1, 0, z), z / 4, random[1]);
+      this.addbush(new Vector3(-1, 0, z), z / 4, random[2]);
+      this.addbush(new Vector3(5, 0, z), z / 4, random[3]);
+      this.addflower(new Vector3(Math.random() * (2 - -2) + -2, 1.5, z), z / 4);
     }
   }
 
@@ -687,7 +692,7 @@ export class EngineService {
     return array;
   }
 
-  public async addRow(delta: number): Promise<void> {
+  public addRow(delta: number): void {
     if (delta === 1) {
       this.forest.bushes.delete = this.forest.bushes.back;
       this.forest.bushes.back = this.forest.bushes.middle;
@@ -723,21 +728,21 @@ export class EngineService {
     const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
     const position = this.shuffleArray([-3, -6, 3, 5]);
     for (let i = 0; i < newTrees; i++) {
-      await this.addtree(
+      this.addtree(
         new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
         delta === -1 ? 2 : 0,
         random_tree[i]
       );
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
-    await this.addflower(
+    this.addflower(
       new Vector3(Math.random() * (2 - -2) + -2, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
       delta === -1 ? 2 : 0
     );
-    await this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
-    await this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[1]);
-    await this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[2]);
-    await this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[3]);
+    this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
+    this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[1]);
+    this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[2]);
+    this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[3]);
   }
 
   public deleteRow(): void {
@@ -763,11 +768,12 @@ export class EngineService {
     }
   }
 
-  public async addflower(position: Vector3, row: number): Promise<void> {
-    const flowerImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
+  public addflower(position: Vector3, row: number): void {
+    // const flowerImmport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
+    const flowerImport = this.flower.instantiateModelsToScene();
     const flower = <Flower>{};
     flower.animations = flowerImport.animationGroups,
-    flower.meshe = flowerImport.meshes[0]
+    flower.meshe = flowerImport.rootNodes[0] as AbstractMesh;
     flower.animations[0].stop();
     flower.animations[0].start(false, 10.0);
     flower.animations[5].start(false, 10.0);
@@ -790,13 +796,16 @@ export class EngineService {
       }
   }
 
-  public async addbush(position: Vector3, row: number, mesh: number): Promise<void> {
-    const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/bush/', 'bush' + mesh.toString() + 'v2.glb', this.scene);
+  public addbush(position: Vector3, row: number, mesh: number): void {
+    // const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/bush/', 'bush' + mesh.toString() + 'v2.glb', this.scene);
+    const bushImport = this.bushes[mesh].instantiateModelsToScene();
     const bush = <Bush>{};
     bush.animations = bushImport.animationGroups,
-    bush.meshe = bushImport.meshes[0]
+    bush.meshe = bushImport.rootNodes[0] as AbstractMesh;
+    console.log(bush.animations);
     bush.animations[0].goToFrame(0);
     bush.animations[0].stop();
+    bush.animations[1].start(false, 10.0);
     bush.meshe.scaling.scaleInPlace(2.5);
     bush.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
     bush.meshe.position = position;
@@ -815,11 +824,12 @@ export class EngineService {
     }
   }
 
-  public async addtree(position: Vector3, row: number, mesh: number): Promise<void> {
-    const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/tree/', 'tree' + mesh.toString() + 'v2.glb', this.scene);
+  public addtree(position: Vector3, row: number, mesh: number): void {
+    // const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/tree/', 'tree' + mesh.toString() + 'v2.glb', this.scene);
+    const treeImport = this.trees[mesh].instantiateModelsToScene();
     const tree = <Tree>{};
     tree.animations = treeImport.animationGroups,
-    tree.meshe = treeImport.meshes[0]
+    tree.meshe = treeImport.rootNodes[0] as AbstractMesh;
     tree.animations[0].goToFrame(0);
     tree.animations[0].stop();
     tree.animations.sort();
@@ -840,6 +850,18 @@ export class EngineService {
       case 2:
         this.forest.trees.back.push(tree);
         break;
+    }
+  }
+
+  public async importforest(): Promise<void> {
+    this.flower = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/', 'flower.glb', this.scene);
+    this.trees = [];
+    this.bushes = [];
+    for (let i = 1; i < 10; i++) {
+      this.trees[i] = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/forestv2/tree/', 'tree' + i.toString() + 'v2.glb', this.scene);
+      if (i < 5) {
+        this.bushes[i] = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/forestv2/bush/', 'bush' + i.toString() + 'v2.glb', this.scene);
+      }
     }
   }
 }
