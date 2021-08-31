@@ -87,6 +87,7 @@ export class EngineService {
   private timeout!: boolean;
   private open!: boolean;
   private koodibrilAnim!: AnimationGroup[];
+  private koodibrilMat!: AbstractMesh;
   private loading!: boolean;
   private touchY!: number;
   private device!: number;
@@ -154,10 +155,12 @@ export class EngineService {
     await this.seed();
 
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
+    console.log(colibri.animationGroups);
 
     colibri.animationGroups[0].stop();
     colibri.animationGroups[0].start(true, 10.0);
     this.koodibril = colibri.meshes[0];
+    this.koodibrilMat = colibri.meshes[1];
     this.koodibrilAnim = colibri.animationGroups;
     this.koodibril.scaling.scaleInPlace(0.13);
     this.koodibril.position.y = 2;
@@ -463,6 +466,7 @@ export class EngineService {
       this.open = false;
       this.koodibrilAnim[1].stop();
       this.koodibrilAnim[0].start(true, 10);
+      this.koodibrilMat.material!.wireframe = false;
     }
   }
 
@@ -588,6 +592,7 @@ export class EngineService {
       gotoflower.onAnimationEndObservable.add(() => {
       this.koodibrilAnim[0].stop();
       this.koodibrilAnim[1].start(true, 10);
+      this.koodibrilMat.material!.wireframe = true;
       });
   }
 
