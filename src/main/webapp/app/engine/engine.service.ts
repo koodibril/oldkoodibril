@@ -5,7 +5,6 @@ import {
   Scene,
   Light,
   MeshBuilder,
-  Mesh,
   SceneLoader,
   Color4,
   Vector3,
@@ -76,7 +75,8 @@ export class EngineService {
   private engine!: Engine;
   private camera!: FlyCamera;
   private scene!: Scene;
-  private light!: Light;
+  private sun!: Light;
+  private moon!: Light;
   private layer!: Layer;
   private move!: boolean;
   private material!: Material;
@@ -118,8 +118,11 @@ export class EngineService {
     // target the camera to scene origin
     this.camera.setTarget(new Vector3(0, 2, 0));
 
-    // create a basic light, aiming 0,1,0 - meaning, to the sky
-    this.light = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
+    // day light
+    this.sun = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
+    // night light
+    // this.moon = new DirectionalLight("DirectionalLight", new Vector3(0, -1, 0), this.scene);
+
 
     const ground = MeshBuilder.CreateGround('ground', { width: 30, height: 30 });
     const grid = new GridMaterial('groundMat', this.scene);
@@ -129,6 +132,7 @@ export class EngineService {
     grid.lineColor = new Color3(0, 0, 0);
     ground.material = grid;
     ground.material.backFaceCulling = false;
+    ground.checkCollisions = true;
 
     this.forest = <Forest>{};
     this.forest.trees = <Trees>{};
@@ -200,6 +204,7 @@ export class EngineService {
             if (this.open) {
               this.opener(0, 0);
               this.reset();
+              this.fly();
             } else {
               this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
             }
@@ -545,6 +550,14 @@ export class EngineService {
     this.lastFly.onAnimationEndObservable.clear();
     const frameRate = 10;
     const flowerPos = this.forest.flowers.front.meshe.position;
+    if (flowerPos.x < 0 && !this.leftoright) {
+      this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+      this.leftoright = true;
+    }
+    if (flowerPos.x > 0 && this.leftoright) {
+      this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
+      this.leftoright = false;
+    }
     const xkeyFramesKooli = [
       {
         frame: 0,
@@ -572,17 +585,9 @@ export class EngineService {
     ySlideKooli.setKeys(ykeyFramesKooli);
     const animationsKooli = [xSlideKooli, ySlideKooli];
       const gotoflower = this.scene.beginDirectAnimation(this.koodibril, animationsKooli, 0, frameRate, false, 2);
+      gotoflower.onAnimationEndObservable.add(() => {
       this.koodibrilAnim[0].stop();
       this.koodibrilAnim[1].start(true, 10);
-      gotoflower.onAnimationEndObservable.add(() => {
-        if (flowerPos.x < 0 && !this.leftoright) {
-          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-          this.leftoright = true;
-        }
-        if (flowerPos.x > 0 && this.leftoright) {
-          this.koodibril.rotate(new Vector3(0, 1, 0), Math.PI);
-          this.leftoright = false;
-        }
       });
   }
 
@@ -657,7 +662,7 @@ export class EngineService {
       await this.addbush(new Vector3(1, 0, z), z / 4, random[1]);
       await this.addbush(new Vector3(-1, 0, z), z / 4, random[2]);
       await this.addbush(new Vector3(5, 0, z), z / 4, random[3]);
-      await this.addflower(new Vector3(Math.random() * (1.5 - -1) + -1, 1.5, z), z / 4);
+      await this.addflower(new Vector3(Math.random() * (2 - -2) + -2, 1.5, z), z / 4);
     }
   }
 
@@ -721,7 +726,7 @@ export class EngineService {
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
     await this.addflower(
-      new Vector3(Math.random() * (1.5 - -1) + -1, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
+      new Vector3(Math.random() * (2 - -2) + -2, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
       delta === -1 ? 2 : 0
     );
     await this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
@@ -766,6 +771,7 @@ export class EngineService {
     flower.meshe.rotate(new Vector3(0, 1, 0), position.x < 0 ? Math.PI * 1.5 : Math.PI / 2);
     flower.meshe.position = position;
     flower.meshe.name = 'flower';
+    flower.meshe.checkCollisions = true;
     switch (row) {
       case 0:
         this.forest.flowers.front = flower;
@@ -780,7 +786,7 @@ export class EngineService {
   }
 
   public async addbush(position: Vector3, row: number, mesh: number): Promise<void> {
-    const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'bush' + mesh.toString() + '.glb', this.scene);
+    const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/bush/', 'bush' + mesh.toString() + 'v2.glb', this.scene);
     const bush = <Bush>{};
     bush.animations = bushImport.animationGroups,
     bush.meshe = bushImport.meshes[0]
@@ -789,6 +795,8 @@ export class EngineService {
     bush.meshe.scaling.scaleInPlace(2.5);
     bush.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
     bush.meshe.position = position;
+    bush.meshe.name = 'bush';
+    bush.meshe.checkCollisions = true;
     switch (row) {
       case 0:
         this.forest.bushes.front.push(bush);
@@ -803,7 +811,7 @@ export class EngineService {
   }
 
   public async addtree(position: Vector3, row: number, mesh: number): Promise<void> {
-    const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'tree' + mesh.toString() + '.glb', this.scene);
+    const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/tree/', 'tree' + mesh.toString() + 'v2.glb', this.scene);
     const tree = <Tree>{};
     tree.animations = treeImport.animationGroups,
     tree.meshe = treeImport.meshes[0]
@@ -813,6 +821,7 @@ export class EngineService {
     tree.animations[1].start(false, 10.0);
     tree.animations[3].start(false, 10.0);
     tree.meshe.scaling.scaleInPlace(2.5);
+    tree.meshe.checkCollisions = true;
     tree.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
     tree.meshe.position = position;
     tree.meshe.name = 'tree';
