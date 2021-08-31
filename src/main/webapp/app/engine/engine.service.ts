@@ -552,7 +552,7 @@ export class EngineService {
       },
       {
         frame: frameRate,
-        value: flowerPos.x < 0 ? 0.2 : -0.2,
+        value: flowerPos.x + (flowerPos.x < 0 ? 0.7 : -0.7),
       },
     ];
     const ykeyFramesKooli = [
