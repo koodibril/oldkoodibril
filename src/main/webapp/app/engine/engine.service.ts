@@ -161,8 +161,6 @@ export class EngineService {
     this.seed();
 
     const colibri = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'koodibril.glb', this.scene);
-    console.log(colibri.animationGroups);
-
     colibri.animationGroups[0].stop();
     colibri.animationGroups[0].start(true, 10.0);
     this.koodibril = colibri.meshes[0];
@@ -181,6 +179,7 @@ export class EngineService {
     this.engine.hideLoadingUI();
     new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add((device) => {
       this.device = device.deviceType;
+      console.log(this.device);
     });
   }
 
@@ -219,6 +218,32 @@ export class EngineService {
               this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
             }
             break;
+        }
+      });
+
+      this.windowRef.window.addEventListener('deviceorientation', (event) => {
+        if (this.device === 3) {
+          let x = event.beta as number;  // In degree in the range [-180,180)
+          let y = event.gamma as number; // In degree in the range [-90,90)
+          
+        const offsetCanvasx = this.canvas.width / 200;
+        const offsetCanvasy = this.canvas.height / 200;
+        
+          // Because we don't want to have the device upside down
+          // We constrain the x value to the range [-90,90]
+          if (x >  90) { x =  90};
+          if (x < -90) { x = -90};
+        
+          // To make computation easier we shift the range of
+          // x and y to [0,180]
+          x += 90;
+          y += 90;
+        
+          // 10 is half the size of the ball
+          // It center the positioning point to the center of the ball
+          
+          this.koodibril.position.x = (offsetCanvasx * x / 180 - 10);
+          this.koodibril.position.y = (offsetCanvasy * y / 180 - 10);
         }
       });
 
@@ -802,7 +827,6 @@ export class EngineService {
     const bush = <Bush>{};
     bush.animations = bushImport.animationGroups,
     bush.meshe = bushImport.rootNodes[0] as AbstractMesh;
-    console.log(bush.animations);
     bush.animations[0].goToFrame(0);
     bush.animations[0].stop();
     bush.animations[1].start(false, 10.0);
