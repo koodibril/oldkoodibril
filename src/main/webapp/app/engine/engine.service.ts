@@ -3,7 +3,6 @@ import { ElementRef, Injectable, NgZone } from '@angular/core';
 import {
   Engine,
   Scene,
-  Light,
   MeshBuilder,
   SceneLoader,
   Color4,
@@ -13,15 +12,15 @@ import {
   Animatable,
   Space,
   AbstractMesh,
-  Layer,
   Color3,
   FlyCamera,
   AnimationGroup,
-  Material,
   PointerEventTypes,
   DeviceSourceManager,
-  SceneOptimizer,
-  AssetContainer
+  AssetContainer,
+  StandardMaterial,
+  ParticleSystem,
+  Texture,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -77,11 +76,7 @@ export class EngineService {
   private engine!: Engine;
   private camera!: FlyCamera;
   private scene!: Scene;
-  private sun!: Light;
-  private moon!: Light;
-  private layer!: Layer;
   private move!: boolean;
-  private material!: Material;
 
   private koodibril!: AbstractMesh;
   private forest!: Forest;
@@ -97,6 +92,8 @@ export class EngineService {
   private flower!: AssetContainer;
   private trees!: AssetContainer[];
   private bushes!: AssetContainer[];
+  private pannel!: AssetContainer;
+  private particle!: ParticleSystem;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -114,21 +111,16 @@ export class EngineService {
     this.scene.clearColor = new Color4(0, 0, 0, 0);
     this.scene.fogMode = Scene.FOGMODE_LINEAR;
     this.scene.fogStart = 4.0;
-    this.scene.fogEnd = 20.0;
+    this.scene.fogEnd = 18.0;
     this.scene.fogColor = new Color3(0.9, 0.9, 0.85);
-    this.scene.fogDensity = 0.15;
 
     // create a FreeCamera, and set its position to (x:5, y:10, z:-20 )
     this.camera = new FlyCamera('camera1', new Vector3(0, 3, -5), this.scene);
 
     // target the camera to scene origin
     this.camera.setTarget(new Vector3(0, 2, 0));
-
-    // day light
-    this.sun = new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene);
     // night light
-    // this.moon = new DirectionalLight("DirectionalLight", new Vector3(0, -1, 0), this.scene);
-
+    const light = new HemisphericLight("DirectionalLight", new Vector3(0, 1, 0), this.scene);
 
     const ground = MeshBuilder.CreateGround('ground', { width: 30, height: 30 });
     const grid = new GridMaterial('groundMat', this.scene);
@@ -175,11 +167,9 @@ export class EngineService {
     this.open = false;
     this.loading = false;
     this.fly();
-    SceneOptimizer.OptimizeAsync(this.scene),
     this.engine.hideLoadingUI();
     new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add((device) => {
       this.device = device.deviceType;
-      console.log(this.device);
     });
   }
 
@@ -202,7 +192,7 @@ export class EngineService {
       this.scene.onPointerObservable.add(pointerInfo => {
         switch (pointerInfo.type) {
           case PointerEventTypes.POINTERMOVE:
-            this.device === 2 ? this.onMove() : null;
+            // this.device === 2 ? this.onMove() : null;
             break;
           case PointerEventTypes.POINTERWHEEL:
             this.wheel(pointerInfo.event);
@@ -210,12 +200,14 @@ export class EngineService {
           case PointerEventTypes.POINTERTAP:
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
-            if (this.open) {
-              this.opener(0, 0);
-              this.reset();
-              this.fly();
-            } else {
-              this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
+            if (!this.move && !this.loading) {
+              if (this.open) {
+                this.opener(0, 0);
+                this.reset();
+                this.fly();
+              } else {
+                this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
+              }
             }
             break;
         }
@@ -263,9 +255,9 @@ export class EngineService {
         }
       });
 
-      this.canvas.addEventListener('mouseout', () => {
-        this.reset();
-      });
+      // this.canvas.addEventListener('mouseout', () => {
+      //   this.reset();
+      // });
 
       this.windowRef.window.addEventListener('resize', () => {
         this.engine.resize();
@@ -338,8 +330,12 @@ export class EngineService {
 
   public wheel(event: any): void {
     const delta = Math.sign(event.deltaY);
-    if (this.open) {
+    if (this.open && !this.loading) {
+      this.lastFly.stop();
+      this.lastFly.onAnimationEndObservable.clear();
       this.reset();
+      this.fly();
+      this.koodibrilMat.material!.wireframe = false;
     }
     if (!this.move && !this.loading) {
       this.move = true;
@@ -435,7 +431,6 @@ export class EngineService {
         rollOver!.onAnimationEndObservable.add(() => {
           this.move = false;
           this.open = false;
-          this.device === 2 ? this.opener(this.koodibril.position.x, this.koodibril.position.y) : null;
           this.deleteRow();
         });
     }
@@ -482,6 +477,7 @@ export class EngineService {
       this.lastFly.onAnimationEndObservable.clear();
       this.open = true;
       this.loading = true;
+      this.start_particle();
       this.goToFlower();
       this.deploy_flower();
       this.deploy_bush();
@@ -490,6 +486,7 @@ export class EngineService {
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
     ) {
+      this.stop_particle();
       this.retract_flower();
       this.retract_tree();
       this.retract_bush();
@@ -498,6 +495,27 @@ export class EngineService {
       this.koodibrilAnim[0].start(true, 10);
       this.koodibrilMat.material!.wireframe = false;
     }
+  }
+
+  public start_particle(): void {
+    const flowerPos =this.forest.flowers.front.meshe.position;
+    this.particle = new ParticleSystem("particles", 2000, this.scene);
+    this.particle.particleTexture = new Texture("../../content/assets/textures/flare.png", this.scene);
+    this.particle.emitter = new Vector3(flowerPos.x > 0 ? flowerPos.x - 0.16 : flowerPos.x + 0.16, flowerPos.y - 0.1, flowerPos.z);
+    this.particle.createSphereEmitter(0.001, 0);
+    this.particle.color1 = new Color4(1.0, 0, 0, 1.0);
+    this.particle.color2 = new Color4(1.0, 0, 0, 1.0);
+    this.particle.minSize = 0.05;
+    this.particle.maxSize = 0.05;
+    this.particle.emitRate = 500;
+    this.particle.minLifeTime = 0.1;
+    this.particle.maxLifeTime = 0.1;
+    this.particle.start();
+  }
+
+  public stop_particle(): void {
+    this.particle.stop();
+    this.particle.reset();
   }
 
   public stop_flower(): void {
@@ -681,6 +699,7 @@ export class EngineService {
 
   public seed(): void {
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    // this.addpannel();
     this.addtree(new Vector3(-3, 0, 0), 0, random_tree[0]);
     this.addtree(new Vector3(4, 0, 0), 0, random_tree[1]);
     this.addtree(new Vector3(-6, 0, 4), 1, random_tree[2]);
@@ -693,10 +712,7 @@ export class EngineService {
 
     for (let z = 0; z <= 8; z = z + 4) {
       const random = this.shuffleArray([1, 2, 3, 4]);
-      this.addbush(new Vector3(-5, 0, z), z / 4, random[0]);
-      this.addbush(new Vector3(1, 0, z), z / 4, random[1]);
-      this.addbush(new Vector3(-1, 0, z), z / 4, random[2]);
-      this.addbush(new Vector3(5, 0, z), z / 4, random[3]);
+      this.addbush(new Vector3(0, 0, z), z / 4, random[0]);
       this.addflower(new Vector3(Math.random() * (2 - -2) + -2, 1.5, z), z / 4);
     }
   }
@@ -750,24 +766,28 @@ export class EngineService {
       this.forest.trees.back = [];
     }
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const newTrees = Math.floor(Math.random() * (4 - 2) + 2);
     const position = this.shuffleArray([-3, -6, 3, 5]);
-    for (let i = 0; i < newTrees; i++) {
-      this.addtree(
-        new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
-        delta === -1 ? 2 : 0,
-        random_tree[i]
-      );
+    for (let i = 0; i < 4; i++) {
+      if (i > 1) {
+        this.addtree(
+          new Vector3(i === 2 ? -8 : 8, delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
+          delta === -1 ? 2 : 0,
+          random_tree[i]
+        );
+      } else {
+        this.addtree(
+          new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
+          delta === -1 ? 2 : 0,
+          random_tree[i]
+        );
+      }
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
     this.addflower(
       new Vector3(Math.random() * (2 - -2) + -2, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
       delta === -1 ? 2 : 0
     );
-    this.addbush(new Vector3(-5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
-    this.addbush(new Vector3(1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[1]);
-    this.addbush(new Vector3(-1, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[2]);
-    this.addbush(new Vector3(5, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[3]);
+    this.addbush(new Vector3(0, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
   }
 
   public deleteRow(): void {
@@ -794,7 +814,6 @@ export class EngineService {
   }
 
   public addflower(position: Vector3, row: number): void {
-    // const flowerImmport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/', 'flower.glb', this.scene);
     const flowerImport = this.flower.instantiateModelsToScene();
     const flower = <Flower>{};
     flower.animations = flowerImport.animationGroups,
@@ -821,8 +840,18 @@ export class EngineService {
       }
   }
 
+  public addpannel(): void {
+    const pannelImport = this.pannel.instantiateModelsToScene();
+    const pannel = <Flower>{};
+    pannel.animations = pannelImport.animationGroups,
+    pannel.meshe = pannelImport.rootNodes[0] as AbstractMesh;
+    pannel.meshe.scaling.scaleInPlace(0.05);
+    pannel.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
+    pannel.meshe.position = new Vector3(0, 0, 1);
+    pannel.meshe.name = 'pannel';
+  }
+
   public addbush(position: Vector3, row: number, mesh: number): void {
-    // const bushImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/bush/', 'bush' + mesh.toString() + 'v2.glb', this.scene);
     const bushImport = this.bushes[mesh].instantiateModelsToScene();
     const bush = <Bush>{};
     bush.animations = bushImport.animationGroups,
@@ -831,7 +860,7 @@ export class EngineService {
     bush.animations[0].stop();
     bush.animations[1].start(false, 10.0);
     bush.meshe.scaling.scaleInPlace(2.5);
-    bush.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
+    bush.meshe.rotate(new Vector3(0, 1, 0), Math.random() > 0.5 ? Math.PI * 1.5 : Math.PI / 2);
     bush.meshe.position = position;
     bush.meshe.name = 'bush';
     bush.meshe.checkCollisions = true;
@@ -849,7 +878,6 @@ export class EngineService {
   }
 
   public addtree(position: Vector3, row: number, mesh: number): void {
-    // const treeImport = await SceneLoader.ImportMeshAsync('', '../../content/assets/models/forestv2/tree/', 'tree' + mesh.toString() + 'v2.glb', this.scene);
     const treeImport = this.trees[mesh].instantiateModelsToScene();
     const tree = <Tree>{};
     tree.animations = treeImport.animationGroups,
@@ -877,8 +905,22 @@ export class EngineService {
     }
   }
 
+  public changeColor(): void {
+    this.forest.bushes.front.forEach(element => {
+      const material = new StandardMaterial('test', this.scene);
+      material.diffuseColor = new Color3(Math.random(), Math.random(), Math.random());
+      element.meshe.material = material;
+    })
+    this.forest.trees.front.forEach(element => {
+      const material = new StandardMaterial('test', this.scene);
+      material.diffuseColor = new Color3(Math.random(), Math.random(), Math.random());
+      element.meshe.material = material;
+    })
+  }
+
   public async importforest(): Promise<void> {
     this.flower = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/', 'flower.glb', this.scene);
+    this.pannel = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/', 'pannel.glb', this.scene);
     this.trees = [];
     this.bushes = [];
     for (let i = 1; i < 10; i++) {
