@@ -61,8 +61,8 @@ export class EngineService {
     this.engine.displayLoadingUI();
 
     this.scene = new Scene(this.engine);
-    this.scene.clearColor = new Color4(1, 1, 1, 1);
-    this.scene.ambientColor = new Color3(1, 1, 1);
+    this.scene.clearColor = new Color4(0.9, 0.9, 0.85, 1);
+    this.scene.ambientColor = new Color3(0.9, 0.9, 0.85);
     this.scene.fogMode = Scene.FOGMODE_LINEAR;
     this.scene.fogStart = 4.0;
     this.scene.fogEnd = 20.0;
