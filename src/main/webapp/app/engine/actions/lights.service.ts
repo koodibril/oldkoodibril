@@ -48,7 +48,7 @@ export class LightsActions {
     this.lights.moon = new SpotLight("moonLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
     this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
     const whiteMat = new StandardMaterial("whiteMat", this.scene);
-    this.lights.sunMat.emissiveColor = new Color3(1, 1, 0);
+    this.lights.sunMat.emissiveColor = new Color3(0.99, 0.9, 0.85);
     whiteMat.emissiveColor = new Color3(1, 1, 1);
     this.lights.sun.intensity = 1;
     this.lights.moon.intensity = 0.3;
@@ -116,9 +116,7 @@ export class LightsActions {
   // sunset at 6
   public day(delta: number): void {
     this.setFocus();
-    this.lights.sunMat.emissiveColor = Color3.Yellow();
-    this.lights.sun.diffuse = Color3.Yellow();
-    this.lights.sun.specular = Color3.Yellow();
+    this.lights.sunMat.emissiveColor = new Color3(0.99, 0.9, 0.85);;
     if (delta === -1) {
       this.hour = this.hour === 0 ? 24 : this.hour - 1;
     } else {
@@ -128,7 +126,7 @@ export class LightsActions {
     const sun_y = Math.round(0 + (10 * Math.cos(sun_ang)));
     const sun_z = Math.round(4 + (10 * Math.sin(sun_ang)));
     this.setFirefly();
-    const moon_ang = (this.hour - 7) * (Math.PI / 12);
+    const moon_ang = ((this.hour === 18 ? 19 : this.hour) - 6) * (Math.PI / 12);
     const moon_x = 0 + (8 * Math.cos(moon_ang));
     const moon_y = 0 + (8 * Math.sin(moon_ang));
     let luminosity = ((sun_y + 20) / 20);
@@ -141,9 +139,6 @@ export class LightsActions {
       luminosity = 0.9;
     }
     if (this.hour === 5) {
-      this.lights.sunMat.emissiveColor = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
-      this.lights.sun.diffuse = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
-      this.lights.sun.specular = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.fogColor = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.clearColor = new Color4(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity, 1);
     } else if (this.hour === 6) {
@@ -158,9 +153,10 @@ export class LightsActions {
       this.scene.clearColor = new Color4(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity, 1);
     }
     this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
-    this.movestar(this.lights.moonMesh, this.lights.moonMesh.position, new Vector3(moon_x, moon_y, 14));
+    this.hour === 6 ? null : this.movestar(this.lights.moonMesh, this.lights.moonMesh.position, new Vector3(moon_x, moon_y, 14));
     this.lights.ambiant.intensity = 1 * luminosity;
     this.lights.groundLight.mainColor = new Color3(1 * luminosity, 1 * luminosity, 1 * luminosity);
+    console.log(this.hour);
   }
 
   public setFirefly(): void {
