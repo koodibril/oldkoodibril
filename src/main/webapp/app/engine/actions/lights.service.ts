@@ -11,6 +11,9 @@ import {
   Mesh,
   ParticleSystem,
   Texture,
+  VolumetricLightScatteringPostProcess,
+  Camera,
+  Engine,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -34,7 +37,7 @@ export class LightsActions {
   private particles!: ParticleSystem[];
 
   
-  public constructor(private scene: Scene) {}
+  public constructor(private scene: Scene, private camera: Camera, private engine: Engine) {}
 
   // create all lights and the sun/moon
   public instantiateLights(): void {
@@ -45,13 +48,11 @@ export class LightsActions {
     this.lights.moon = new SpotLight("moonLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
     this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
     const whiteMat = new StandardMaterial("whiteMat", this.scene);
-    this.lights.sunMat.emissiveColor = Color3.Yellow();
+    this.lights.sunMat.emissiveColor = new Color3(1, 1, 0);
     whiteMat.emissiveColor = new Color3(1, 1, 1);
-    this.lights.sun.diffuse = Color3.Yellow();
-    this.lights.sun.specular = Color3.Yellow();
-    this.lights.moon.diffuse = new Color3(1, 1, 1);
-    this.lights.moon.specular = new Color3(1, 1, 1);
-    this.lights.sunMesh = MeshBuilder.CreateSphere("sunMesh", {diameter: 1.5});
+    this.lights.sun.intensity = 1;
+    this.lights.moon.intensity = 0.3;
+    this.lights.sunMesh = MeshBuilder.CreateSphere("sunMesh", {diameter: 3});
     this.lights.moonMesh = MeshBuilder.CreateSphere("moonMesh", {diameter: 1.5});
     this.lights.sunMesh.material = this.lights.sunMat;
     this.lights.moonMesh.material = whiteMat;
@@ -59,6 +60,8 @@ export class LightsActions {
     this.lights.moon.parent = this.lights.moonMesh;
     this.lights.sunMesh.position = new Vector3(0, 8, 4);
     this.lights.moonMesh.position = new Vector3(0, -8, 4);
+    this.lights.moonMesh.applyFog = false;
+    this.lights.sunMesh.applyFog = false;
     this.hour = 0;
     this.firefly = false;
     this.particles = [];
@@ -125,9 +128,9 @@ export class LightsActions {
     const sun_y = Math.round(0 + (10 * Math.cos(sun_ang)));
     const sun_z = Math.round(4 + (10 * Math.sin(sun_ang)));
     this.setFirefly();
-    const moon_ang = (this.hour - 6) * (Math.PI / 12);
-    const moon_x = 0 + (6 * Math.cos(moon_ang));
-    const moon_y = 0 + (6 * Math.sin(moon_ang));
+    const moon_ang = (this.hour - 7) * (Math.PI / 12);
+    const moon_x = 0 + (8 * Math.cos(moon_ang));
+    const moon_y = 0 + (8 * Math.sin(moon_ang));
     let luminosity = ((sun_y + 20) / 20);
     if (luminosity > 1 || sun_y > 0) {
       luminosity = 1;
@@ -137,19 +140,17 @@ export class LightsActions {
     if (this.hour === 18) {
       luminosity = 0.9;
     }
-    if (this.hour === 4) {
-      luminosity = 1.1;
-      this.scene.fogColor = new Color3(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity);
-      this.scene.clearColor = new Color4(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity, 1);
-    } else if (this.hour === 5) {
-      luminosity = 1.05;
+    if (this.hour === 5) {
+      this.lights.sunMat.emissiveColor = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
+      this.lights.sun.diffuse = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
+      this.lights.sun.specular = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.fogColor = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.clearColor = new Color4(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity, 1);
     } else if (this.hour === 6) {
       luminosity = 0.9;
-      this.lights.sunMat.emissiveColor = new Color3(1, 0, 0);
-      this.lights.sun.diffuse = new Color3(1, 0, 0);
-      this.lights.sun.specular = new Color3(1, 0, 0);
+      this.lights.sunMat.emissiveColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
+      this.lights.sun.diffuse = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
+      this.lights.sun.specular = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
     } else {

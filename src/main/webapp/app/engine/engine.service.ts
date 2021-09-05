@@ -71,7 +71,7 @@ export class EngineService {
     this.camera = new FlyCamera('camera1', new Vector3(0, 3, -5), this.scene);
 
     this.camera.setTarget(new Vector3(0, 2, 0));
-    this.lightsAction = new LightsActions(this.scene);
+    this.lightsAction = new LightsActions(this.scene, this.camera, this.engine);
     this.lightsAction.instantiateLights();
     this.lights = this.lightsAction.lights;
 
@@ -125,6 +125,7 @@ export class EngineService {
             this.wheel(pointerInfo.event);
             break;
           case PointerEventTypes.POINTERTAP:
+            this.lights.moon.intensity = this.lights.moon.intensity + 0.1;
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
             if (!this.move && !this.animationsActions.loading) {
