@@ -14,6 +14,7 @@ import {
   VolumetricLightScatteringPostProcess,
   Camera,
   Engine,
+  Material,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -35,6 +36,8 @@ export class LightsActions {
   private hour!: number;
   private firefly!: boolean;
   private particles!: ParticleSystem[];
+  private vls?: VolumetricLightScatteringPostProcess;
+  private moonvls?: VolumetricLightScatteringPostProcess;
 
   
   public constructor(private scene: Scene, private camera: Camera, private engine: Engine) {}
@@ -48,7 +51,8 @@ export class LightsActions {
     this.lights.moon = new SpotLight("moonLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
     this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
     const whiteMat = new StandardMaterial("whiteMat", this.scene);
-    this.lights.sunMat.emissiveColor = new Color3(0.99, 0.9, 0.85);
+    this.lights.sunMat.emissiveColor = Color3.Yellow();
+    this.lights.sunMat.disableLighting = true;
     whiteMat.emissiveColor = new Color3(1, 1, 1);
     this.lights.sun.intensity = 1;
     this.lights.moon.intensity = 0.3;
@@ -62,6 +66,11 @@ export class LightsActions {
     this.lights.moonMesh.position = new Vector3(0, -8, 4);
     this.lights.moonMesh.applyFog = false;
     this.lights.sunMesh.applyFog = false;
+    this.vls = new VolumetricLightScatteringPostProcess('vls', 1, this.camera, this.lights.sunMesh, 100);
+    this.vls.exposure = 0.1;
+    this.vls.decay = 0.95;
+    this.vls.weight = 0.95;
+    this.vls.density = 0.95;
     this.hour = 0;
     this.firefly = false;
     this.particles = [];
@@ -116,7 +125,6 @@ export class LightsActions {
   // sunset at 6
   public day(delta: number): void {
     this.setFocus();
-    this.lights.sunMat.emissiveColor = new Color3(0.99, 0.9, 0.85);;
     if (delta === -1) {
       this.hour = this.hour === 0 ? 24 : this.hour - 1;
     } else {
@@ -125,11 +133,15 @@ export class LightsActions {
     const sun_ang = this.hour * (Math.PI / 12);
     const sun_y = Math.round(0 + (10 * Math.cos(sun_ang)));
     const sun_z = Math.round(4 + (10 * Math.sin(sun_ang)));
-    this.setFirefly();
-    const moon_ang = ((this.hour === 18 ? 19 : this.hour) - 6) * (Math.PI / 12);
+    const moon_ang = ((this.hour === 18 ? 19 : this.hour === 6 ? 5 : this.hour) - 6) * (Math.PI / 12);
     const moon_x = 0 + (8 * Math.cos(moon_ang));
     const moon_y = 0 + (8 * Math.sin(moon_ang));
     let luminosity = ((sun_y + 20) / 20);
+    this.setVls();
+    this.setFirefly();
+    this.setSunColor();
+    this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
+    this.movestar(this.lights.moonMesh, this.lights.moonMesh.position, new Vector3(moon_x, moon_y, 14));
     if (luminosity > 1 || sun_y > 0) {
       luminosity = 1;
     } else if (luminosity === 0.5) {
@@ -142,21 +154,114 @@ export class LightsActions {
       this.scene.fogColor = new Color3(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.clearColor = new Color4(0.9 * luminosity * 1.1, 0.9 * luminosity, 0.85 * luminosity, 1);
     } else if (this.hour === 6) {
-      luminosity = 0.9;
-      this.lights.sunMat.emissiveColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
-      this.lights.sun.diffuse = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
-      this.lights.sun.specular = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
-      this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
-      this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
+      this.sunset();
     } else {
       this.scene.fogColor = new Color3(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity);
       this.scene.clearColor = new Color4(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity, 1);
     }
-    this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
-    this.hour === 6 ? null : this.movestar(this.lights.moonMesh, this.lights.moonMesh.position, new Vector3(moon_x, moon_y, 14));
     this.lights.ambiant.intensity = 1 * luminosity;
     this.lights.groundLight.mainColor = new Color3(1 * luminosity, 1 * luminosity, 1 * luminosity);
-    console.log(this.hour);
+  }
+
+  public setVls(): void {
+    switch (this.hour) {
+      case 4:
+        this.smoothVls(this.vls!, this.vls!.exposure, 0.1);
+        break;
+      case 5:
+        this.smoothVls(this.vls!, this.vls!.exposure, 0.05);
+        break;
+      case 6:
+        this.smoothVls(this.vls!, this.vls!.exposure, 0.1);
+        break;
+    }
+  }
+
+  public setSunColor(): void {
+    switch (this.hour) {
+      case 4:
+        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
+        break;
+      case 5:
+        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
+        break;
+      case 6:
+        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(255/255,102/255,112/255));
+        break;
+      default:
+        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
+    }
+  }
+
+  public smoothVls(object: VolumetricLightScatteringPostProcess, from: number, to: number): void {
+    const frameRate = 100;
+    const rkeyFrames = [
+      {
+        frame: 0,
+        value: from,
+      },
+      {
+        frame: frameRate,
+        value: to,
+      },
+    ];
+
+    const rSlide = new Animation('rSlide', 'exposure', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    rSlide.setKeys(rkeyFrames);
+    const animations = [rSlide];
+    this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, 2);
+  }
+  
+  // function that will move the sun/moon
+  public smoothColor(object: StandardMaterial, from: Color3, to: Color3): void {
+    const frameRate = 100;
+    const rkeyFrames = [
+      {
+        frame: 0,
+        value: from.r,
+      },
+      {
+        frame: frameRate,
+        value: to.r,
+      },
+    ];
+    const gkeyFrames = [
+      {
+        frame: 0,
+        value: from.g,
+      },
+      {
+        frame: frameRate,
+        value: to.g,
+      },
+    ];
+    const bkeyFrames = [
+      {
+        frame: 0,
+        value: from.b,
+      },
+      {
+        frame: frameRate,
+        value: to.b,
+      },
+    ];
+
+    const rSlide = new Animation('rSlide', 'emissiveColor.r', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const gSlide = new Animation('gSlide', 'emissiveColor.g', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+    const bSlide = new Animation('bSlide', 'emissiveColor.b', frameRate, Animation.ANIMATIONTYPE_FLOAT);
+
+    rSlide.setKeys(rkeyFrames);
+    gSlide.setKeys(gkeyFrames);
+    bSlide.setKeys(bkeyFrames);
+    const animations = [rSlide, gSlide, bSlide];
+    this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, 2);
+  }
+  
+  public sunset(): void {
+    const luminosity = 0.9;
+    this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
+    this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
   }
 
   public setFirefly(): void {
