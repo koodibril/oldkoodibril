@@ -11,14 +11,8 @@ import {
   Mesh,
   ParticleSystem,
   Texture,
-  VolumetricLightScatteringPostProcess,
   Camera,
   Engine,
-  Material,
-  StandardRenderingPipeline,
-  DefaultRenderingPipeline,
-  BlurPostProcess,
-  Vector2,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -40,8 +34,6 @@ export class LightsActions {
   private hour!: number;
   private firefly!: boolean;
   private particles!: ParticleSystem[];
-  private vls?: VolumetricLightScatteringPostProcess;
-  private moonvls?: VolumetricLightScatteringPostProcess;
 
   
   public constructor(private scene: Scene, private camera: Camera, private engine: Engine) {}
@@ -55,27 +47,20 @@ export class LightsActions {
     this.lights.moon = new SpotLight("moonLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
     this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
     const whiteMat = new StandardMaterial("whiteMat", this.scene);
-    this.lights.sunMat.emissiveColor = Color3.Yellow();
-    this.lights.sunMat.disableLighting = true;
+    this.lights.sunMat.emissiveColor = new Color3(1, 1, 0.5);
     whiteMat.emissiveColor = new Color3(1, 1, 1);
     this.lights.sun.intensity = 1;
     this.lights.moon.intensity = 0.3;
-    this.lights.sunMesh = MeshBuilder.CreateSphere("sunMesh", {diameter: 3});
+    this.lights.sunMesh = MeshBuilder.CreateIcoSphere("sunMesh", {radius: 5});
     this.lights.moonMesh = MeshBuilder.CreateSphere("moonMesh", {diameter: 1.5});
     this.lights.sunMesh.material = this.lights.sunMat;
     this.lights.moonMesh.material = whiteMat;
     this.lights.sun.parent = this.lights.sunMesh;
     this.lights.moon.parent = this.lights.moonMesh;
-    this.lights.sunMesh.position = new Vector3(0, 8, 4);
+    this.lights.sunMesh.position = new Vector3(0, 20, 4);
     this.lights.moonMesh.position = new Vector3(0, -8, 4);
     this.lights.moonMesh.applyFog = false;
     this.lights.sunMesh.applyFog = false;
-    // vls disable msaa wich destroy the quality of the scene
-    this.vls = new VolumetricLightScatteringPostProcess('vls', 2.0, this.camera, this.lights.sunMesh, 100, Texture.BILINEAR_SAMPLINGMODE, this.engine, false, this.scene);
-    this.vls.exposure = 0.1;
-    this.vls.decay = 0.95;
-    this.vls.weight = 0.95;
-    this.vls.density = 0.95;
     this.hour = 0;
     this.firefly = false;
     this.particles = [];
@@ -130,19 +115,18 @@ export class LightsActions {
   // sunset at 6
   public day(delta: number): void {
     this.setFocus();
-    if (delta === -1) {
+    if (delta === 1) {
       this.hour = this.hour === 0 ? 24 : this.hour - 1;
     } else {
       this.hour = this.hour === 24 ? 0 : this.hour + 1;
     }
     const sun_ang = this.hour * (Math.PI / 12);
-    const sun_y = Math.round(0 + (10 * Math.cos(sun_ang)));
-    const sun_z = Math.round(4 + (10 * Math.sin(sun_ang)));
+    const sun_y = 0 + (24 * Math.cos(sun_ang));
+    const sun_z = 4 + (24 * Math.sin(sun_ang));
     const moon_ang = ((this.hour === 18 ? 19 : this.hour === 6 ? 5 : this.hour) - 6) * (Math.PI / 12);
     const moon_x = 0 + (8 * Math.cos(moon_ang));
     const moon_y = 0 + (8 * Math.sin(moon_ang));
     let luminosity = ((sun_y + 20) / 20);
-    //this.setVls();
     this.setFirefly();
     this.setSunColor();
     this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
@@ -168,20 +152,6 @@ export class LightsActions {
     this.lights.groundLight.mainColor = new Color3(1 * luminosity, 1 * luminosity, 1 * luminosity);
   }
 
-  public setVls(): void {
-    switch (this.hour) {
-      case 4:
-        this.smoothVls(this.vls!, this.vls!.exposure, 0.1);
-        break;
-      case 5:
-        this.smoothVls(this.vls!, this.vls!.exposure, 0.05);
-        break;
-      case 6:
-        this.smoothVls(this.vls!, this.vls!.exposure, 0.1);
-        break;
-    }
-  }
-
   public setSunColor(): void {
     switch (this.hour) {
       case 4:
@@ -196,26 +166,6 @@ export class LightsActions {
       default:
         this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
     }
-  }
-
-  public smoothVls(object: VolumetricLightScatteringPostProcess, from: number, to: number): void {
-    const frameRate = 100;
-    const rkeyFrames = [
-      {
-        frame: 0,
-        value: from,
-      },
-      {
-        frame: frameRate,
-        value: to,
-      },
-    ];
-
-    const rSlide = new Animation('rSlide', 'exposure', frameRate, Animation.ANIMATIONTYPE_FLOAT);
-
-    rSlide.setKeys(rkeyFrames);
-    const animations = [rSlide];
-    this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, 2);
   }
   
   // function that will move the sun/moon

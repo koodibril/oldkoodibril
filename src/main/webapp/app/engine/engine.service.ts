@@ -75,7 +75,7 @@ export class EngineService {
     this.lightsAction.instantiateLights();
     this.lights = this.lightsAction.lights;
 
-    const ground = MeshBuilder.CreateGround('ground', { width: 30, height: 30 });
+    const ground = MeshBuilder.CreateGround('ground', { width: 300, height: 300 });
     this.lights.groundLight = new GridMaterial('groundMat', this.scene);
     this.lights.groundLight.majorUnitFrequency = 20;
     this.lights.groundLight.gridOffset = new Vector3(0, 0, 4);
@@ -230,8 +230,8 @@ export class EngineService {
       this.reset();
     }
     if (!this.move && !this.animationsActions.loading) {
-      this.move = true;
         this.forestActions.addRow(delta);
+        this.move = true;
         let rollOver: any;
         let toMove: any;
         this.lightsAction.day(delta);
