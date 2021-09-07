@@ -15,6 +15,10 @@ import {
   Camera,
   Engine,
   Material,
+  StandardRenderingPipeline,
+  DefaultRenderingPipeline,
+  BlurPostProcess,
+  Vector2,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
@@ -66,7 +70,8 @@ export class LightsActions {
     this.lights.moonMesh.position = new Vector3(0, -8, 4);
     this.lights.moonMesh.applyFog = false;
     this.lights.sunMesh.applyFog = false;
-    this.vls = new VolumetricLightScatteringPostProcess('vls', 1, this.camera, this.lights.sunMesh, 100);
+    // vls disable msaa wich destroy the quality of the scene
+    this.vls = new VolumetricLightScatteringPostProcess('vls', 2.0, this.camera, this.lights.sunMesh, 100, Texture.BILINEAR_SAMPLINGMODE, this.engine, false, this.scene);
     this.vls.exposure = 0.1;
     this.vls.decay = 0.95;
     this.vls.weight = 0.95;
@@ -137,7 +142,7 @@ export class LightsActions {
     const moon_x = 0 + (8 * Math.cos(moon_ang));
     const moon_y = 0 + (8 * Math.sin(moon_ang));
     let luminosity = ((sun_y + 20) / 20);
-    this.setVls();
+    //this.setVls();
     this.setFirefly();
     this.setSunColor();
     this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
