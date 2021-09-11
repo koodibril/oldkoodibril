@@ -11,19 +11,19 @@ import '@babylonjs/loaders/glTF';
 export interface Flower {
     animations: AnimationGroup[],
     meshe: AbstractMesh,
-    position: number
+    color: AbstractMesh[]
   }
   
   export interface Bush {
     animations: AnimationGroup[],
     meshe: AbstractMesh,
-    position: number
+    color: AbstractMesh[]
   }
   
   export interface Tree {
     animations: AnimationGroup[],
     meshe: AbstractMesh,
-    position: number
+    color: AbstractMesh[]
   }
   
   export interface Trees {
@@ -138,6 +138,7 @@ export class ForestActions {
   public addflower(position: Vector3, row: number): void {
     const flowerImport = this.flower.instantiateModelsToScene();
     const flower = <Flower>{};
+    flower.color = flowerImport.rootNodes[0].getChildMeshes();
     flower.animations = flowerImport.animationGroups,
     flower.meshe = flowerImport.rootNodes[0] as AbstractMesh;
     flower.animations[0].stop();
@@ -178,7 +179,8 @@ export class ForestActions {
   public addbush(position: Vector3, row: number, mesh: number): void {
     const bushImport = this.bushes[mesh].instantiateModelsToScene();
     const bush = <Bush>{};
-    bush.animations = bushImport.animationGroups,
+    bush.animations = bushImport.animationGroups;
+    bush.color = bushImport.rootNodes[0].getChildMeshes();
     bush.meshe = bushImport.rootNodes[0] as AbstractMesh;
     bush.animations[0].goToFrame(0);
     bush.animations[0].stop();
@@ -206,6 +208,7 @@ export class ForestActions {
     const treeImport = this.trees[mesh].instantiateModelsToScene();
     const tree = <Tree>{};
     tree.animations = treeImport.animationGroups,
+    tree.color = treeImport.rootNodes[0].getChildMeshes().sort();
     tree.meshe = treeImport.rootNodes[0] as AbstractMesh;
     tree.animations[0].goToFrame(0);
     tree.animations[0].stop();

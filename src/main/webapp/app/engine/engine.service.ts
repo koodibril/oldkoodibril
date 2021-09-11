@@ -10,13 +10,13 @@ import {
   FlyCamera,
   PointerEventTypes,
   DeviceSourceManager,
-  StandardMaterial,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 import { ForestActions, Forest } from './actions/forest.service';
 import { LightsActions, Lights } from './actions/lights.service';
 import { AnimationsActions, Koodibril } from './actions/animations.service';
+import { GuiActions } from './actions/gui.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
@@ -48,6 +48,7 @@ export class EngineService {
   private lightsAction!: LightsActions;
   private koodibril!: Koodibril;
   private animationsActions!: AnimationsActions;
+  private guiAction!: GuiActions;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {
   }
@@ -93,6 +94,10 @@ export class EngineService {
     await this.animationsActions.initiateAnimation();
     this.koodibril = this.animationsActions.koodibril;
 
+    this.guiAction = new GuiActions(this.scene, this.camera, this.engine);
+    this.guiAction.instantiateGui();
+    this.refreshGui();
+
     this.timeout = false;
     this.open = false;
     this.engine.hideLoadingUI();
@@ -125,7 +130,6 @@ export class EngineService {
             this.wheel(pointerInfo.event);
             break;
           case PointerEventTypes.POINTERTAP:
-            this.lights.moon.intensity = this.lights.moon.intensity + 0.1;
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
             if (!this.move && !this.animationsActions.loading) {
@@ -176,7 +180,6 @@ export class EngineService {
         this.animationsActions.retract_fast_flower();
         this.animationsActions.retract_tree();
         this.animationsActions.retract_bush();
-        this.animationsActions.stop_particle();
         this.open = false;
       }
       this.koodibril.animation[1].stop();
@@ -235,6 +238,7 @@ export class EngineService {
         let rollOver: any;
         let toMove: any;
         this.lightsAction.day(delta);
+        this.refreshGui();
         for (let i = 0; i < 12; i++) {
           switch (i) {
             case 0:
@@ -304,7 +308,6 @@ export class EngineService {
       this.koodibril.lastFly.onAnimationEndObservable.clear();
       this.open = true;
       this.animationsActions.loading = true;
-      this.animationsActions.start_particle();
       this.animationsActions.goToFlower();
       this.animationsActions.deploy_flower();
       this.animationsActions.deploy_bush();
@@ -313,7 +316,6 @@ export class EngineService {
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
     ) {
-      this.animationsActions.stop_particle();
       this.animationsActions.retract_flower();
       this.animationsActions.retract_tree();
       this.animationsActions.retract_bush();
@@ -323,16 +325,16 @@ export class EngineService {
   }
 
   // tried to change color of the forest on the forest on the run
-  public changeColor(): void {
-    this.forest.bushes.front.forEach(element => {
-      const material = new StandardMaterial('test', this.scene);
-      material.diffuseColor = new Color3(Math.random(), Math.random(), Math.random());
-      element.meshe.material = material;
-    })
-    this.forest.trees.front.forEach(element => {
-      const material = new StandardMaterial('test', this.scene);
-      material.diffuseColor = new Color3(Math.random(), Math.random(), Math.random());
-      element.meshe.material = material;
-    })
+  public refreshGui(): void {
+    this.guiAction.reset();
+    this.guiAction.instantiateGui();
+    this.guiAction.createColorPannel('Sun', this.lights.sunMesh);
+    this.guiAction.createPBRColorPannel('Bush', this.forest.bushes.front[0].color[0].subMeshes[0].getMesh(), false);
+    this.guiAction.createPBRColorPannel('FlowerTop', this.forest.flowers.front.color[1].subMeshes[0].getMesh(), true);
+    this.guiAction.createPBRColorPannel('FlowerBot', this.forest.flowers.front.color[2].subMeshes[0].getMesh(), true);
+    this.guiAction.createTreeColorPannel('TreeBot', this.forest.trees, false);
+    this.guiAction.createTreeColorPannel('TreeTop', this.forest.trees, true);
+    this.guiAction.createFogColorPannel();
+    this.guiAction.createAmbiantColorPannel();
   }
 }

@@ -21,8 +21,6 @@ export interface Lights {
   sun: SpotLight,
   sunMesh: Mesh,
   sunMat: StandardMaterial,
-  moon: SpotLight,
-  moonMesh: Mesh,
   ambiant: HemisphericLight,
   groundLight: GridMaterial
 }
@@ -44,22 +42,15 @@ export class LightsActions {
     this.lights.ambiant = new HemisphericLight("DirectionalLight", new Vector3(0, 1, 0), this.scene);
     this.lights.ambiant.intensity = 1;
     this.lights.sun = new SpotLight("sunLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
-    this.lights.moon = new SpotLight("moonLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
     this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
     const whiteMat = new StandardMaterial("whiteMat", this.scene);
     this.lights.sunMat.emissiveColor = new Color3(1, 1, 0.5);
     whiteMat.emissiveColor = new Color3(1, 1, 1);
     this.lights.sun.intensity = 1;
-    this.lights.moon.intensity = 0.3;
     this.lights.sunMesh = MeshBuilder.CreateIcoSphere("sunMesh", {radius: 5});
-    this.lights.moonMesh = MeshBuilder.CreateSphere("moonMesh", {diameter: 1.5});
     this.lights.sunMesh.material = this.lights.sunMat;
-    this.lights.moonMesh.material = whiteMat;
     this.lights.sun.parent = this.lights.sunMesh;
-    this.lights.moon.parent = this.lights.moonMesh;
     this.lights.sunMesh.position = new Vector3(0, 20, 4);
-    this.lights.moonMesh.position = new Vector3(0, -8, 4);
-    this.lights.moonMesh.applyFog = false;
     this.lights.sunMesh.applyFog = false;
     this.hour = 0;
     this.firefly = false;
@@ -123,17 +114,13 @@ export class LightsActions {
     const sun_ang = this.hour * (Math.PI / 12);
     const sun_y = 0 + (24 * Math.cos(sun_ang));
     const sun_z = 4 + (24 * Math.sin(sun_ang));
-    const moon_ang = ((this.hour === 18 ? 19 : this.hour === 6 ? 5 : this.hour) - 6) * (Math.PI / 12);
-    const moon_x = 0 + (8 * Math.cos(moon_ang));
-    const moon_y = 0 + (8 * Math.sin(moon_ang));
-    let luminosity = ((sun_y + 20) / 20);
+    let luminosity = ((sun_y + 24) / 24);
     this.setFirefly();
     this.setSunColor();
     this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
-    this.movestar(this.lights.moonMesh, this.lights.moonMesh.position, new Vector3(moon_x, moon_y, 14));
     if (luminosity > 1 || sun_y > 0) {
       luminosity = 1;
-    } else if (luminosity === 0.5) {
+    } else if (luminosity < 0.5) {
       luminosity = 0.375;
     }
     if (this.hour === 18) {
@@ -168,7 +155,14 @@ export class LightsActions {
     }
   }
   
-  // function that will move the sun/moon
+  public sunset(): void {
+    const luminosity = 0.9;
+    this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity));
+    this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
+    this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
+  }
+  
+  // function that will change the sun/moon color
   public smoothColor(object: StandardMaterial, from: Color3, to: Color3): void {
     const frameRate = 100;
     const rkeyFrames = [
@@ -212,12 +206,6 @@ export class LightsActions {
     const animations = [rSlide, gSlide, bSlide];
     this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, 2);
   }
-  
-  public sunset(): void {
-    const luminosity = 0.9;
-    this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
-    this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
-  }
 
   public setFirefly(): void {
     if (this.hour >= 10 && this.hour <= 13 && !this.firefly) {
@@ -229,7 +217,7 @@ export class LightsActions {
           particleSystem.emitter = new Vector3(x, 0, z);
           particleSystem.color1 = new Color4(0, 1.0, 0, 1.0);
           particleSystem.color2 = new Color4(0, 1.0, 0, 1.0);
-          particleSystem.gravity = new Vector3((Math.random() * (0.5 - -0.5) + -0.5), (Math.random() * (0.5 - -0.5) + -0.5), 0);
+          particleSystem.gravity = new Vector3((Math.random() * (0.5 - -0.5) + -0.5), (Math.random() * (0 - 0.3) + -0.3), 0);
           particleSystem.minSize = 0.1;
           particleSystem.maxSize = 0.1;
           particleSystem.emitRate = 1;
@@ -250,7 +238,6 @@ export class LightsActions {
 
   public setFocus(): void {
     this.lights.sun.setDirectionToTarget(new Vector3(0, 0, 0));
-    this.lights.moon.setDirectionToTarget(new Vector3(0, 0, 0));
   }
 
 }
