@@ -1,16 +1,6 @@
 import { WindowRefService } from './../services/window-ref.service';
 import { ElementRef, Injectable, NgZone } from '@angular/core';
-import {
-  Engine,
-  Scene,
-  MeshBuilder,
-  Color4,
-  Vector3,
-  Color3,
-  FlyCamera,
-  PointerEventTypes,
-  DeviceSourceManager,
-} from '@babylonjs/core';
+import { Engine, Scene, MeshBuilder, Color4, Vector3, Color3, FlyCamera, PointerEventTypes, DeviceSourceManager } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 import { ForestActions, Forest } from './actions/forest.service';
@@ -39,7 +29,7 @@ export class EngineService {
   // device type, 2 === pc, 3 === phone
   private device!: number;
   // store all mesh of the forest
-  private forest!: Forest; 
+  private forest!: Forest;
   // class that oversee the forests loading, and add/delete rows
   private forestActions!: ForestActions;
   // store all light related value
@@ -50,8 +40,7 @@ export class EngineService {
   private animationsActions!: AnimationsActions;
   private guiAction!: GuiActions;
 
-  public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {
-  }
+  public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
   // instantiate everything in the scene, take canvas for rendering
   public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
@@ -94,16 +83,18 @@ export class EngineService {
     await this.animationsActions.initiateAnimation();
     this.koodibril = this.animationsActions.koodibril;
 
-    this.guiAction = new GuiActions(this.scene, this.camera, this.engine);
-    this.guiAction.instantiateGui();
-    this.refreshGui();
+    new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add(device => {
+      this.device = device.deviceType;
+    });
+
+    if (this.device === 2) {
+      this.guiAction = new GuiActions(this.scene, this.camera, this.engine, this.lights, this.forest);
+      this.guiAction.instantiatePannelGui();
+    }
 
     this.timeout = false;
     this.open = false;
     this.engine.hideLoadingUI();
-    new DeviceSourceManager(this.scene.getEngine()).onDeviceConnectedObservable.add((device) => {
-      this.device = device.deviceType;
-    });
   }
 
   // class that is called outside of the rendering for listeners
@@ -137,7 +128,7 @@ export class EngineService {
                 this.opener(0, 0);
                 this.reset();
               } else {
-                this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y)
+                this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
               }
             }
             break;
@@ -145,16 +136,16 @@ export class EngineService {
       });
 
       // observable for scroll in phone
-      this.canvas.addEventListener('touchstart', (event) => {
+      this.canvas.addEventListener('touchstart', event => {
         this.touchY = event.touches[0].clientY;
       });
-      this.canvas.addEventListener('touchend', (event) => {
+      this.canvas.addEventListener('touchend', event => {
         const test = <any>{};
         const currentY = event.changedTouches[0].clientY;
-        if (currentY > this.touchY && ((currentY - this.touchY) > 50)){
+        if (currentY > this.touchY && currentY - this.touchY > 50) {
           test.deltaY = -1;
           this.wheel(test);
-        } else if(currentY < this.touchY && ((currentY - this.touchY) < -50)){
+        } else if (currentY < this.touchY && currentY - this.touchY < -50) {
           test.deltaY = 1;
           this.wheel(test);
         }
@@ -170,7 +161,7 @@ export class EngineService {
       });
     });
   }
-  
+
   // reset the position of the colibri at the center of the screen
   public reset(): void {
     if (!this.animationsActions.loading) {
@@ -184,12 +175,17 @@ export class EngineService {
       }
       this.koodibril.animation[1].stop();
       this.koodibril.animation[0].start(true, 10);
-      this.animationsActions.slideObject(this.koodibril.mesh, this.koodibril.mesh.position, new Vector3(0, 2, this.koodibril.mesh.position.z), 2);
+      this.animationsActions.slideObject(
+        this.koodibril.mesh,
+        this.koodibril.mesh.position,
+        new Vector3(0, 2, this.koodibril.mesh.position.z),
+        2
+      );
       this.animationsActions.fly();
     }
   }
 
-  // not used anymore, allow the colibri to follow the cursor, 
+  // not used anymore, allow the colibri to follow the cursor,
   // a little off because the colibri move on x and y with z=0 but the camera is
   // at y = 3 for dof, so the calculations is approximative
   public onMove(): void {
@@ -233,67 +229,82 @@ export class EngineService {
       this.reset();
     }
     if (!this.move && !this.animationsActions.loading) {
-        this.forestActions.addRow(delta);
-        this.move = true;
-        let rollOver: any;
-        let toMove: any;
-        this.lightsAction.day(delta);
-        this.refreshGui();
-        for (let i = 0; i < 12; i++) {
-          switch (i) {
-            case 0:
-              toMove = this.forest.trees.front;
-              break;
-            case 1:
-              toMove = this.forest.trees.middle;
-              break;
-            case 2:
-              toMove = this.forest.trees.back;
-              break;
-            case 3:
-              toMove = this.forest.trees.delete;
-              break;
-            case 4:
-              toMove = this.forest.bushes.front;
-              break;
-            case 5:
-              toMove = this.forest.bushes.middle;
-              break;
-            case 6:
-              toMove = this.forest.bushes.back;
-              break;
-            case 7:
-              toMove = this.forest.bushes.delete;
-              break;
-            case 8:
-              toMove = [this.forest.flowers.front];
-              break;
-            case 9:
-              toMove = [this.forest.flowers.middle];
-              break;
-            case 10:
-              toMove = [this.forest.flowers.back];
-              break;
-            case 11:
-              toMove = [this.forest.flowers.delete];
-              break;
-          }
-          toMove.forEach((element: any) => {
-            const position = element.meshe.position;
-              if (element.meshe.position.z === 8 && delta === 1) {
-                rollOver = this.animationsActions.slideObject(element.meshe, position, new Vector3(position.x, -5, position.z as number + 4 * delta), 2);
-              } else if (element.meshe.position.z === 12 && delta === -1) {
-                rollOver = this.animationsActions.slideObject(element.meshe, position, new Vector3(position.x, element.meshe.name === 'flower' ? 1.5 : 0, position.z as number + 4 * delta), 2);
-              } else {
-                rollOver = this.animationsActions.slideObject(element.meshe, position, new Vector3(position.x, position.y, position.z as number + 4 * delta), 2);
-              }
-            });
+      this.forestActions.addRow(delta);
+      this.move = true;
+      let rollOver: any;
+      let toMove: any;
+      this.lightsAction.day(delta);
+      this.device === 2 && this.guiAction.show ? this.refreshColorGui() : null;
+      for (let i = 0; i < 12; i++) {
+        switch (i) {
+          case 0:
+            toMove = this.forest.trees.front;
+            break;
+          case 1:
+            toMove = this.forest.trees.middle;
+            break;
+          case 2:
+            toMove = this.forest.trees.back;
+            break;
+          case 3:
+            toMove = this.forest.trees.delete;
+            break;
+          case 4:
+            toMove = this.forest.bushes.front;
+            break;
+          case 5:
+            toMove = this.forest.bushes.middle;
+            break;
+          case 6:
+            toMove = this.forest.bushes.back;
+            break;
+          case 7:
+            toMove = this.forest.bushes.delete;
+            break;
+          case 8:
+            toMove = [this.forest.flowers.front];
+            break;
+          case 9:
+            toMove = [this.forest.flowers.middle];
+            break;
+          case 10:
+            toMove = [this.forest.flowers.back];
+            break;
+          case 11:
+            toMove = [this.forest.flowers.delete];
+            break;
         }
-        rollOver!.onAnimationEndObservable.add(() => {
-          this.move = false;
-          this.open = false;
-          this.forestActions.deleteRow();
+        toMove.forEach((element: any) => {
+          const position = element.meshe.position;
+          if (element.meshe.position.z === 8 && delta === 1) {
+            rollOver = this.animationsActions.slideObject(
+              element.meshe,
+              position,
+              new Vector3(position.x, -5, (position.z as number) + 4 * delta),
+              2
+            );
+          } else if (element.meshe.position.z === 12 && delta === -1) {
+            rollOver = this.animationsActions.slideObject(
+              element.meshe,
+              position,
+              new Vector3(position.x, element.meshe.name === 'flower' ? 1.5 : 0, (position.z as number) + 4 * delta),
+              2
+            );
+          } else {
+            rollOver = this.animationsActions.slideObject(
+              element.meshe,
+              position,
+              new Vector3(position.x, position.y, (position.z as number) + 4 * delta),
+              2
+            );
+          }
         });
+      }
+      rollOver!.onAnimationEndObservable.add(() => {
+        this.move = false;
+        this.open = false;
+        this.forestActions.deleteRow();
+      });
     }
   }
 
@@ -325,9 +336,9 @@ export class EngineService {
   }
 
   // tried to change color of the forest on the forest on the run
-  public refreshGui(): void {
+  public refreshColorGui(): void {
     this.guiAction.reset();
-    this.guiAction.instantiateGui();
+    this.guiAction.instantiateColorGui();
     this.guiAction.createColorPannel('Sun', this.lights.sunMesh);
     this.guiAction.createPBRColorPannel('Bush', this.forest.bushes.front[0].color[0].subMeshes[0].getMesh(), false);
     this.guiAction.createPBRColorPannel('FlowerTop', this.forest.flowers.front.color[1].subMeshes[0].getMesh(), true);
