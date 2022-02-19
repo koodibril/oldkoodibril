@@ -241,8 +241,12 @@ export class EngineService {
   // sliding them frontward, or backward
   public wheel(event: any): void {
     const delta = Math.sign(event.deltaY);
-    this.position -= delta;
-    if (this.position === 24 || this.position === -24) {
+    if (delta === 1) {
+      this.position = this.position === 0 ? 23 : this.position - 1;
+    } else {
+      this.position = this.position === 24 ? 1 : this.position + 1;
+    }
+    if (this.position === 24) {
       this.position = 0;
     }
     console.log(this.position);
@@ -346,13 +350,13 @@ export class EngineService {
       this.animationsActions.deploy_tree();
       this.animationsActions.deploy_pannel();
       setTimeout(() => {
-        this.textActions.generateTopText('MATCHA');
+        this.textActions.generateTopText(this.position);
       }, 150);
       setTimeout(() => {
-        this.textActions.generateMiddleText('A simple match app');
+        this.textActions.generateMiddleText(this.position);
       }, 250);
       setTimeout(() => {
-        this.textActions.generateBottomText('More info');
+        this.textActions.generateBottomText(this.position);
       }, 350);
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
