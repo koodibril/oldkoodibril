@@ -1,57 +1,57 @@
-import {
-  Scene,
-  SceneLoader,
-  Vector3,
-  AbstractMesh,
-  AnimationGroup,
-  AssetContainer,
-} from '@babylonjs/core';
+import { Scene, SceneLoader, Vector3, AbstractMesh, AnimationGroup, AssetContainer } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
 export interface Flower {
-    animations: AnimationGroup[],
-    meshe: AbstractMesh,
-    color: AbstractMesh[]
-  }
-  
-  export interface Bush {
-    animations: AnimationGroup[],
-    meshe: AbstractMesh,
-    color: AbstractMesh[]
-  }
-  
-  export interface Tree {
-    animations: AnimationGroup[],
-    meshe: AbstractMesh,
-    color: AbstractMesh[]
-  }
-  
-  export interface Trees {
-    front: Tree[],
-    middle: Tree[],
-    back: Tree[],
-    delete: Tree[]
-  }
-  
-  export interface Bushes {
-    front: Bush[],
-    middle: Bush[],
-    back: Bush[],
-    delete: Bush[]
-  }
-  
-  export interface Flowers {
-    front: Flower,
-    middle: Flower,
-    back: Flower,
-    delete: Flower
-  }
-  
-  export interface Forest {
-    trees: Trees,
-    flowers: Flowers,
-    bushes: Bushes,
-  }
+  animations: AnimationGroup[];
+  meshe: AbstractMesh;
+  color: AbstractMesh[];
+}
+
+export interface Pannel {
+  animations: AnimationGroup[];
+  meshe: AbstractMesh;
+  color: AbstractMesh[];
+}
+
+export interface Bush {
+  animations: AnimationGroup[];
+  meshe: AbstractMesh;
+  color: AbstractMesh[];
+}
+
+export interface Tree {
+  animations: AnimationGroup[];
+  meshe: AbstractMesh;
+  color: AbstractMesh[];
+}
+
+export interface Trees {
+  front: Tree[];
+  middle: Tree[];
+  back: Tree[];
+  delete: Tree[];
+}
+
+export interface Bushes {
+  front: Bush[];
+  middle: Bush[];
+  back: Bush[];
+  delete: Bush[];
+}
+
+export interface Flowers {
+  front: Flower;
+  middle: Flower;
+  back: Flower;
+  delete: Flower;
+}
+
+export interface Forest {
+  trees: Trees;
+  flowers: Flowers;
+  bushes: Bushes;
+  pannel: Pannel;
+}
 
 export class ForestActions {
   // store all forest mesh and animation
@@ -64,30 +64,31 @@ export class ForestActions {
   private bushes!: AssetContainer[];
   // store the pannel.glb for fast loading
   private pannel!: AssetContainer;
-  
+
   public constructor(private scene: Scene) {}
 
   // instantiate the forest object before filling it
   public async instantiateForest(): Promise<void> {
-      this.forest = <Forest>{};
-      this.forest.trees = <Trees>{};
-      this.forest.bushes = <Bushes>{};
-      this.forest.flowers = <Flowers>{};
-      
-      this.forest.trees.front = [];
-      this.forest.trees.middle = [];
-      this.forest.trees.back = [];
-      this.forest.trees.delete = [];
-      this.forest.bushes.front = [];
-      this.forest.bushes.middle = [];
-      this.forest.bushes.back = [];
-      this.forest.bushes.delete = [];
-      this.forest.flowers.front = <Flower>{};
-      this.forest.flowers.middle = <Flower>{};
-      this.forest.flowers.back = <Flower>{};
-      this.forest.flowers.delete = <Flower>{};
-      await this.importforest();
-      this.seed();
+    this.forest = <Forest>{};
+    this.forest.trees = <Trees>{};
+    this.forest.bushes = <Bushes>{};
+    this.forest.flowers = <Flowers>{};
+    this.forest.pannel = <Pannel>{};
+
+    this.forest.trees.front = [];
+    this.forest.trees.middle = [];
+    this.forest.trees.back = [];
+    this.forest.trees.delete = [];
+    this.forest.bushes.front = [];
+    this.forest.bushes.middle = [];
+    this.forest.bushes.back = [];
+    this.forest.bushes.delete = [];
+    this.forest.flowers.front = <Flower>{};
+    this.forest.flowers.middle = <Flower>{};
+    this.forest.flowers.back = <Flower>{};
+    this.forest.flowers.delete = <Flower>{};
+    await this.importforest();
+    this.seed();
   }
 
   // import all forest.glb and store them for fast loading
@@ -97,9 +98,17 @@ export class ForestActions {
     this.trees = [];
     this.bushes = [];
     for (let i = 1; i < 10; i++) {
-      this.trees[i] = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/forestv2/tree/', 'tree' + i.toString() + 'v2.glb', this.scene);
+      this.trees[i] = await SceneLoader.LoadAssetContainerAsync(
+        '../../content/assets/models/forestv2/tree/',
+        'tree' + i.toString() + 'v2.glb',
+        this.scene
+      );
       if (i < 5) {
-        this.bushes[i] = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/forestv2/bush/', 'bush' + i.toString() + 'v2.glb', this.scene);
+        this.bushes[i] = await SceneLoader.LoadAssetContainerAsync(
+          '../../content/assets/models/forestv2/bush/',
+          'bush' + i.toString() + 'v2.glb',
+          this.scene
+        );
       }
     }
   }
@@ -107,7 +116,7 @@ export class ForestActions {
   // create the forest on 3 rows
   public seed(): void {
     const random_tree = this.shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    // this.addpannel();
+    this.addpannel();
     this.addtree(new Vector3(-3, 0, 0), 0, random_tree[0]);
     this.addtree(new Vector3(4, 0, 0), 0, random_tree[1]);
     this.addtree(new Vector3(-6, 0, 4), 1, random_tree[2]);
@@ -139,8 +148,7 @@ export class ForestActions {
     const flowerImport = this.flower.instantiateModelsToScene();
     const flower = <Flower>{};
     flower.color = flowerImport.rootNodes[0].getChildMeshes();
-    flower.animations = flowerImport.animationGroups,
-    flower.meshe = flowerImport.rootNodes[0] as AbstractMesh;
+    (flower.animations = flowerImport.animationGroups), (flower.meshe = flowerImport.rootNodes[0] as AbstractMesh);
     flower.animations[0].stop();
     flower.animations[0].start(false, 10.0);
     flower.animations[5].start(false, 10.0);
@@ -160,19 +168,22 @@ export class ForestActions {
       case 2:
         this.forest.flowers.back = flower;
         break;
-      }
+    }
   }
 
   // add the pannel wich will nether move, only open and close
   public addpannel(): void {
     const pannelImport = this.pannel.instantiateModelsToScene();
-    const pannel = <Flower>{};
-    pannel.animations = pannelImport.animationGroups,
-    pannel.meshe = pannelImport.rootNodes[0] as AbstractMesh;
-    pannel.meshe.scaling.scaleInPlace(0.05);
-    pannel.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 1.5);
-    pannel.meshe.position = new Vector3(0, 0, 1);
+    const pannel = <Pannel>{};
+    (pannel.animations = pannelImport.animationGroups), (pannel.meshe = pannelImport.rootNodes[0] as AbstractMesh);
+    pannel.meshe.scaling.scaleInPlace(1);
+    pannel.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 0.5);
+    pannel.meshe.position = new Vector3(0, 4, 1);
+    pannel.animations[0].goToFrame(0);
+    pannel.animations[0].stop();
+    pannel.animations[1].start(false, 10.0);
     pannel.meshe.name = 'pannel';
+    this.forest.pannel = pannel;
   }
 
   // add another instance of bush on the forest
@@ -207,8 +218,7 @@ export class ForestActions {
   public addtree(position: Vector3, row: number, mesh: number): void {
     const treeImport = this.trees[mesh].instantiateModelsToScene();
     const tree = <Tree>{};
-    tree.animations = treeImport.animationGroups,
-    tree.color = treeImport.rootNodes[0].getChildMeshes().sort();
+    (tree.animations = treeImport.animationGroups), (tree.color = treeImport.rootNodes[0].getChildMeshes().sort());
     tree.meshe = treeImport.rootNodes[0] as AbstractMesh;
     tree.animations[0].goToFrame(0);
     tree.animations[0].stop();
@@ -270,27 +280,16 @@ export class ForestActions {
     const position = this.shuffleArray([-3, -6, 3, 5]);
     for (let i = 0; i < 4; i++) {
       if (i > 1) {
-        this.addtree(
-          new Vector3(i === 2 ? -8 : 8, delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
-          delta === -1 ? 2 : 0,
-          random_tree[i]
-        );
+        this.addtree(new Vector3(i === 2 ? -8 : 8, delta === -1 ? -6 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random_tree[i]);
       } else {
-        this.addtree(
-          new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4),
-          delta === -1 ? 2 : 0,
-          random_tree[i]
-        );
+        this.addtree(new Vector3(position[i], delta === -1 ? -6 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random_tree[i]);
       }
     }
     const random = this.shuffleArray([1, 2, 3, 4]);
-    this.addflower(
-      new Vector3(Math.random() * (2 - -2) + -2, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4),
-      delta === -1 ? 2 : 0
-    );
+    this.addflower(new Vector3(Math.random() * (2 - -2) + -2, delta === -1 ? -5 : 1.5, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0);
     this.addbush(new Vector3(0, delta === -1 ? -5 : 0, delta === -1 ? 12 : -4), delta === -1 ? 2 : 0, random[0]);
   }
-  
+
   // called at the end of scroll, will delete all mesh and destroy arrays of every mesh considered out of map (<4 || >12)
   public deleteRow(): void {
     for (let i = 0; i < 3; i++) {

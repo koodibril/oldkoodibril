@@ -323,6 +323,7 @@ export class EngineService {
       this.animationsActions.deploy_flower();
       this.animationsActions.deploy_bush();
       this.animationsActions.deploy_tree();
+      this.animationsActions.deploy_pannel();
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
@@ -330,6 +331,7 @@ export class EngineService {
       this.animationsActions.retract_flower();
       this.animationsActions.retract_tree();
       this.animationsActions.retract_bush();
+      this.animationsActions.retract_pannel();
       this.open = false;
       this.reset();
     }

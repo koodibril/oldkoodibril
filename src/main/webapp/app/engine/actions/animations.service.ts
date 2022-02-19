@@ -194,6 +194,26 @@ export class AnimationsActions {
   }
 
   // stop all flower animations
+  public stop_pannel(): void {
+    this.forest.pannel.animations.forEach(element => {
+      element.stop();
+    });
+  }
+
+  public deploy_pannel(): void {
+    this.stop_pannel();
+    this.forest.pannel.meshe.position = new Vector3(0, 2.7, 1);
+    this.forest.pannel.animations[0].start(false, 1);
+  }
+
+  public retract_pannel(): void {
+    this.stop_pannel();
+    this.forest.pannel.animations[1].start(false, 1).onAnimationEndObservable.add(() => {
+      this.forest.pannel.meshe.position = new Vector3(0, 4, 1);
+    });
+  }
+
+  // stop all flower animations
   public stop_flower(): void {
     this.forest.flowers.front.animations.forEach(element => {
       element.stop();
