@@ -87,10 +87,10 @@ export class EngineService {
       this.device = device.deviceType;
     });
 
-    if (this.device === 2) {
-      this.guiAction = new GuiActions(this.scene, this.camera, this.engine, this.lights, this.forest);
-      this.guiAction.instantiatePannelGui();
-    }
+    // if (this.device === 2) {
+    //   this.guiAction = new GuiActions(this.scene, this.camera, this.engine, this.lights, this.forest);
+    //   this.guiAction.instantiatePannelGui();
+    // }
 
     this.timeout = false;
     this.open = false;
@@ -234,7 +234,7 @@ export class EngineService {
       let rollOver: any;
       let toMove: any;
       this.lightsAction.day(delta);
-      this.device === 2 && this.guiAction.show ? this.refreshColorGui() : null;
+      // this.device === 2 && this.guiAction.show ? this.refreshColorGui() : null;
       for (let i = 0; i < 12; i++) {
         switch (i) {
           case 0:

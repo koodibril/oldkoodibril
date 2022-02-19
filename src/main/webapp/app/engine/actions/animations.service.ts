@@ -14,11 +14,11 @@ import '@babylonjs/loaders/glTF';
 import { Forest } from './forest.service';
 
 export interface Koodibril {
-  mesh: AbstractMesh,
-  leftoright: boolean,
-  animation: AnimationGroup[],
-  material: AbstractMesh,
-  lastFly: Animatable
+  mesh: AbstractMesh;
+  leftoright: boolean;
+  animation: AnimationGroup[];
+  material: AbstractMesh;
+  lastFly: Animatable;
 }
 
 export class AnimationsActions {
@@ -92,13 +92,12 @@ export class AnimationsActions {
     return this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, speed);
   }
 
-  
   // generate random movements for the colibri, will call itself at the end of the last animations
   // to stop the fly always clean all observables, if not you will have double fly wich makes it jumpy
   public fly(): void {
     const frameRate = 20;
     const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const ytravel = (Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2)) + 2;
+    const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2) + 2;
     if (this.koodibril.mesh.position.x > xtravel && !this.koodibril.leftoright) {
       this.koodibril.mesh.rotate(new Vector3(0, 1, 0), Math.PI);
       this.koodibril.leftoright = true;
@@ -144,9 +143,8 @@ export class AnimationsActions {
     this.koodibril.lastFly = this.scene.beginDirectAnimation(this.koodibril.mesh, animations, 0, frameRate, false, 1);
     this.koodibril.lastFly.onAnimationEndObservable.addOnce(() => {
       this.fly();
-  });
-}
-
+    });
+  }
 
   // animate the colibri to go to the flower
   public goToFlower(): void {
@@ -161,19 +159,22 @@ export class AnimationsActions {
       this.koodibril.mesh.rotate(new Vector3(0, 1, 0), Math.PI);
       this.koodibril.leftoright = false;
     }
-    this.slideObject(this.koodibril.mesh, this.koodibril.mesh.position, new Vector3(flowerPos.x + (flowerPos.x < 0 ? 0.7 : -0.7), 1.7, this.koodibril.mesh.position.z), 2).onAnimationEndObservable.add(() => {
+    this.slideObject(
+      this.koodibril.mesh,
+      this.koodibril.mesh.position,
+      new Vector3(flowerPos.x + (flowerPos.x < 0 ? 0.7 : -0.7), 1.7, this.koodibril.mesh.position.z),
+      2
+    ).onAnimationEndObservable.add(() => {
       this.koodibril.animation[0].stop();
       this.koodibril.animation[1].start(true, 10);
     });
   }
 
-  
-
   // initiante the particle system
   public start_particle(): void {
-    const flowerPos =this.forest.flowers.front.meshe.position;
-    this.particle = new ParticleSystem("particles", 2000, this.scene);
-    this.particle.particleTexture = new Texture("../../content/assets/textures/flare.png", this.scene);
+    const flowerPos = this.forest.flowers.front.meshe.position;
+    this.particle = new ParticleSystem('particles', 2000, this.scene);
+    this.particle.particleTexture = new Texture('../../content/assets/textures/flare.png', this.scene);
     this.particle.emitter = new Vector3(flowerPos.x > 0 ? flowerPos.x - 0.16 : flowerPos.x + 0.16, flowerPos.y - 0.1, flowerPos.z);
     this.particle.createSphereEmitter(0.001, 0);
     this.particle.color1 = new Color4(1.0, 0, 0, 1.0);
@@ -202,26 +203,28 @@ export class AnimationsActions {
   // launch the flower animations
   public deploy_flower(): void {
     this.stop_flower();
-    this.forest.flowers.front.animations[2].start(false, 1).onAnimationEndObservable.add(() => {
-      this.forest.flowers.front.animations[4].start(false, 1);
-      this.forest.flowers.front.animations[6].start(false, 1);
-    });
+    // this.forest.flowers.front.animations[2].start(false, 1).onAnimationEndObservable.add(() => {
+    //   this.forest.flowers.front.animations[4].start(false, 1);
+    //   this.forest.flowers.front.animations[6].start(false, 1);
+    // });
+    this.forest.flowers.front.animations[2].start(false, 1);
   }
 
   // close the flower beautifully
   public retract_flower(): void {
-    this.stop_flower()
-    this.forest.flowers.front.animations[5].start(false, 1);
-    this.forest.flowers.front.animations[3].start(false, 1).onAnimationEndObservable.add(() => {
-      this.forest.flowers.front.animations[0].start(false, 1);
-    });
+    this.stop_flower();
+    // this.forest.flowers.front.animations[5].start(false, 1);
+    // this.forest.flowers.front.animations[3].start(false, 1).onAnimationEndObservable.add(() => {
+    //   this.forest.flowers.front.animations[0].start(false, 1);
+    // });
+    this.forest.flowers.front.animations[0].start(false, 1);
   }
 
   // close the flower fast, called whith scroll
   public retract_fast_flower(): void {
-    this.forest.flowers.front.animations[5].start(false, 0.5);
-    this.forest.flowers.front.animations[3].start(false, 2);
-    this.forest.flowers.front.animations[0].start(false, 0.5);
+    // this.forest.flowers.front.animations[5].start(false, 0.5);
+    // this.forest.flowers.front.animations[3].start(false, 2);
+    // this.forest.flowers.front.animations[0].start(false, 0.5);
   }
 
   // stop all tree animation
@@ -230,27 +233,27 @@ export class AnimationsActions {
       element.animations.forEach(element2 => {
         element2.stop();
       });
-    })
+    });
   }
 
   // start the deploying tree animations
   public deploy_tree(): void {
     this.stop_tree();
-    for (let i = 0; i < this.forest.trees.front.length; i++) {
-      this.forest.trees.front[i].animations[0].start(false, 0.3);
-      this.forest.trees.front[i].animations[2].start(false, 0.3);
-    }
+    // for (let i = 0; i < this.forest.trees.front.length; i++) {
+    //   this.forest.trees.front[i].animations[0].start(false, 0.3);
+    //   this.forest.trees.front[i].animations[2].start(false, 0.3);
+    // }
   }
 
   // start the retract tree animations
   public retract_tree(): void {
     this.stop_tree();
-    for (let i = 0; i < this.forest.trees.front.length; i++) {
-      this.forest.trees.front[i].animations[0].stop();
-      this.forest.trees.front[i].animations[2].stop();
-      this.forest.trees.front[i].animations[1].start(false, 0.5);
-      this.forest.trees.front[i].animations[3].start(false, 0.5);
-    }
+    // for (let i = 0; i < this.forest.trees.front.length; i++) {
+    //   this.forest.trees.front[i].animations[0].stop();
+    //   this.forest.trees.front[i].animations[2].stop();
+    //   this.forest.trees.front[i].animations[1].start(false, 0.5);
+    //   this.forest.trees.front[i].animations[3].start(false, 0.5);
+    // }
   }
 
   // stop all bush animations
@@ -259,26 +262,26 @@ export class AnimationsActions {
       element.animations.forEach(element2 => {
         element2.stop();
       });
-    })
+    });
   }
 
   // start the deploying bush animations
   public deploy_bush(): void {
     this.stop_bush();
-    this.forest.bushes.front.forEach(element => {
-      element.animations[0].start(false, 0.3).onAnimationEndObservable.add(() => {
-        this.loading = false;
-      });
-    });
+    this.loading = false;
+    // this.forest.bushes.front.forEach(element => {
+    //   element.animations[0].start(false, 0.3).onAnimationEndObservable.add(() => {
+    //     this.loading = false;
+    //   });
+    // });
   }
 
   // start the retracting bush animations
   public retract_bush(): void {
     this.stop_bush();
-    this.forest.bushes.front.forEach(element => {
-      element.animations[0].stop();
-      element.animations[1].start(false, 0.5);
-    });
+    // this.forest.bushes.front.forEach(element => {
+    //   element.animations[0].stop();
+    //   element.animations[1].start(false, 0.5);
+    // });
   }
-
 }
