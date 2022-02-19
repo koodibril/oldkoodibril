@@ -1,4 +1,4 @@
-import { Scene, StandardMaterial, Mesh, Camera, Engine, AbstractMesh, PBRMaterial, Color3, TransformNode } from '@babylonjs/core';
+import { Scene, StandardMaterial, Mesh, Camera, Engine, AbstractMesh, PBRMaterial, Color3 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { AdvancedDynamicTexture, Checkbox, ColorPicker, Control, StackPanel, TextBlock } from '@babylonjs/gui';
 import { Forest, Trees } from './forest.service';

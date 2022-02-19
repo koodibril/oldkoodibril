@@ -1,21 +1,6 @@
 import { WindowRefService } from './../services/window-ref.service';
 import { ElementRef, Injectable, NgZone } from '@angular/core';
-import {
-  Engine,
-  Scene,
-  MeshBuilder,
-  Color4,
-  Vector3,
-  Color3,
-  FlyCamera,
-  PointerEventTypes,
-  DeviceSourceManager,
-  Mesh,
-  AbstractMesh,
-  StandardMaterial,
-  DynamicTexture,
-  AnimationGroup,
-} from '@babylonjs/core';
+import { Engine, Scene, MeshBuilder, Color4, Vector3, Color3, FlyCamera, PointerEventTypes, DeviceSourceManager } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 import { ForestActions, Forest } from './actions/forest.service';
@@ -56,6 +41,7 @@ export class EngineService {
   private animationsActions!: AnimationsActions;
   private guiAction!: GuiActions;
   private textActions!: textActions;
+  private position!: number;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -113,6 +99,7 @@ export class EngineService {
 
     this.timeout = false;
     this.open = false;
+    this.position = 0;
     this.engine.hideLoadingUI();
   }
 
@@ -254,6 +241,11 @@ export class EngineService {
   // sliding them frontward, or backward
   public wheel(event: any): void {
     const delta = Math.sign(event.deltaY);
+    this.position -= delta;
+    if (this.position === 24 || this.position === -24) {
+      this.position = 0;
+    }
+    console.log(this.position);
     if (this.open && !this.animationsActions.loading) {
       this.reset();
     }

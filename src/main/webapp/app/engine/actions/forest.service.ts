@@ -1,14 +1,4 @@
-import {
-  Scene,
-  SceneLoader,
-  Vector3,
-  AbstractMesh,
-  AnimationGroup,
-  AssetContainer,
-  DynamicTexture,
-  Color3,
-  StandardMaterial,
-} from '@babylonjs/core';
+import { Scene, SceneLoader, Vector3, AbstractMesh, AnimationGroup, AssetContainer } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
 export interface Flower {

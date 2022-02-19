@@ -18,11 +18,11 @@ import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 
 export interface Lights {
-  sun: SpotLight,
-  sunMesh: Mesh,
-  sunMat: StandardMaterial,
-  ambiant: HemisphericLight,
-  groundLight: GridMaterial
+  sun: SpotLight;
+  sunMesh: Mesh;
+  sunMat: StandardMaterial;
+  ambiant: HemisphericLight;
+  groundLight: GridMaterial;
 }
 
 export class LightsActions {
@@ -33,21 +33,20 @@ export class LightsActions {
   private firefly!: boolean;
   private particles!: ParticleSystem[];
 
-  
   public constructor(private scene: Scene, private camera: Camera, private engine: Engine) {}
 
   // create all lights and the sun/moon
   public instantiateLights(): void {
     this.lights = <Lights>{};
-    this.lights.ambiant = new HemisphericLight("DirectionalLight", new Vector3(0, 1, 0), this.scene);
+    this.lights.ambiant = new HemisphericLight('DirectionalLight', new Vector3(0, 1, 0), this.scene);
     this.lights.ambiant.intensity = 1;
-    this.lights.sun = new SpotLight("sunLight", Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
-    this.lights.sunMat = new StandardMaterial("yellowMat", this.scene);
-    const whiteMat = new StandardMaterial("whiteMat", this.scene);
+    this.lights.sun = new SpotLight('sunLight', Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
+    this.lights.sunMat = new StandardMaterial('yellowMat', this.scene);
+    const whiteMat = new StandardMaterial('whiteMat', this.scene);
     this.lights.sunMat.emissiveColor = new Color3(1, 1, 0.5);
     whiteMat.emissiveColor = new Color3(1, 1, 1);
     this.lights.sun.intensity = 1;
-    this.lights.sunMesh = MeshBuilder.CreateIcoSphere("sunMesh", {radius: 5});
+    this.lights.sunMesh = MeshBuilder.CreateIcoSphere('sunMesh', { radius: 5 });
     this.lights.sunMesh.material = this.lights.sunMat;
     this.lights.sun.parent = this.lights.sunMesh;
     this.lights.sunMesh.position = new Vector3(0, 20, 4);
@@ -107,14 +106,14 @@ export class LightsActions {
   public day(delta: number): void {
     this.setFocus();
     if (delta === 1) {
-      this.hour = this.hour === 0 ? 24 : this.hour - 1;
+      this.hour = this.hour === 0 ? 23 : this.hour - 1;
     } else {
-      this.hour = this.hour === 24 ? 0 : this.hour + 1;
+      this.hour = this.hour === 24 ? 1 : this.hour + 1;
     }
     const sun_ang = this.hour * (Math.PI / 12);
-    const sun_y = 0 + (24 * Math.cos(sun_ang));
-    const sun_z = 4 + (24 * Math.sin(sun_ang));
-    let luminosity = ((sun_y + 24) / 24);
+    const sun_y = 0 + 24 * Math.cos(sun_ang);
+    const sun_z = 4 + 24 * Math.sin(sun_ang);
+    let luminosity = (sun_y + 24) / 24;
     this.setFirefly();
     this.setSunColor();
     this.movestar(this.lights.sunMesh, this.lights.sunMesh.position, new Vector3(0, sun_y, sun_z));
@@ -148,20 +147,24 @@ export class LightsActions {
         this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
         break;
       case 6:
-        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(255/255,102/255,112/255));
+        this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(255 / 255, 102 / 255, 112 / 255));
         break;
       default:
         this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9, 0.9, 0.5));
     }
   }
-  
+
   public sunset(): void {
     const luminosity = 0.9;
-    this.smoothColor(this.lights.sunMat, this.lights.sunMat.emissiveColor, new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity));
+    this.smoothColor(
+      this.lights.sunMat,
+      this.lights.sunMat.emissiveColor,
+      new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity)
+    );
     this.scene.fogColor = new Color3(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity);
     this.scene.clearColor = new Color4(0.9 * luminosity * 1.15, 0.9 * luminosity, 0.85 * luminosity, 1);
   }
-  
+
   // function that will change the sun/moon color
   public smoothColor(object: StandardMaterial, from: Color3, to: Color3): void {
     const frameRate = 100;
@@ -212,12 +215,12 @@ export class LightsActions {
       this.firefly = true;
       for (let z = 0; z <= 8; z = z + 4) {
         for (let x = -3; x <= 6; x = x + 3) {
-          const particleSystem = new ParticleSystem("particles", 5, this.scene);
-          particleSystem.particleTexture = new Texture("../../content/assets/textures/flare.png", this.scene);
+          const particleSystem = new ParticleSystem('particles', 5, this.scene);
+          particleSystem.particleTexture = new Texture('../../content/assets/textures/flare.png', this.scene);
           particleSystem.emitter = new Vector3(x, 0, z);
           particleSystem.color1 = new Color4(0, 1.0, 0, 1.0);
           particleSystem.color2 = new Color4(0, 1.0, 0, 1.0);
-          particleSystem.gravity = new Vector3((Math.random() * (0.5 - -0.5) + -0.5), (Math.random() * (0 - 0.3) + -0.3), 0);
+          particleSystem.gravity = new Vector3(Math.random() * (0.5 - -0.5) + -0.5, Math.random() * (0 - 0.3) + -0.3, 0);
           particleSystem.minSize = 0.1;
           particleSystem.maxSize = 0.1;
           particleSystem.emitRate = 1;
@@ -239,5 +242,4 @@ export class LightsActions {
   public setFocus(): void {
     this.lights.sun.setDirectionToTarget(new Vector3(0, 0, 0));
   }
-
 }

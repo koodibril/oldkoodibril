@@ -46,13 +46,7 @@ export class textActions {
     textOnly.color = 'white';
     textOnly.fontSize = 140;
     textOnly.fontFamily = 'verdana';
-    textOnly.hoverCursor = 'pointer';
-
-    textOnly.isHitTestVisible = true;
-
-    textOnly.onPointerUpObservable.add(function () {
-      alert('Top Menu clicked');
-    });
+    textOnly.isHitTestVisible = false;
     advancedTexture.addControl(textOnly);
     this.middleText = MiddlePlane;
   }

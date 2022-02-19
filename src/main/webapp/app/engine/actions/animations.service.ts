@@ -9,8 +9,6 @@ import {
   AnimationGroup,
   ParticleSystem,
   Texture,
-  DynamicTexture,
-  StandardMaterial,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { Forest } from './forest.service';
@@ -98,8 +96,8 @@ export class AnimationsActions {
   // to stop the fly always clean all observables, if not you will have double fly wich makes it jumpy
   public fly(): void {
     const frameRate = 20;
-    const xtravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2);
-    const ytravel = Math.floor(Math.random() * (2 - -1) + -1) / Math.floor(Math.random() * 3 + 2) + 2;
+    const xtravel = Math.floor(Math.random() * (3 - -2 + 1)) + -2;
+    const ytravel = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
     if (this.koodibril.mesh.position.x > xtravel && !this.koodibril.leftoright) {
       this.koodibril.mesh.rotate(new Vector3(0, 1, 0), Math.PI);
       this.koodibril.leftoright = true;
