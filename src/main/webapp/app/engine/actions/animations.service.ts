@@ -9,6 +9,8 @@ import {
   AnimationGroup,
   ParticleSystem,
   Texture,
+  DynamicTexture,
+  StandardMaterial,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { Forest } from './forest.service';
@@ -166,7 +168,7 @@ export class AnimationsActions {
       2
     ).onAnimationEndObservable.add(() => {
       this.koodibril.animation[0].stop();
-      this.koodibril.animation[1].start(true, 10);
+      this.koodibril.animation[1].start(true, 0.5);
     });
   }
 
@@ -202,14 +204,14 @@ export class AnimationsActions {
 
   public deploy_pannel(): void {
     this.stop_pannel();
-    this.forest.pannel.meshe.position = new Vector3(0, 2.7, 1);
+    this.forest.pannel.meshe.position = new Vector3(0, 2.7, 3);
     this.forest.pannel.animations[0].start(false, 1);
   }
 
   public retract_pannel(): void {
     this.stop_pannel();
     this.forest.pannel.animations[1].start(false, 1).onAnimationEndObservable.add(() => {
-      this.forest.pannel.meshe.position = new Vector3(0, 4, 1);
+      this.forest.pannel.meshe.position = new Vector3(0, 4, 3);
     });
   }
 

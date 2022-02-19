@@ -1,12 +1,28 @@
 import { WindowRefService } from './../services/window-ref.service';
 import { ElementRef, Injectable, NgZone } from '@angular/core';
-import { Engine, Scene, MeshBuilder, Color4, Vector3, Color3, FlyCamera, PointerEventTypes, DeviceSourceManager } from '@babylonjs/core';
+import {
+  Engine,
+  Scene,
+  MeshBuilder,
+  Color4,
+  Vector3,
+  Color3,
+  FlyCamera,
+  PointerEventTypes,
+  DeviceSourceManager,
+  Mesh,
+  AbstractMesh,
+  StandardMaterial,
+  DynamicTexture,
+  AnimationGroup,
+} from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { GridMaterial } from '@babylonjs/materials';
 import { ForestActions, Forest } from './actions/forest.service';
 import { LightsActions, Lights } from './actions/lights.service';
 import { AnimationsActions, Koodibril } from './actions/animations.service';
 import { GuiActions } from './actions/gui.service';
+import { textActions } from './actions/text.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
@@ -39,6 +55,7 @@ export class EngineService {
   private koodibril!: Koodibril;
   private animationsActions!: AnimationsActions;
   private guiAction!: GuiActions;
+  private textActions!: textActions;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
 
@@ -91,6 +108,8 @@ export class EngineService {
     //   this.guiAction = new GuiActions(this.scene, this.camera, this.engine, this.lights, this.forest);
     //   this.guiAction.instantiatePannelGui();
     // }
+
+    this.textActions = new textActions(this.scene, this.canvas);
 
     this.timeout = false;
     this.open = false;
@@ -171,6 +190,16 @@ export class EngineService {
         this.animationsActions.retract_fast_flower();
         this.animationsActions.retract_tree();
         this.animationsActions.retract_bush();
+        this.animationsActions.retract_pannel();
+        setTimeout(() => {
+          this.textActions.bottomText.dispose();
+        }, 100);
+        setTimeout(() => {
+          this.textActions.middleText.dispose();
+        }, 200);
+        setTimeout(() => {
+          this.textActions.topText.dispose();
+        }, 300);
         this.open = false;
       }
       this.koodibril.animation[1].stop();
@@ -324,6 +353,15 @@ export class EngineService {
       this.animationsActions.deploy_bush();
       this.animationsActions.deploy_tree();
       this.animationsActions.deploy_pannel();
+      setTimeout(() => {
+        this.textActions.generateTopText('MATCHA');
+      }, 150);
+      setTimeout(() => {
+        this.textActions.generateMiddleText('A simple match app');
+      }, 250);
+      setTimeout(() => {
+        this.textActions.generateBottomText('More info');
+      }, 350);
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
@@ -332,6 +370,15 @@ export class EngineService {
       this.animationsActions.retract_tree();
       this.animationsActions.retract_bush();
       this.animationsActions.retract_pannel();
+      setTimeout(() => {
+        this.textActions.bottomText.dispose();
+      }, 100);
+      setTimeout(() => {
+        this.textActions.middleText.dispose();
+      }, 200);
+      setTimeout(() => {
+        this.textActions.topText.dispose();
+      }, 300);
       this.open = false;
       this.reset();
     }

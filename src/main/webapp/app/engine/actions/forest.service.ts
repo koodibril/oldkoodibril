@@ -1,4 +1,14 @@
-import { Scene, SceneLoader, Vector3, AbstractMesh, AnimationGroup, AssetContainer } from '@babylonjs/core';
+import {
+  Scene,
+  SceneLoader,
+  Vector3,
+  AbstractMesh,
+  AnimationGroup,
+  AssetContainer,
+  DynamicTexture,
+  Color3,
+  StandardMaterial,
+} from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
 export interface Flower {
@@ -178,7 +188,7 @@ export class ForestActions {
     (pannel.animations = pannelImport.animationGroups), (pannel.meshe = pannelImport.rootNodes[0] as AbstractMesh);
     pannel.meshe.scaling.scaleInPlace(1);
     pannel.meshe.rotate(new Vector3(0, 1, 0), Math.PI * 0.5);
-    pannel.meshe.position = new Vector3(0, 4, 1);
+    pannel.meshe.position = new Vector3(0, 4, 3);
     pannel.animations[0].goToFrame(0);
     pannel.animations[0].stop();
     pannel.animations[1].start(false, 10.0);
