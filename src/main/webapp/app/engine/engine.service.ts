@@ -8,10 +8,12 @@ import { LightsActions, Lights } from './actions/lights.service';
 import { AnimationsActions, Koodibril } from './actions/animations.service';
 import { GuiActions } from './actions/gui.service';
 import { textActions } from './actions/text.service';
+import { BehaviorSubject } from 'rxjs';
 // import { CustomLoadingScreen } from './actions/screen.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
+  public appName = new BehaviorSubject<string>('');
   // the canvas is where our scene is loaded
   private canvas!: HTMLCanvasElement;
   // the babylon engine
@@ -98,7 +100,7 @@ export class EngineService {
     //   this.guiAction.instantiatePannelGui();
     // }
 
-    this.textActions = new textActions(this.scene, this.canvas);
+    this.textActions = new textActions(this.scene, this.canvas, this.appName);
 
     this.timeout = false;
     this.open = false;

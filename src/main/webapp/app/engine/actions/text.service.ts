@@ -1,47 +1,246 @@
 import { Scene, Mesh, Vector3, MeshBuilder } from '@babylonjs/core';
 import { AdvancedDynamicTexture, TextBlock } from '@babylonjs/gui';
 import '@babylonjs/loaders/glTF';
+import { BehaviorSubject } from 'rxjs';
 
 export interface Application {
   name: string;
+  subtitle: string;
+  logo: URL;
+  pictures: URL[];
   description: string;
-  available: boolean;
+  link: URL;
+  technos: string[];
 }
+
+export const applications: Application[] = [
+  {
+    name: 'KOODIBRIL',
+    subtitle: 'A simple colibri app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'MIES HOUSE',
+    subtitle: 'A simple logistic app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'UBEBEST',
+    subtitle: 'A simple eco app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'GRAPHIT',
+    subtitle: 'A simple db app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'BABYLON',
+    subtitle: 'A simple fps app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'CAMAGRU',
+    subtitle: 'A simple instagram app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'WOODART',
+    subtitle: 'A simple wordpress',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'MATCHA',
+    subtitle: 'A simple match app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'CLEAN-APP',
+    subtitle: 'A simple clean app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'HYPERTUBE',
+    subtitle: 'A simple youtube app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'MUSICROOM',
+    subtitle: 'A simple deezer app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'BALANCINGBANK',
+    subtitle: 'A simple bank app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: "UNIQU'AIR",
+    subtitle: 'A simple radio app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'RED-TETRIS',
+    subtitle: 'A simple tetris app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'LEMIN',
+    subtitle: 'A simple ant app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'COREWAR',
+    subtitle: 'A simple war app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'PUSH_SWAP',
+    subtitle: 'A simple stack app',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+  {
+    name: 'YOUR APP',
+    subtitle: 'Coming soon',
+    logo: new URL(''),
+    pictures: [new URL('')],
+    description: '',
+    link: new URL(''),
+    technos: [],
+  },
+];
 
 export class textActions {
   public show!: boolean;
   public topText!: Mesh;
   public middleText!: Mesh;
   public bottomText!: Mesh;
-  private applications: Application[];
+  public applications: Application[];
 
-  public constructor(private scene: Scene, private canvas: HTMLCanvasElement) {
-    this.applications = [
-      { name: 'KOODIBRIL', description: 'A simple colibri app', available: true },
-      { name: 'MIES HOUSE', description: 'A simple logistic app', available: false },
-      { name: 'UBEBEST', description: 'A simple eco app', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'GRAPHIT', description: 'A simple db app', available: true },
-      { name: 'BABYLON', description: 'A simple fps app', available: true },
-      { name: 'CAMAGRU', description: 'A simple instagram app', available: true },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'WOODART', description: 'A simple wordpress', available: true },
-      { name: 'MATCHA', description: 'A simple match app', available: true },
-      { name: 'CLEAN-APP', description: 'A simple clean app', available: true },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'HYPERTUBE', description: 'A simple youtube app', available: false },
-      { name: 'MUSICROOM', description: 'A simple deezer app', available: false },
-      { name: 'BALANCINGBANK', description: 'A simple bank app', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: "UNIQU'AIR", description: 'A simple radio app', available: false },
-      { name: 'RED-TETRIS', description: 'A simple tetris app', available: false },
-      { name: 'LEMIN', description: 'A simple ant app', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'COREWAR', description: 'A simple war app', available: false },
-      { name: 'PUSH_SWAP', description: 'A simple stack app', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-    ];
+  public constructor(private scene: Scene, private canvas: HTMLCanvasElement, private appName: BehaviorSubject<string>) {
+    this.applications = applications;
   }
 
   public generateTopText(position: number): void {
@@ -73,7 +272,7 @@ export class textActions {
 
     const advancedTexture = AdvancedDynamicTexture.CreateForMesh(MiddlePlane, 2000, 500);
 
-    const textOnly = new TextBlock('textMid', this.applications[position].description);
+    const textOnly = new TextBlock('textMid', this.applications[position].subtitle);
     textOnly.isPointerBlocker = true;
     textOnly.width = 2.8;
     textOnly.height = 1.4;
@@ -102,10 +301,10 @@ export class textActions {
     textOnly.fontFamily = 'verdana';
     textOnly.hoverCursor = 'pointer';
 
-    textOnly.isHitTestVisible = this.applications[position].available;
+    textOnly.isHitTestVisible = true;
 
-    textOnly.onPointerUpObservable.add(function () {
-      alert('Top Menu clicked');
+    textOnly.onPointerUpObservable.add(() => {
+      this.appName.next(this.applications[position].name);
     });
     advancedTexture.addControl(textOnly);
     this.bottomText = BottomPlane;

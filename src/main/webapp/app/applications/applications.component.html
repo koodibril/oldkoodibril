@@ -1,1 +1,22 @@
-<div *ngIf="show" class="wrapper">COUCOU</div>
+<div *ngIf="show" [@slideInOut] class="wrapper">
+  <div class="title">
+    {{ app }}
+    {{ subtitle }}
+  </div>
+  <div class="content">
+    <img class="logo" />
+    <div class="pictures">
+      <img class="picture" *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" />
+    </div>
+    <div class="description">
+      {{ description }}
+    </div>
+    <div class="link">You can access this project here: {{ link }}</div>
+  </div>
+  <div class="footer">
+    <div class="techno">
+      <i *ngFor="let techno of technos; let i = index" [attr.data-index]="i" [attr.class]="techno"></i>
+      <i class="devicon-adonisjs-original"></i>
+    </div>
+  </div>
+</div>

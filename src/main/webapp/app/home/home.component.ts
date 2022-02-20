@@ -14,9 +14,25 @@ import { Account } from 'app/core/auth/account.model';
 export class HomeComponent implements OnInit, OnDestroy {
   account: Account | null = null;
 
+  public showApp = false;
+  public app = '';
   private readonly destroy$ = new Subject<void>();
 
   constructor(private accountService: AccountService, private router: Router) {}
+
+  setApp(app: string): void {
+    setTimeout(() => {
+      this.showApp = true;
+      this.app = app;
+    }, 1);
+  }
+
+  resetApp(): void {
+    if (this.showApp) {
+      this.showApp = false;
+      this.app = '';
+    }
+  }
 
   ngOnInit(): void {
     this.accountService
