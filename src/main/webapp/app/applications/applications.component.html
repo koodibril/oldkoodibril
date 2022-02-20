@@ -4,14 +4,14 @@
     {{ subtitle }}
   </div>
   <div class="content">
-    <img class="logo" />
+    <img class="logo" [src]="logo" />
     <div class="pictures">
       <img class="picture" *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" />
     </div>
     <div class="description">
       {{ description }}
     </div>
-    <div class="link">You can access this project here: {{ link }}</div>
+    <div class="link">You can access this project <a [href]="link">here</a></div>
   </div>
   <div class="footer">
     <div class="techno">

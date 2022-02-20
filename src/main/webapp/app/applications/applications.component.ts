@@ -20,13 +20,13 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
   account: Account | null = null;
 
   @Input() public show = false;
-  @Input() public app!: string;
-  public subtitle!: string;
-  public logo!: URL;
-  public pictures!: URL[];
-  public description!: string;
-  public link!: URL;
-  public technos!: string[];
+  @Input() public app = '';
+  public subtitle = '';
+  public logo = '';
+  public pictures = [''];
+  public description = '';
+  public link = '';
+  public technos = [''];
   private readonly destroy$ = new Subject<void>();
   constructor(private router: Router) {}
 
