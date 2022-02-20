@@ -20,25 +20,25 @@ export class textActions {
       { name: 'KOODIBRIL', description: 'A simple colibri app', available: true },
       { name: 'MIES HOUSE', description: 'A simple logistic app', available: false },
       { name: 'UBEBEST', description: 'A simple eco app', available: false },
+      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'GRAPHIT', description: 'A simple db app', available: true },
       { name: 'BABYLON', description: 'A simple fps app', available: true },
       { name: 'CAMAGRU', description: 'A simple instagram app', available: true },
+      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'WOODART', description: 'A simple wordpress', available: true },
       { name: 'MATCHA', description: 'A simple match app', available: true },
       { name: 'CLEAN-APP', description: 'A simple clean app', available: true },
+      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'HYPERTUBE', description: 'A simple youtube app', available: false },
       { name: 'MUSICROOM', description: 'A simple deezer app', available: false },
       { name: 'BALANCINGBANK', description: 'A simple bank app', available: false },
+      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: "UNIQU'AIR", description: 'A simple radio app', available: false },
       { name: 'RED-TETRIS', description: 'A simple tetris app', available: false },
       { name: 'LEMIN', description: 'A simple ant app', available: false },
+      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'COREWAR', description: 'A simple war app', available: false },
       { name: 'PUSH_SWAP', description: 'A simple stack app', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
-      { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'YOUR APP', description: 'COMMING SOON', available: false },
       { name: 'YOUR APP', description: 'COMMING SOON', available: false },
     ];
@@ -50,7 +50,7 @@ export class textActions {
     TopPlane.position = new Vector3(0.1, 3.6, 2.8);
     TopPlane.billboardMode = Mesh.BILLBOARDMODE_ALL;
 
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(TopPlane, 1000, 500);
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(TopPlane, 2000, 500);
 
     const textOnly = new TextBlock('textTop', this.applications[position].name);
     textOnly.isPointerBlocker = true;

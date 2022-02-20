@@ -8,6 +8,7 @@ import { LightsActions, Lights } from './actions/lights.service';
 import { AnimationsActions, Koodibril } from './actions/animations.service';
 import { GuiActions } from './actions/gui.service';
 import { textActions } from './actions/text.service';
+// import { CustomLoadingScreen } from './actions/screen.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
@@ -51,6 +52,8 @@ export class EngineService {
     this.move = false;
 
     this.engine = new Engine(this.canvas, true);
+    // const loadingScreen = new CustomLoadingScreen("I'm Loading !");
+    // this.engine.loadingScreen = loadingScreen;
     this.engine.displayLoadingUI();
 
     this.scene = new Scene(this.engine);
@@ -249,7 +252,6 @@ export class EngineService {
     if (this.position === 24) {
       this.position = 0;
     }
-    console.log(this.position);
     if (this.open && !this.animationsActions.loading) {
       this.reset();
     }
