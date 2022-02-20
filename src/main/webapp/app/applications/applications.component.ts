@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, Input, OnInit } from '@angular/core';
+import { Component, OnChanges, OnDestroy, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Account } from 'app/core/auth/account.model';
@@ -16,7 +16,7 @@ import { applications } from 'app/engine/actions/text.service';
     ]),
   ],
 })
-export class ApplicationsComponent implements OnChanges, OnInit, OnDestroy {
+export class ApplicationsComponent implements OnChanges, OnDestroy {
   account: Account | null = null;
 
   @Input() public show = false;
@@ -29,10 +29,6 @@ export class ApplicationsComponent implements OnChanges, OnInit, OnDestroy {
   public technos = [''];
   private readonly destroy$ = new Subject<void>();
   constructor(private router: Router) {}
-
-  ngOnInit(): void {
-    console.log('init');
-  }
 
   ngOnChanges(): void {
     const index = applications.findIndex(el => el.name === this.app);
