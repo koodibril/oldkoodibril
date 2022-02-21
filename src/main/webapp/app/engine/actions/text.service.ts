@@ -3,6 +3,7 @@ import { AdvancedDynamicTexture, TextBlock } from '@babylonjs/gui';
 import '@babylonjs/loaders/glTF';
 import { BehaviorSubject } from 'rxjs';
 import * as FontFaceObserver from 'fontfaceobserver';
+import { pannelInfo } from '../engine.component';
 
 export interface Application {
   name: string;
@@ -11,6 +12,7 @@ export interface Application {
   pictures: string[];
   description: string;
   link: string;
+  git: string;
   technos: string[];
 }
 
@@ -19,9 +21,15 @@ export const applications: Application[] = [
     name: 'KOODIBRIL',
     subtitle: 'A simple colibri app',
     logo: 'https://koodibril.com/colibri.png',
-    pictures: ['https://koodibril.com/colibri.png'],
+    pictures: [
+      'https://koodibril.com/colibri.png',
+      'https://koodibril.com/colibri.png',
+      'https://koodibril.com/colibri.png',
+      'https://koodibril.com/colibri.png',
+    ],
     description: 'This app has for purpoose to display my work in a fun way',
     link: 'https://koodibril.com',
+    git: 'https://github.com/koodibril/koodibril',
     technos: [
       'devicon-angularjs-plain colored',
       'devicon-devicon-plain colored',
@@ -37,6 +45,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -46,6 +55,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -55,6 +65,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -64,6 +75,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -73,6 +85,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -82,6 +95,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -91,6 +105,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -100,6 +115,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -109,6 +125,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -118,6 +135,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -127,6 +145,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -136,6 +155,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -145,6 +165,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -154,6 +175,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -163,6 +185,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -172,6 +195,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -181,6 +205,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -190,6 +215,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -199,6 +225,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -208,6 +235,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -217,6 +245,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -226,6 +255,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
   {
@@ -235,6 +265,7 @@ export const applications: Application[] = [
     pictures: [''],
     description: '',
     link: '',
+    git: '',
     technos: [],
   },
 ];
@@ -246,7 +277,7 @@ export class textActions {
   public bottomText!: Mesh;
   public applications: Application[];
 
-  public constructor(private scene: Scene, private canvas: HTMLCanvasElement, private appName: BehaviorSubject<string>) {
+  public constructor(private scene: Scene, private canvas: HTMLCanvasElement, private appName: BehaviorSubject<pannelInfo>) {
     this.applications = applications;
     // create textblocks to load fonts
     Promise.all([new FontFaceObserver('jungleRoar').load(), new FontFaceObserver('Tommy').load()]);
@@ -293,7 +324,7 @@ export class textActions {
     this.middleText = MiddlePlane;
   }
 
-  public generateBottomText(position: number): void {
+  public generateBottomText(position: number, sens: boolean): void {
     const BottomPlane = MeshBuilder.CreatePlane('plane2', { width: 2.8, height: 1 }, this.scene);
     BottomPlane.isPickable = true;
     BottomPlane.position = new Vector3(0, 1.98, 2.5);
@@ -313,7 +344,7 @@ export class textActions {
     textOnly.isHitTestVisible = true;
 
     textOnly.onPointerUpObservable.add(() => {
-      this.appName.next(this.applications[position].name);
+      this.appName.next({ app: this.applications[position].name, side: sens });
     });
     advancedTexture.addControl(textOnly);
     this.bottomText = BottomPlane;

@@ -9,12 +9,13 @@ import { AnimationsActions, Koodibril } from './actions/animations.service';
 import { GuiActions } from './actions/gui.service';
 import { textActions } from './actions/text.service';
 import { BehaviorSubject } from 'rxjs';
+import { pannelInfo } from './engine.component';
 // import { CustomLoadingScreen } from './actions/screen.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
   public loading: boolean;
-  public appName = new BehaviorSubject<string>('');
+  public appName = new BehaviorSubject<pannelInfo>({ app: '', side: false });
   // the canvas is where our scene is loaded
   private canvas!: HTMLCanvasElement;
   // the babylon engine
@@ -354,7 +355,7 @@ export class EngineService {
         this.textActions.generateMiddleText(this.position);
       }, 250);
       setTimeout(() => {
-        this.textActions.generateBottomText(this.position);
+        this.textActions.generateBottomText(this.position, flowerPos.x < 0);
         this.open = true;
         this.loading = false;
       }, 350);

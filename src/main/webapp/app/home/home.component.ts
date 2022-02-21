@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
+import { pannelInfo } from 'app/engine/engine.component';
 
 @Component({
   selector: 'jhi-home',
@@ -15,12 +16,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   account: Account | null = null;
 
   public showApp = false;
-  public app = '';
+  public app: pannelInfo = { app: '', side: false };
   private readonly destroy$ = new Subject<void>();
 
   constructor(private accountService: AccountService, private router: Router) {}
 
-  setApp(app: string): void {
+  setApp(app: pannelInfo): void {
     if (!this.showApp) {
       setTimeout(() => {
         this.showApp = true;
@@ -32,7 +33,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   resetApp(): void {
     if (this.showApp) {
       this.showApp = false;
-      this.app = '';
+      this.app = { app: '', side: false };
     }
   }
 

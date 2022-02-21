@@ -4,28 +4,34 @@ import { Subject } from 'rxjs';
 import { Account } from 'app/core/auth/account.model';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Application, applications } from 'app/engine/actions/text.service';
+import { pannelInfo } from 'app/engine/engine.component';
 
 @Component({
   selector: 'jhi-applications',
   templateUrl: './applications.component.html',
   styleUrls: ['./applications.component.scss'],
   animations: [
-    trigger('slideInOut', [
+    trigger('slideInOutRight', [
       transition(':enter', [style({ transform: 'translateX(100%)' }), animate('200ms ease-in', style({ transform: 'translateX(0%)' }))]),
       transition(':leave', [animate('200ms ease-in', style({ transform: 'translateX(100%)' }))]),
+    ]),
+    trigger('slideInOutLeft', [
+      transition(':enter', [style({ transform: 'translateX(-100%)' }), animate('200ms ease-in', style({ transform: 'translateX(0%)' }))]),
+      transition(':leave', [animate('200ms ease-in', style({ transform: 'translateX(-100%)' }))]),
     ]),
   ],
 })
 export class ApplicationsComponent implements OnChanges, OnDestroy {
   account: Account | null = null;
 
-  @Input() public show = true;
-  @Input() public app = 'KOODIBRIL';
+  @Input() public show = false;
+  @Input() public app: pannelInfo = { app: '', side: false };
   public subtitle = '';
   public logo = '';
   public pictures = [''];
   public description = '';
   public link = '';
+  public git = '';
   public technos = [''];
   private applications: Application[];
   private readonly destroy$ = new Subject<void>();
@@ -34,13 +40,14 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(): void {
-    if (this.app !== '') {
-      const index = applications.findIndex(el => el.name === this.app);
+    if (this.app.app !== '') {
+      const index = applications.findIndex(el => el.name === this.app.app);
       this.subtitle = applications[index].subtitle;
       this.logo = applications[index].logo;
       this.pictures = applications[index].pictures;
       this.description = applications[index].description;
       this.link = applications[index].link;
+      this.git = applications[index].git;
       this.technos = applications[index].technos;
     }
   }

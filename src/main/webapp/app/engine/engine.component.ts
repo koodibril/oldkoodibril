@@ -1,6 +1,11 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from '@angular/core';
 import { EngineService } from './engine.service';
 
+export interface pannelInfo {
+  app: string;
+  side: boolean;
+}
+
 @Component({
   selector: 'jhi-app-engine',
   templateUrl: './engine.component.html',
@@ -8,7 +13,7 @@ import { EngineService } from './engine.service';
 })
 export class EngineComponent implements OnInit, OnChanges {
   @Input() public show = false;
-  @Output() newEvent = new EventEmitter<string>();
+  @Output() newEvent = new EventEmitter<pannelInfo>();
   @ViewChild('rendererCanvas', { static: true })
   public rendererCanvas!: ElementRef<HTMLCanvasElement>;
 

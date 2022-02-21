@@ -1,24 +1,53 @@
-<div *ngIf="show" [@slideInOut] class="wrapper">
-  <div class="title row justify-content-center">
-    <img class="logo" [src]="logo" />
-    {{ app }}
-  </div>
-  <div class="subtitle row justify-content-center">
-    {{ subtitle }}
+<div *ngIf="show && app.side" [@slideInOutRight] class="wrapper">
+  <div>
+    <div class="title row justify-content-center">
+      <img class="logo" [src]="logo" />
+      {{ app.app }}
+    </div>
+    <div class="subtitle row justify-content-center">
+      {{ subtitle }}
+    </div>
   </div>
   <div class="content">
-    <div class="pictures">
-      <img class="picture" *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" />
+    <div class="pictures row justify-content-center">
+      <img *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" [attr.src]="picture" class="picture" />
     </div>
     <div class="description">
       {{ description }}
     </div>
-    <div class="link">You can access this project <a [href]="link">here</a></div>
+    <div class="link">You can access a live demo <a [href]="link">here</a></div>
+    <div *ngIf="git !== ''" class="linkbis">This project is open-source, you can find it on <a [href]="git">Github</a></div>
   </div>
   <div class="footer">
-    <div class="techno">
-      <i *ngFor="let techno of technos; let i = index" [attr.data-index]="i" [attr.class]="techno"></i>
-      <i class="devicon-adonisjs-original"></i>
+    <div class="technos row">
+      <i *ngFor="let techno of technos; let i = index" [attr.data-index]="i" [attr.class]="techno + ' tech'" class="tech"></i>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="show && !app.side" [@slideInOutLeft] class="wrapper left">
+  <div>
+    <div class="title row justify-content-center">
+      <img class="logo" [src]="logo" />
+      {{ app.app }}
+    </div>
+    <div class="subtitle row justify-content-center">
+      {{ subtitle }}
+    </div>
+  </div>
+  <div class="content">
+    <div class="pictures row justify-content-center">
+      <img *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" [attr.src]="picture" class="picture" />
+    </div>
+    <div class="description">
+      {{ description }}
+    </div>
+    <div class="link">You can access a live demo <a [href]="link">here</a></div>
+    <div *ngIf="git !== ''" class="linkbis">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+  </div>
+  <div class="footer">
+    <div class="technos row">
+      <i *ngFor="let techno of technos; let i = index" [attr.data-index]="i" [attr.class]="techno + ' tech'" class="tech"></i>
     </div>
   </div>
 </div>
