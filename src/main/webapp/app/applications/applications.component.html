@@ -1,5 +1,5 @@
 <div *ngIf="show && app.side" [@slideInOutRight] class="wrapper">
-  <div>
+  <div class="title-wrapper">
     <div class="title row justify-content-center">
       <img class="logo" [src]="logo" />
       {{ app.app }}
@@ -15,8 +15,10 @@
     <div class="description">
       {{ description }}
     </div>
-    <div class="link">You can access a live demo <a [href]="link">here</a></div>
-    <div *ngIf="git !== ''" class="linkbis">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+    <div class="links">
+      <div class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="git !== ''" class="link">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+    </div>
   </div>
   <div class="footer">
     <div class="technos row">
@@ -26,7 +28,7 @@
 </div>
 
 <div *ngIf="show && !app.side" [@slideInOutLeft] class="wrapper left">
-  <div>
+  <div class="title-wrapper">
     <div class="title row justify-content-center">
       <img class="logo" [src]="logo" />
       {{ app.app }}
@@ -42,8 +44,10 @@
     <div class="description">
       {{ description }}
     </div>
-    <div class="link">You can access a live demo <a [href]="link">here</a></div>
-    <div *ngIf="git !== ''" class="linkbis">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+    <div class="links">
+      <div class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="git !== ''" class="link">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+    </div>
   </div>
   <div class="footer">
     <div class="technos row">
