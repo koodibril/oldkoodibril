@@ -21,10 +21,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(private accountService: AccountService, private router: Router) {}
 
   setApp(app: string): void {
-    setTimeout(() => {
-      this.showApp = true;
-      this.app = app;
-    }, 1);
+    if (!this.showApp) {
+      setTimeout(() => {
+        this.showApp = true;
+        this.app = app;
+      }, 1);
+    }
   }
 
   resetApp(): void {

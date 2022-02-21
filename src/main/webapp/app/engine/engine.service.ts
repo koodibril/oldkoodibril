@@ -128,7 +128,6 @@ export class EngineService {
 
       // observable for scroll, click and doubleclick
       this.scene.onPointerObservable.add(pointerInfo => {
-        console.log(this.move, this.loading);
         switch (pointerInfo.type) {
           case PointerEventTypes.POINTERMOVE:
             break;
