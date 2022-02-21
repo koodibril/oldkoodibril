@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Account } from 'app/core/auth/account.model';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { applications } from 'app/engine/actions/text.service';
+import { Application, applications } from 'app/engine/actions/text.service';
 
 @Component({
   selector: 'jhi-applications',
@@ -19,25 +19,30 @@ import { applications } from 'app/engine/actions/text.service';
 export class ApplicationsComponent implements OnChanges, OnDestroy {
   account: Account | null = null;
 
-  @Input() public show = false;
-  @Input() public app = '';
+  @Input() public show = true;
+  @Input() public app = 'KOODIBRIL';
   public subtitle = '';
   public logo = '';
   public pictures = [''];
   public description = '';
   public link = '';
   public technos = [''];
+  private applications: Application[];
   private readonly destroy$ = new Subject<void>();
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    this.applications = applications;
+  }
 
   ngOnChanges(): void {
-    const index = applications.findIndex(el => el.name === this.app);
-    this.subtitle = applications[index].subtitle;
-    this.logo = applications[index].logo;
-    this.pictures = applications[index].pictures;
-    this.description = applications[index].description;
-    this.link = applications[index].link;
-    this.technos = applications[index].technos;
+    if (this.app !== '') {
+      const index = applications.findIndex(el => el.name === this.app);
+      this.subtitle = applications[index].subtitle;
+      this.logo = applications[index].logo;
+      this.pictures = applications[index].pictures;
+      this.description = applications[index].description;
+      this.link = applications[index].link;
+      this.technos = applications[index].technos;
+    }
   }
 
   login(): void {

@@ -1,10 +1,12 @@
 <div *ngIf="show" [@slideInOut] class="wrapper">
-  <div class="title">
+  <div class="title row justify-content-center">
+    <img class="logo" [src]="logo" />
     {{ app }}
+  </div>
+  <div class="subtitle row justify-content-center">
     {{ subtitle }}
   </div>
   <div class="content">
-    <img class="logo" [src]="logo" />
     <div class="pictures">
       <img class="picture" *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" />
     </div>

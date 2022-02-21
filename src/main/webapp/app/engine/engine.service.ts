@@ -45,8 +45,11 @@ export class EngineService {
   private guiAction!: GuiActions;
   private textActions!: textActions;
   private position!: number;
+  private loading: boolean;
 
-  public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {}
+  public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {
+    this.loading = false;
+  }
 
   // instantiate everything in the scene, take canvas for rendering
   public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
@@ -134,10 +137,9 @@ export class EngineService {
           case PointerEventTypes.POINTERTAP:
             break;
           case PointerEventTypes.POINTERDOUBLETAP:
-            if (!this.move && !this.animationsActions.loading) {
+            if (!this.move && !this.loading) {
               if (this.open) {
                 this.opener(0, 0);
-                this.reset();
               } else {
                 this.opener(this.forest.flowers.front.meshe.position.x, this.forest.flowers.front.meshe.position.y);
               }
@@ -175,35 +177,28 @@ export class EngineService {
 
   // reset the position of the colibri at the center of the screen
   public reset(): void {
-    if (!this.animationsActions.loading) {
-      this.koodibril.lastFly.stop();
-      this.koodibril.lastFly.onAnimationEndObservable.clear();
-      if (this.open) {
-        this.animationsActions.retract_fast_flower();
-        this.animationsActions.retract_tree();
-        this.animationsActions.retract_bush();
-        this.animationsActions.retract_pannel();
-        setTimeout(() => {
-          this.textActions.bottomText.dispose();
-        }, 100);
-        setTimeout(() => {
-          this.textActions.middleText.dispose();
-        }, 200);
-        setTimeout(() => {
-          this.textActions.topText.dispose();
-        }, 300);
-        this.open = false;
-      }
-      this.koodibril.animation[1].stop();
-      this.koodibril.animation[0].start(true, 10);
-      this.animationsActions.slideObject(
-        this.koodibril.mesh,
-        this.koodibril.mesh.position,
-        new Vector3(0, 2, this.koodibril.mesh.position.z),
-        2
-      );
-      this.animationsActions.fly();
+    this.koodibril.lastFly.stop();
+    this.koodibril.lastFly.onAnimationEndObservable.clear();
+    if (this.open) {
+      this.animationsActions.retract_fast_flower();
+      this.animationsActions.retract_tree();
+      this.animationsActions.retract_bush();
+      this.animationsActions.retract_pannel();
+      this.textActions.bottomText.dispose();
+      this.textActions.middleText.dispose();
+      this.textActions.topText.dispose();
+      this.open = false;
     }
+    this.koodibril.animation[1].stop();
+    this.koodibril.animation[0].start(true, 10);
+    this.animationsActions.slideObject(
+      this.koodibril.mesh,
+      this.koodibril.mesh.position,
+      new Vector3(0, 2, this.koodibril.mesh.position.z),
+      2
+    );
+    this.animationsActions.fly();
+    this.loading = false;
   }
 
   // not used anymore, allow the colibri to follow the cursor,
@@ -340,14 +335,13 @@ export class EngineService {
   // fonction that check if the flower can open (position of the colibri vs position of the flower)
   // will start all the animations relative to
   public opener(x: number, y: number): void {
+    this.loading = true;
     const flowerPos = this.forest.flowers.front.meshe.position;
     const xOffsetr = flowerPos.x < 0 ? 0.5 : 0.1;
     const xOffsetl = flowerPos.x < 0 ? 0.1 : 0.5;
     if (flowerPos.x >= x - xOffsetr && flowerPos.x <= x + xOffsetl && flowerPos.y >= y - 0.5 && flowerPos.y <= y + 1 && !this.open) {
       this.koodibril.lastFly.stop();
       this.koodibril.lastFly.onAnimationEndObservable.clear();
-      this.open = true;
-      this.animationsActions.loading = true;
       this.animationsActions.goToFlower();
       this.animationsActions.deploy_flower();
       this.animationsActions.deploy_bush();
@@ -361,25 +355,13 @@ export class EngineService {
       }, 250);
       setTimeout(() => {
         this.textActions.generateBottomText(this.position);
+        this.open = true;
+        this.loading = false;
       }, 350);
     } else if (
       (flowerPos.x <= x - xOffsetr || flowerPos.x >= x + xOffsetl || flowerPos.y <= y - 0.5 || flowerPos.y >= y + 1) &&
       this.open
     ) {
-      this.animationsActions.retract_flower();
-      this.animationsActions.retract_tree();
-      this.animationsActions.retract_bush();
-      this.animationsActions.retract_pannel();
-      setTimeout(() => {
-        this.textActions.bottomText.dispose();
-      }, 100);
-      setTimeout(() => {
-        this.textActions.middleText.dispose();
-      }, 200);
-      setTimeout(() => {
-        this.textActions.topText.dispose();
-      }, 300);
-      this.open = false;
       this.reset();
     }
   }

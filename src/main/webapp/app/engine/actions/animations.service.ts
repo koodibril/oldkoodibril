@@ -245,6 +245,7 @@ export class AnimationsActions {
     // this.forest.flowers.front.animations[5].start(false, 0.5);
     // this.forest.flowers.front.animations[3].start(false, 2);
     // this.forest.flowers.front.animations[0].start(false, 0.5);
+    this.forest.flowers.front.animations[0].start(false, 1);
   }
 
   // stop all tree animation

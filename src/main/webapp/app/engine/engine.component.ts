@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from '@angular/core';
 import { EngineService } from './engine.service';
 
 @Component({
@@ -6,14 +6,14 @@ import { EngineService } from './engine.service';
   templateUrl: './engine.component.html',
   styleUrls: ['./engine.component.scss'],
 })
-export class EngineComponent implements OnInit {
+export class EngineComponent implements OnInit, OnChanges {
+  @Input() public show = false;
   @Output() newEvent = new EventEmitter<string>();
   @ViewChild('rendererCanvas', { static: true })
   public rendererCanvas!: ElementRef<HTMLCanvasElement>;
 
   public constructor(private engServ: EngineService) {
     engServ.appName.subscribe(value => {
-      console.log(value);
       this.newEvent.emit(value);
     });
   }
@@ -21,5 +21,11 @@ export class EngineComponent implements OnInit {
   public ngOnInit(): void {
     this.engServ.createScene(this.rendererCanvas);
     this.engServ.animate();
+  }
+
+  public ngOnChanges(): void {
+    if (!this.show) {
+      this.engServ.reset();
+    }
   }
 }

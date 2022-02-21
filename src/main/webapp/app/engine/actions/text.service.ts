@@ -299,14 +299,14 @@ export class textActions {
     BottomPlane.position = new Vector3(0, 1.98, 2.5);
     BottomPlane.billboardMode = Mesh.BILLBOARDMODE_ALL;
 
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(BottomPlane, 2000, 1000);
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(BottomPlane, 2800, 1000);
 
     const textOnly = new TextBlock('textBot', 'More information');
     textOnly.isPointerBlocker = true;
     textOnly.width = 2.8;
     textOnly.height = 1;
     textOnly.color = 'white';
-    textOnly.fontSize = 140;
+    textOnly.fontSize = 200;
     textOnly.fontFamily = 'Tommy';
     textOnly.hoverCursor = 'pointer';
 
