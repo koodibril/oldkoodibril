@@ -182,6 +182,7 @@ export class ForestActions {
     pannel.animations[0].goToFrame(0);
     pannel.animations[0].stop();
     pannel.animations[1].start(false, 10.0);
+    pannel.color = pannelImport.rootNodes[0].getChildMeshes();
     pannel.meshe.name = 'pannel';
     this.forest.pannel = pannel;
   }
