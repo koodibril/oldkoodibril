@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
+  public loading: boolean;
   public appName = new BehaviorSubject<string>('');
   // the canvas is where our scene is loaded
   private canvas!: HTMLCanvasElement;
@@ -45,7 +46,6 @@ export class EngineService {
   private guiAction!: GuiActions;
   private textActions!: textActions;
   private position!: number;
-  private loading: boolean;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {
     this.loading = false;
@@ -128,6 +128,7 @@ export class EngineService {
 
       // observable for scroll, click and doubleclick
       this.scene.onPointerObservable.add(pointerInfo => {
+        console.log(this.move, this.loading);
         switch (pointerInfo.type) {
           case PointerEventTypes.POINTERMOVE:
             break;

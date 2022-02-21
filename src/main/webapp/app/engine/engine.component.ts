@@ -24,7 +24,7 @@ export class EngineComponent implements OnInit, OnChanges {
   }
 
   public ngOnChanges(): void {
-    if (!this.show) {
+    if (!this.show && !this.engServ.loading) {
       this.engServ.reset();
     }
   }
