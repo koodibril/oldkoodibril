@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, Input } from '@angular/core';
+import { Component, OnChanges, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Account } from 'app/core/auth/account.model';
@@ -26,6 +26,7 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
 
   @Input() public show = false;
   @Input() public app: pannelInfo = { app: '', side: false };
+  @Output() newEvent = new EventEmitter<boolean>();
   public subtitle = '';
   public logo = '';
   public pictures = [''];
@@ -51,7 +52,6 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
       this.link = applications[index].link;
       this.git = applications[index].git;
       this.technos = applications[index].technos;
-      console.log(this.pictures);
     }
   }
 
@@ -59,8 +59,13 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
     this.router.navigate(['/login']);
   }
 
+  reset(): void {
+    this.show = false;
+    this.app.app = '';
+    this.newEvent.emit(false);
+  }
+
   setModal(img: string): void {
-    console.log(img);
     this.showModal = true;
     this.image = img;
   }

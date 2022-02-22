@@ -15,6 +15,9 @@
 .left {
   left: 0;
 }
+.close {
+  display: none;
+}
 .modalImage {
   position: fixed;
   top: 0;
@@ -83,4 +86,23 @@
 }
 .nopic {
   padding-top: 20%;
+}
+@media screen and (max-width: 500px) {
+  .wrapper {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+  .tech {
+    font-size: 70px;
+  }
+  .close {
+    display: inline-block;
+    position: fixed;
+    width: 50px;
+    fill: 'black';
+    height: 50px;
+    z-index: 6;
+    top: 0;
+    right: 0;
+  }
 }
