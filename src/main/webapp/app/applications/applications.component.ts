@@ -33,6 +33,8 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
   public link = '';
   public git = '';
   public technos = [''];
+  public image = '';
+  public showModal = false;
   private applications: Application[];
   private readonly destroy$ = new Subject<void>();
   constructor(private router: Router) {
@@ -54,6 +56,17 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
 
   login(): void {
     this.router.navigate(['/login']);
+  }
+
+  setModal(img: string): void {
+    console.log(img);
+    this.showModal = true;
+    this.image = img;
+  }
+
+  clearModal(): void {
+    this.showModal = false;
+    this.image = '';
   }
 
   ngOnDestroy(): void {

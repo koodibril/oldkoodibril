@@ -10,7 +10,13 @@
   </div>
   <div class="content">
     <div class="pictures row justify-content-center">
-      <img *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" [attr.src]="picture" class="picture" />
+      <img
+        *ngFor="let picture of pictures; let i = index"
+        (click)="setModal(picture)"
+        [attr.data-index]="i"
+        [attr.src]="picture"
+        class="picture"
+      />
     </div>
     <div class="description">
       {{ description }}
@@ -39,7 +45,13 @@
   </div>
   <div class="content">
     <div class="pictures row justify-content-center">
-      <img *ngFor="let picture of pictures; let i = index" [attr.data-index]="i" [attr.src]="picture" class="picture" />
+      <img
+        *ngFor="let picture of pictures; let i = index"
+        (click)="setModal(picture)"
+        [attr.data-index]="i"
+        [attr.src]="picture"
+        class="picture"
+      />
     </div>
     <div class="description">
       {{ description }}
@@ -54,4 +66,8 @@
       <i *ngFor="let techno of technos; let i = index" [attr.data-index]="i" [attr.class]="techno + ' tech'" class="tech"></i>
     </div>
   </div>
+</div>
+
+<div *ngIf="showModal && image !== ''" class="modalImage" (click)="clearModal()">
+  <img class="imgModal" [attr.src]="image" />
 </div>
