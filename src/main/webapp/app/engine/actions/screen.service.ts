@@ -174,14 +174,14 @@ export class CustomLoadingScreen implements ILoadingScreen {
     this._loadingDiv!.removeChild(this.imgBack);
     this._loadingDiv!.removeChild(this.imageSpinnerContainer);
     const test = document.createElement('button');
-    test.innerHTML = 'I get it! (click me)';
+    test.innerHTML = '(click me)';
     test.style.height = '150px';
     test.style.width = '150px';
     test.style.fontFamily = 'Tommy';
     test.style.fontSize = '25px';
     test.style.color = 'white';
     test.style.backgroundColor = 'black';
-    test.style.border = '2px solid white';
+    test.style.border = 'none';
     test.style.borderRadius = '75px';
     test.style.gridColumn = '1';
     test.style.gridRow = '1';
@@ -193,7 +193,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     test.onclick = this.test;
 
     const subleft = document.createElement('div');
-    subleft.innerHTML = 'Double tap to select a project';
+    subleft.innerHTML = 'Double tap<br>to select a project';
     subleft.style.gridColumn = '1';
     subleft.style.gridRow = '1';
     subleft.style.top = '35%';
@@ -203,6 +203,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     subleft.style.fontFamily = 'Tommy';
     subleft.style.fontSize = '25px';
     subleft.style.color = 'white';
+    subleft.style.textAlign = 'center';
     const imgleft = new Image();
     imgleft.src = '../../content/images/DoubleTap.svg';
     imgleft.style.width = '150px';
@@ -215,7 +216,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     imgleft.style.position = 'absolute';
 
     const subright = document.createElement('div');
-    subright.innerHTML = 'Scroll to change project';
+    subright.innerHTML = 'Scroll<br>to change project';
     subright.style.gridColumn = '1';
     subright.style.gridRow = '1';
     subright.style.top = '90%';
@@ -225,6 +226,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     subright.style.fontFamily = 'Tommy';
     subright.style.fontSize = '25px';
     subright.style.color = 'white';
+    subright.style.textAlign = 'center';
     const imgright = new Image();
     imgright.src = '../../content/images/Scroll-Vertical.svg';
     imgright.style.width = '150px';

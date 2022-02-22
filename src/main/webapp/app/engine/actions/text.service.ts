@@ -29,9 +29,10 @@ export const applications: Application[] = [
     ],
     // description: "This app has for purpoose to display my work in a fun way",
     description:
-      "Portfolio sous babylonjs, une librairie js travaillant avec webGl, qui permet l'utilisation \
+      "Portfolio sous babylonjs, une librairie travaillant avec webGl, qui permet l'utilisation \
       de l'acceleration graphique pour le rendu d'une page web. Dans ce projet, j'ai egalement realiser \
-      l'integralite des modeles 3D sous blender, ainsi que leurs animations.",
+      l'integralite des modeles 3D sous blender, ainsi que leurs animations. La generation de la foret \
+      est effectuer de maniere aleatoire a chaque generation de rangs. Il existe exactement ",
     link: 'https://koodibril.com',
     git: 'https://github.com/koodibril/koodibril',
     technos: [

@@ -365,7 +365,7 @@ export class EngineService {
         this.textActions.generateMiddleText(this.position);
       }, 250);
       setTimeout(() => {
-        this.textActions.generateBottomText(this.position, flowerPos.x < 0);
+        this.textActions.generateBottomText(this.position, flowerPos.x + (flowerPos.x < 0 ? 0.5 : -0.5) < 0);
         this.open = true;
         this.loading = false;
       }, 350);
