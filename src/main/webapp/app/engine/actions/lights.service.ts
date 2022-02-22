@@ -28,6 +28,7 @@ export interface Lights {
 export class LightsActions {
   // store all lights
   public lights!: Lights;
+  public stars!: Mesh[];
   // set the hour of the day on 24
   private hour!: number;
   private firefly!: boolean;
@@ -54,6 +55,23 @@ export class LightsActions {
     this.hour = 0;
     this.firefly = false;
     this.particles = [];
+    this.stars = [];
+    this.instantiateStars();
+  }
+
+  public instantiateStars(): void {
+    for (let i = 0; i < 200; i++) {
+      const light = new SpotLight('starLight', Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 10, this.scene);
+      const whiteMat = new StandardMaterial('whiteMat', this.scene);
+      whiteMat.emissiveColor = new Color3(1, 1, 1);
+      light.intensity = 1;
+      const starMesh = MeshBuilder.CreateIcoSphere('starMesh', { radius: (Math.floor(Math.random() * (10 - 1 + 1)) + 1) / 100 });
+      starMesh.material = whiteMat;
+      light.parent = starMesh;
+      starMesh.position = new Vector3(Math.floor(Math.random() * (40 - -40 + 1)) + -40, Math.floor(Math.random() * (20 - 1 + 1)) + 1, 50);
+      starMesh.applyFog = false;
+      this.stars.push(starMesh);
+    }
   }
 
   // function that will move the sun/moon
@@ -131,8 +149,8 @@ export class LightsActions {
     } else if (this.hour === 6) {
       this.sunset();
     } else {
-      this.scene.fogColor = new Color3(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity);
-      this.scene.clearColor = new Color4(0.9 * luminosity, 0.9 * luminosity, 0.85 * luminosity, 1);
+      this.scene.fogColor = new Color3(1 * luminosity, 1 * luminosity, 1 * luminosity);
+      this.scene.clearColor = new Color4(1 * luminosity, 1 * luminosity, 1 * luminosity, 1);
     }
     this.lights.ambiant.intensity = 1 * luminosity;
     this.lights.groundLight.mainColor = new Color3(1 * luminosity, 1 * luminosity, 1 * luminosity);

@@ -51,6 +51,7 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
       this.link = applications[index].link;
       this.git = applications[index].git;
       this.technos = applications[index].technos;
+      console.log(this.pictures);
     }
   }
 

@@ -57,6 +57,9 @@
 .picture {
   height: 45%;
 }
+.picture:hover {
+  cursor: pointer;
+}
 .description {
   height: 30%;
   -ms-overflow-style: none; /* IE and Edge */
@@ -67,7 +70,7 @@
   display: none;
 }
 .links {
-  padding-top: 10px;
+  padding-top: 20px;
   height: 10%;
 }
 .technos {
@@ -76,5 +79,8 @@
   justify-content: space-around;
 }
 .tech {
-  font-size: 50px;
+  font-size: 100px;
+}
+.nopic {
+  padding-top: 20%;
 }

@@ -22,7 +22,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(private accountService: AccountService, private router: Router) {}
 
   setApp(app: pannelInfo): void {
-    if (!this.showApp) {
+    if (this.showApp && app.app === 'wheel') {
+      this.resetApp();
+    } else if (!this.showApp && app.app !== 'wheel') {
       setTimeout(() => {
         this.showApp = true;
         this.app = app;

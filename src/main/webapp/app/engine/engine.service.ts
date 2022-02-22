@@ -250,6 +250,7 @@ export class EngineService {
   // function that will add an animation to all mesh of the forest
   // sliding them frontward, or backward
   public wheel(event: any): void {
+    this.appName.next({ app: 'wheel', side: false });
     const delta = Math.sign(event.deltaY);
     if (delta === 1) {
       this.position = this.position === 0 ? 23 : this.position - 1;

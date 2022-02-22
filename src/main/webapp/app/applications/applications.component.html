@@ -17,13 +17,16 @@
         [attr.src]="picture"
         class="picture"
       />
+      <div *ngIf="pictures.length === 0" class="nopic">No pictures are available.</div>
     </div>
     <div class="description">
       {{ description }}
     </div>
     <div class="links">
-      <div class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="link !== ''" class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="link === ''" class="link">No demo is actually available.</div>
       <div *ngIf="git !== ''" class="link">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+      <div *ngIf="git === ''" class="link">This project is private, no repository is available.</div>
     </div>
   </div>
   <div class="footer">
@@ -57,8 +60,10 @@
       {{ description }}
     </div>
     <div class="links">
-      <div class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="link !== ''" class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="link === ''" class="link">No demo is actually available.</div>
       <div *ngIf="git !== ''" class="link">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+      <div *ngIf="git === ''" class="link">This project is private, no repository is available.</div>
     </div>
   </div>
   <div class="footer">
