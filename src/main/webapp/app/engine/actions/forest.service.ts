@@ -1,5 +1,6 @@
 import { Scene, SceneLoader, Vector3, AbstractMesh, AnimationGroup, AssetContainer } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
+import { BehaviorSubject } from 'rxjs';
 
 export interface Flower {
   animations: AnimationGroup[];
@@ -65,7 +66,7 @@ export class ForestActions {
   // store the pannel.glb for fast loading
   private pannel!: AssetContainer;
 
-  public constructor(private scene: Scene) {}
+  public constructor(private scene: Scene, private loadingState: BehaviorSubject<string>) {}
 
   // instantiate the forest object before filling it
   public async instantiateForest(): Promise<void> {
@@ -93,17 +94,21 @@ export class ForestActions {
 
   // import all forest.glb and store them for fast loading
   public async importforest(): Promise<void> {
+    this.loadingState.next('Loading flowers');
     this.flower = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/', 'flower.glb', this.scene);
+    this.loadingState.next('Loading pannel');
     this.pannel = await SceneLoader.LoadAssetContainerAsync('../../content/assets/models/', 'pannel.glb', this.scene);
     this.trees = [];
     this.bushes = [];
     for (let i = 1; i < 10; i++) {
+      this.loadingState.next('Loading tree ' + i.toString() + '/9');
       this.trees[i] = await SceneLoader.LoadAssetContainerAsync(
         '../../content/assets/models/forestv2/tree/',
         'tree' + i.toString() + 'v2.glb',
         this.scene
       );
       if (i < 5) {
+        this.loadingState.next('Loading bush ' + i.toString() + '/4');
         this.bushes[i] = await SceneLoader.LoadAssetContainerAsync(
           '../../content/assets/models/forestv2/bush/',
           'bush' + i.toString() + 'v2.glb',

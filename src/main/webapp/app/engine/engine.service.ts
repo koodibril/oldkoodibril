@@ -10,12 +10,13 @@ import { GuiActions } from './actions/gui.service';
 import { textActions } from './actions/text.service';
 import { BehaviorSubject } from 'rxjs';
 import { pannelInfo } from './engine.component';
-// import { CustomLoadingScreen } from './actions/screen.service';
+import { CustomLoadingScreen } from './actions/screen.service';
 
 @Injectable({ providedIn: 'root' })
 export class EngineService {
   public loading: boolean;
   public appName = new BehaviorSubject<pannelInfo>({ app: '', side: false });
+  public loadingState = new BehaviorSubject<string>('h');
   // the canvas is where our scene is loaded
   private canvas!: HTMLCanvasElement;
   // the babylon engine
@@ -58,10 +59,14 @@ export class EngineService {
     this.move = false;
 
     this.engine = new Engine(this.canvas, true);
-    // const loadingScreen = new CustomLoadingScreen("I'm Loading !");
-    // this.engine.loadingScreen = loadingScreen;
+    const loadingScreen = new CustomLoadingScreen(this.canvas);
+    this.engine.loadingScreen = loadingScreen;
     this.engine.displayLoadingUI();
+    this.loadingState.subscribe(value => {
+      this.engine.loadingUIText = value;
+    });
 
+    this.loadingState.next('Creating scene');
     this.scene = new Scene(this.engine);
     this.scene.clearColor = new Color4(1, 1, 1, 1); // set the color of the void
     this.scene.ambientColor = new Color3(1, 1, 1); // set the ambiant color, don't seem to affect object
@@ -77,6 +82,7 @@ export class EngineService {
     this.lightsAction.instantiateLights();
     this.lights = this.lightsAction.lights;
 
+    this.loadingState.next('Creating ground');
     const ground = MeshBuilder.CreateGround('ground', { width: 300, height: 300 });
     this.lights.groundLight = new GridMaterial('groundMat', this.scene);
     this.lights.groundLight.majorUnitFrequency = 20;
@@ -87,10 +93,12 @@ export class EngineService {
     ground.material.backFaceCulling = false;
     ground.checkCollisions = true;
 
-    this.forestActions = new ForestActions(this.scene);
+    this.loadingState.next('Creating Forest');
+    this.forestActions = new ForestActions(this.scene, this.loadingState);
     await this.forestActions.instantiateForest();
     this.forest = this.forestActions.forest;
 
+    this.loadingState.next('Loading animations');
     this.animationsActions = new AnimationsActions(this.scene, this.forest);
     await this.animationsActions.initiateAnimation();
     this.koodibril = this.animationsActions.koodibril;
@@ -109,7 +117,8 @@ export class EngineService {
     this.timeout = false;
     this.open = false;
     this.position = 0;
-    this.engine.hideLoadingUI();
+    this.loadingState.next('');
+    this.engine.loadingUIBackgroundColor = 'rgb(1, 1, 1, 0.7)';
   }
 
   // class that is called outside of the rendering for listeners
