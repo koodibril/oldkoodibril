@@ -256,20 +256,20 @@ export class CustomLoadingScreen implements ILoadingScreen {
     imgright.style.transform = 'translate(-50%, -75%)';
     imgright.style.position = 'absolute';
 
-    if (mobile) {
-      // for now mobile isn't supported, let's say that.
-      subright.style.top = '50%';
-      subright.style.transform = 'translate(-50%, -50%)';
-      subright.style.fontSize = '25px';
-      subright.innerHTML = 'Mobile are not supported yet.<br>Please, visit on desktop for <br> a full portfolio';
-      this._loadingDiv?.appendChild(subright);
-    } else {
-      this._loadingDiv?.appendChild(test);
-      this._loadingDiv?.appendChild(imgleft);
-      this._loadingDiv?.appendChild(subleft);
-      this._loadingDiv?.appendChild(imgright);
-      this._loadingDiv?.appendChild(subright);
-    }
+    // if (mobile) {
+    //   // for now mobile isn't supported, let's say that.
+    //   subright.style.top = '50%';
+    //   subright.style.transform = 'translate(-50%, -50%)';
+    //   subright.style.fontSize = '25px';
+    //   subright.innerHTML = 'Mobile are not supported yet.<br>Please, visit on desktop for <br> a full portfolio';
+    //   this._loadingDiv?.appendChild(subright);
+    // } else {
+    this._loadingDiv?.appendChild(test);
+    this._loadingDiv?.appendChild(imgleft);
+    this._loadingDiv?.appendChild(subleft);
+    this._loadingDiv?.appendChild(imgright);
+    this._loadingDiv?.appendChild(subright);
+    // }
   }
 
   /**
