@@ -16,7 +16,7 @@ jobs:
           cd ~/build/koodibril
           git checkout staging
           git pull
-          ./mvnw -Pprod -T 4C verify jib:dockerBuild
+          ./mvnw -Pprod -DskipTests -T 4C verify jib:dockerBuild
       - name: Deploy
         run: |
           cd ~/websites/staging
