@@ -167,6 +167,8 @@ export class CustomLoadingScreen implements ILoadingScreen {
 
   public test(): void {
     const div = document.getElementById('babylonjsLoadingDiv');
+    const canvas = document.getElementById('renderCanvas');
+    canvas?.requestFullscreen();
     div?.parentElement?.removeChild(div);
   }
 
