@@ -116,7 +116,6 @@ export class EngineService {
     ) {
       this.device = 2;
       // this.camera.position = new Vector3(0, 4, -7);
-      screen.orientation.lock('landscape');
     } else {
       this.device = 1;
     }
@@ -228,13 +227,6 @@ export class EngineService {
         } else if (currentY < this.touchY && currentY - this.touchY < -50) {
           test.deltaY = 1;
           this.wheel(test);
-        }
-      });
-
-      this.canvas.addEventListener('click', () => {
-        if (!this.engine.isFullscreen) {
-          // this.engine.switchFullscreen(true);
-          this.canvas.requestFullscreen();
         }
       });
 
