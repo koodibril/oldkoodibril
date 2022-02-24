@@ -176,7 +176,10 @@ export class CustomLoadingScreen implements ILoadingScreen {
         navigator.userAgent.substr(0, 4)
       )
     ) {
-      screen.orientation.lock('landscape');
+      window.screen.orientation.lock('landscape-primary').then(
+        success => console.log(success),
+        failure => console.log(failure)
+      );
     }
     div?.parentElement?.removeChild(div);
   }
