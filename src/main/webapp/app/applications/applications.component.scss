@@ -87,22 +87,29 @@
 .nopic {
   padding-top: 20%;
 }
-@media screen and (max-width: 500px) {
-  .wrapper {
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.85);
-  }
+@media screen and (max-height: 500px) {
   .tech {
-    font-size: 70px;
+    font-size: 40px;
   }
-  .close {
-    display: inline-block;
-    position: fixed;
-    width: 50px;
-    fill: 'black';
-    height: 50px;
-    z-index: 6;
-    top: 0;
-    right: 0;
+  .wrapper {
+    font-size: 10px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .title-wrapper {
+    height: 20%;
+  }
+  .content {
+    height: 70%;
+  }
+  .pictures {
+    height: 30%;
+  }
+  .picture {
+    height: 70%;
+  }
+  .description {
+    height: 40%;
   }
 }
