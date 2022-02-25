@@ -5,6 +5,7 @@ import { Account } from 'app/core/auth/account.model';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Application, applications } from 'app/engine/actions/text.service';
 import { pannelInfo } from 'app/engine/engine.component';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'jhi-applications',
@@ -35,23 +36,28 @@ export class ApplicationsComponent implements OnChanges, OnDestroy {
   public git = '';
   public technos = [''];
   public image = '';
+  public pdf = '';
+  public trustPdf!: SafeResourceUrl;
   public showModal = false;
   private applications: Application[];
   private readonly destroy$ = new Subject<void>();
-  constructor(private router: Router) {
+  constructor(private router: Router, protected _sanitizer: DomSanitizer) {
     this.applications = applications;
   }
 
   ngOnChanges(): void {
     if (this.app.app !== '') {
-      const index = applications.findIndex(el => el.name === this.app.app);
-      this.subtitle = applications[index].subtitle;
-      this.logo = applications[index].logo;
-      this.pictures = applications[index].pictures;
-      this.description = applications[index].description;
-      this.link = applications[index].link;
-      this.git = applications[index].git;
-      this.technos = applications[index].technos;
+      const index = this.applications.findIndex(el => el.name === this.app.app);
+      this.subtitle = this.applications[index].subtitle;
+      this.logo = this.applications[index].logo;
+      this.pictures = this.applications[index].pictures;
+      this.pdf = this.applications[index].pdf;
+      this.trustPdf = this._sanitizer.bypassSecurityTrustResourceUrl(this.applications[index].pdf);
+      this.description = this.applications[index].description;
+      this.link = this.applications[index].link;
+      this.git = this.applications[index].git;
+      this.technos = this.applications[index].technos;
+      console.log(this.trustPdf);
     }
   }
 

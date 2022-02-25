@@ -13,6 +13,7 @@ export interface Application {
   description: string;
   link: string;
   git: string;
+  pdf: string;
   technos: string[];
 }
 
@@ -20,11 +21,12 @@ export const applications: Application[] = [
   {
     name: 'KOODIBRIL',
     subtitle: 'A simple colibri app',
-    logo: '../../content/images/portfolio/koodibril/colibri.png',
+    logo: '/content/images/portfolio/koodibril/colibri.png',
+    pdf: '',
     pictures: [
-      '../../content/images/portfolio/koodibril/1.png',
-      '../../content/images/portfolio/koodibril/3.png',
-      '../../content/images/portfolio/koodibril/4.png',
+      '/content/images/portfolio/koodibril/1.png',
+      '/content/images/portfolio/koodibril/3.png',
+      '/content/images/portfolio/koodibril/4.png',
     ],
     // description: "This app has for purpoose to display my work in a fun way",
     description:
@@ -45,7 +47,8 @@ export const applications: Application[] = [
   {
     name: 'MIES HOUSE',
     subtitle: 'A simple logistic app',
-    logo: '../../content/images/portfolio/mies_house/1.jpeg',
+    logo: '/content/images/portfolio/mies_house/1.jpeg',
+    pdf: '',
     pictures: [],
     description:
       "Développer de nouvelles fonctionnalités, veiller a la robustesse, a l'extensibilité \
@@ -66,10 +69,11 @@ export const applications: Application[] = [
     name: 'UBEBEST',
     subtitle: 'A simple eco app',
     logo: 'https://ubebest.com/wp-content/uploads/2021/08/logo.png',
+    pdf: '',
     pictures: [
-      '../../content/images/portfolio/ubebest/1.png',
-      '../../content/images/portfolio/ubebest/2.png',
-      '../../content/images/portfolio/ubebest/3.png',
+      '/content/images/portfolio/ubebest/1.png',
+      '/content/images/portfolio/ubebest/2.png',
+      '/content/images/portfolio/ubebest/3.png',
     ],
     description:
       "Amelioration du backend, migration de scripts sous gcp afin de repartir la charge \
@@ -89,6 +93,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -99,11 +104,12 @@ export const applications: Application[] = [
     name: 'GRAPHIT',
     subtitle: 'A simple db app',
     logo: 'http://demo.graph-it.fr/static/media/Logo.8afff936.png',
+    pdf: '',
     pictures: [
-      '../../content/images/portfolio/graphit/1.png',
-      '../../content/images/portfolio/graphit/2.png',
-      '../../content/images/portfolio/graphit/3.png',
-      '../../content/images/portfolio/graphit/4.png',
+      '/content/images/portfolio/graphit/1.png',
+      '/content/images/portfolio/graphit/2.png',
+      '/content/images/portfolio/graphit/3.png',
+      '/content/images/portfolio/graphit/4.png',
     ],
     description:
       "Reprise du projet abandonne par deux developpeurs, remise a neuf du site, \
@@ -123,10 +129,11 @@ export const applications: Application[] = [
     name: 'BABYLON',
     subtitle: 'A simple fps app',
     logo: 'https://upload.wikimedia.org/wikipedia/fr/0/0d/Logo_OpenClassrooms.png',
+    pdf: '',
     pictures: [
-      '../../content/images/portfolio/babylon/1.png',
-      '../../content/images/portfolio/babylon/2.png',
-      '../../content/images/portfolio/babylon/3.png',
+      '/content/images/portfolio/babylon/1.png',
+      '/content/images/portfolio/babylon/2.png',
+      '/content/images/portfolio/babylon/3.png',
     ],
     description: "Tuto d'initiation a l'openGl avec la librairie babylonjs, plus d'information \
     sur openclassroom",
@@ -138,10 +145,11 @@ export const applications: Application[] = [
     name: 'CAMAGRU',
     subtitle: 'A simple instagram app',
     logo: '',
+    pdf: '/content/images/portfolio/camagru/camagru.en.pdf',
     pictures: [
-      '../../content/images/portfolio/camagru/1.png',
-      '../../content/images/portfolio/camagru/2.png',
-      '../../content/images/portfolio/camagru/4.png',
+      '/content/images/portfolio/camagru/1.png',
+      '/content/images/portfolio/camagru/2.png',
+      '/content/images/portfolio/camagru/4.png',
     ],
     description: "Projet web, ou l'objectif est de realiser une simple copie d'instagram.",
     link: 'https://camagru.koodibril.com/',
@@ -152,6 +160,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -162,10 +171,11 @@ export const applications: Application[] = [
     name: 'WOODART',
     subtitle: 'A simple wordpress',
     logo: '',
+    pdf: '',
     pictures: [
-      '../../content/images/portfolio/woodart/1.png',
-      '../../content/images/portfolio/woodart/2.png',
-      '../../content/images/portfolio/woodart/3.png',
+      '/content/images/portfolio/woodart/1.png',
+      '/content/images/portfolio/woodart/2.png',
+      '/content/images/portfolio/woodart/3.png',
     ],
     description:
       "Realisation d'un wordpress simple pour mettre en avant les tableaux d'un artiste \
@@ -178,6 +188,7 @@ export const applications: Application[] = [
     name: 'MATCHA',
     subtitle: 'A simple match app',
     logo: '',
+    pdf: '/content/images/portfolio/matcha/matcha.pdf',
     pictures: [],
     description: "Projet web, ou l'objectif est de realiser une simple copie de tinder.",
     link: '',
@@ -187,7 +198,8 @@ export const applications: Application[] = [
   {
     name: 'CLEAN-APP',
     subtitle: 'A simple clean app',
-    logo: '../../content/images/portfolio/clean_app/1.png',
+    logo: '/content/images/portfolio/clean_app/1.png',
+    pdf: '',
     pictures: [],
     description:
       "Un script bash, utiliser pour generer le squelette d'un application type MERN avec de \
@@ -200,6 +212,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -210,6 +223,7 @@ export const applications: Application[] = [
     name: 'HYPERTUBE',
     subtitle: 'A simple youtube app',
     logo: '',
+    pdf: '/content/images/portfolio/hypertube/hypertube/pdf',
     pictures: [],
     description: "Projet web, ou l'objectif est de realiser une simple copie de youtube.",
     link: '',
@@ -220,6 +234,7 @@ export const applications: Application[] = [
     name: 'MUSICROOM',
     subtitle: 'A simple deezer app',
     logo: '',
+    pdf: '/content/images/portfolio/musicroom/music-room.pdf',
     pictures: [],
     description: "Projet web, ou l'objectif est de realiser une simple copie de deezer.",
     link: '',
@@ -230,6 +245,7 @@ export const applications: Application[] = [
     name: 'BALANCINGBANK',
     subtitle: 'A simple bank app',
     logo: '',
+    pdf: '',
     pictures: [],
     description:
       "Projet web, ou l'objectif est de realiser une application capable de recupere \
@@ -243,6 +259,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -253,6 +270,7 @@ export const applications: Application[] = [
     name: "UNIQU'AIR",
     subtitle: 'A simple radio app',
     logo: '',
+    pdf: '',
     pictures: [],
     description:
       "Projet web, ou l'objectif est de realiser une radio web utilisant la blockchain \
@@ -265,6 +283,7 @@ export const applications: Application[] = [
     name: 'RED-TETRIS',
     subtitle: 'A simple tetris app',
     logo: '',
+    pdf: '/content/images/portfolio/red_tetris/tetris.pdf',
     pictures: [],
     description:
       "Projet web, ou l'objectif est de realiser une copie ameliorer de tetris afin de \
@@ -277,6 +296,7 @@ export const applications: Application[] = [
     name: 'LEMIN',
     subtitle: 'A simple ant app',
     logo: '',
+    pdf: '/content/images/portfolio/lemin/lemin.pdf',
     pictures: [],
     description:
       "Projet dont l'objectif est de realiser un algorithme permettant aux 'fourmis' \
@@ -289,6 +309,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -299,6 +320,7 @@ export const applications: Application[] = [
     name: 'COREWAR',
     subtitle: 'A simple war app',
     logo: '',
+    pdf: '/content/images/portfolio/corewar/corewar.fr.pdf',
     pictures: [],
     description:
       "Projet dont l'object est de participer a la guerre de MARS (corewar), une guerre \
@@ -311,6 +333,7 @@ export const applications: Application[] = [
     name: 'PUSH_SWAP',
     subtitle: 'A simple stack app',
     logo: '',
+    pdf: '/content/images/portfolio/pushswap/push_swap.fr.pdf',
     pictures: [],
     description:
       "Projet dont l'objectif est de realiser un algorithme de tri. Il n'aura pour seule \
@@ -324,6 +347,7 @@ export const applications: Application[] = [
     name: 'YOUR APP',
     subtitle: 'Coming soon',
     logo: '',
+    pdf: '',
     pictures: [],
     description: '',
     link: '',
@@ -334,6 +358,7 @@ export const applications: Application[] = [
     name: 'AlphaBril',
     subtitle: 'Florian-Marie Doucet',
     logo: '',
+    pdf: '/content/images/portfolio/alphabril/cv.pdf',
     pictures: ['https://dam.malt.com/txnsh1cmtklme34ypjva?gravity=face&func=face&face_margin=60&w=440&h=440&force_format=webp'],
     description:
       "Développeur en freelance depuis 3 ans, j'accompagne mes clients en leur apportant \
