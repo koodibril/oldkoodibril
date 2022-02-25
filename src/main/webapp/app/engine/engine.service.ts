@@ -125,8 +125,6 @@ export class EngineService {
     this.position = 0;
     this.loadingState.next('');
     this.engine.loadingUIBackgroundColor = 'rgb(1, 1, 1, 0.7)';
-    // this.canvas.requestFullscreen();
-    // this.canvas.click();
   }
 
   // this class use vertex to get the position on canvas in px of an object rendered
@@ -236,6 +234,9 @@ export class EngineService {
       });
       // this will resize the scene if the phone change orientation
       this.windowRef.window.addEventListener('orientationchange', () => {
+        if (window.screen.orientation.type === 'portrait-primary' || window.screen.orientation.type === 'portrait-secondary') {
+          this.engine.displayLoadingUI();
+        }
         this.engine.resize();
       });
     });

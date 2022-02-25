@@ -41,6 +41,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
   public displayLoadingUI(): void {
     if (this._loadingDiv) {
       // Do not add a loading screen if there is already one
+      this._loadingDiv.style.opacity = '1';
       return;
     }
 
@@ -165,8 +166,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     this._loadingDiv.style.opacity = '1';
   }
 
-  public test(): void {
-    const div = document.getElementById('babylonjsLoadingDiv');
+  public mobileChecker(): void {
     if (
       /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
         navigator.userAgent
@@ -181,7 +181,8 @@ export class CustomLoadingScreen implements ILoadingScreen {
         failure => console.log(failure)
       );
     }
-    div?.parentElement?.removeChild(div);
+    const div = document.getElementById('babylonjsLoadingDiv');
+    div!.style.opacity = '0';
   }
 
   public readyUIDiv(): void {
@@ -198,24 +199,24 @@ export class CustomLoadingScreen implements ILoadingScreen {
     }
     this._loadingDiv!.removeChild(this.imgBack);
     this._loadingDiv!.removeChild(this.imageSpinnerContainer);
-    const test = document.createElement('button');
-    test.innerHTML = 'Click me';
-    test.style.height = '150px';
-    test.style.width = '150px';
-    test.style.fontFamily = 'Tommy';
-    test.style.fontSize = '25px';
-    test.style.color = 'white';
-    test.style.backgroundColor = 'rgb(49, 54, 63, 0.7)';
-    test.style.border = 'none';
-    test.style.borderRadius = '75px';
-    test.style.gridColumn = '1';
-    test.style.gridRow = '1';
-    test.style.top = '50%';
-    test.style.left = '50%';
-    test.style.transform = 'translate(-50%, -50%)';
-    test.style.position = 'absolute';
-    test.style.zIndex = '10';
-    test.onclick = this.test;
+    const button = document.createElement('button');
+    button.innerHTML = 'Click me';
+    button.style.height = '150px';
+    button.style.width = '150px';
+    button.style.fontFamily = 'Tommy';
+    button.style.fontSize = '25px';
+    button.style.color = 'white';
+    button.style.backgroundColor = 'rgb(49, 54, 63, 0.7)';
+    button.style.border = 'none';
+    button.style.borderRadius = '75px';
+    button.style.gridColumn = '1';
+    button.style.gridRow = '1';
+    button.style.top = '50%';
+    button.style.left = '50%';
+    button.style.transform = 'translate(-50%, -50%)';
+    button.style.position = 'absolute';
+    button.style.zIndex = '10';
+    button.onclick = this.mobileChecker;
 
     const subleft = document.createElement('div');
     const imgleft = new Image();
@@ -276,7 +277,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     //   subright.innerHTML = 'Mobile are not supported yet.<br>Please, visit on desktop for <br> a full portfolio';
     //   this._loadingDiv?.appendChild(subright);
     // } else {
-    this._loadingDiv?.appendChild(test);
+    this._loadingDiv?.appendChild(button);
     this._loadingDiv?.appendChild(imgleft);
     this._loadingDiv?.appendChild(subleft);
     this._loadingDiv?.appendChild(imgright);
