@@ -41,6 +41,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
   public displayLoadingUI(): void {
     if (this._loadingDiv) {
       // Do not add a loading screen if there is already one
+      this._loadingDiv.style.display = 'block';
       this._loadingDiv.style.opacity = '1';
       return;
     }
@@ -183,6 +184,9 @@ export class CustomLoadingScreen implements ILoadingScreen {
     }
     const div = document.getElementById('babylonjsLoadingDiv');
     div!.style.opacity = '0';
+    div!.addEventListener('transitionend', () => {
+      div!.style.display = 'none';
+    });
   }
 
   public readyUIDiv(): void {
