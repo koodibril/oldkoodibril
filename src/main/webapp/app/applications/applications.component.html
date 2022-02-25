@@ -50,7 +50,6 @@
   <div class="content">
     <div class="pictures row justify-content-center">
       <div *ngIf="pictures.length === 0 && pdf === ''" class="nopic">No pictures are available.</div>
-      <div *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" class="picture">PDF</div>
       <img
         *ngFor="let picture of pictures; let i = index"
         (click)="setModal(picture)"
@@ -58,6 +57,7 @@
         [attr.src]="picture"
         class="picture"
       />
+      <img *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" src="/content/images/pdf.svg" class="picture" />
     </div>
     <div class="description">
       {{ description }}
