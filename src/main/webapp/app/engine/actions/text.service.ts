@@ -20,12 +20,11 @@ export const applications: Application[] = [
   {
     name: 'KOODIBRIL',
     subtitle: 'A simple colibri app',
-    logo: 'https://koodibril.com/colibri.png',
+    logo: '../../content/images/portfolio/koodibril/colibri.png',
     pictures: [
-      'https://koodibril.com/colibri.png',
-      'https://koodibril.com/colibri.png',
-      'https://koodibril.com/colibri.png',
-      'https://koodibril.com/colibri.png',
+      '../../content/images/portfolio/koodibril/1.png',
+      '../../content/images/portfolio/koodibril/3.png',
+      '../../content/images/portfolio/koodibril/4.png',
     ],
     // description: "This app has for purpoose to display my work in a fun way",
     description:
@@ -46,7 +45,7 @@ export const applications: Application[] = [
   {
     name: 'MIES HOUSE',
     subtitle: 'A simple logistic app',
-    logo: '',
+    logo: '../../content/images/portfolio/mies_house/1.jpeg',
     pictures: [],
     description:
       "Développer de nouvelles fonctionnalités, veiller a la robustesse, a l'extensibilité \
@@ -67,7 +66,11 @@ export const applications: Application[] = [
     name: 'UBEBEST',
     subtitle: 'A simple eco app',
     logo: 'https://ubebest.com/wp-content/uploads/2021/08/logo.png',
-    pictures: [],
+    pictures: [
+      '../../content/images/portfolio/ubebest/1.png',
+      '../../content/images/portfolio/ubebest/2.png',
+      '../../content/images/portfolio/ubebest/3.png',
+    ],
     description:
       "Amelioration du backend, migration de scripts sous gcp afin de repartir la charge \
     du serveur, creation d'un module strapi pour controler le serveur de scripts, et les lancer si \
@@ -96,7 +99,12 @@ export const applications: Application[] = [
     name: 'GRAPHIT',
     subtitle: 'A simple db app',
     logo: 'http://demo.graph-it.fr/static/media/Logo.8afff936.png',
-    pictures: [],
+    pictures: [
+      '../../content/images/portfolio/graphit/1.png',
+      '../../content/images/portfolio/graphit/2.png',
+      '../../content/images/portfolio/graphit/3.png',
+      '../../content/images/portfolio/graphit/4.png',
+    ],
     description:
       "Reprise du projet abandonne par deux developpeurs, remise a neuf du site, \
     correction de toutes les fonctionnalites implementes mais compromises. Developpement de nouvelles \
@@ -115,7 +123,11 @@ export const applications: Application[] = [
     name: 'BABYLON',
     subtitle: 'A simple fps app',
     logo: 'https://upload.wikimedia.org/wikipedia/fr/0/0d/Logo_OpenClassrooms.png',
-    pictures: [],
+    pictures: [
+      '../../content/images/portfolio/babylon/1.png',
+      '../../content/images/portfolio/babylon/2.png',
+      '../../content/images/portfolio/babylon/3.png',
+    ],
     description: "Tuto d'initiation a l'openGl avec la librairie babylonjs, plus d'information \
     sur openclassroom",
     link: 'https://babylon.koodibril.com/',
@@ -126,7 +138,11 @@ export const applications: Application[] = [
     name: 'CAMAGRU',
     subtitle: 'A simple instagram app',
     logo: '',
-    pictures: [],
+    pictures: [
+      '../../content/images/portfolio/camagru/1.png',
+      '../../content/images/portfolio/camagru/2.png',
+      '../../content/images/portfolio/camagru/4.png',
+    ],
     description: "Projet web, ou l'objectif est de realiser une simple copie d'instagram.",
     link: 'https://camagru.koodibril.com/',
     git: 'https://github.com/koodibril/camagru',
@@ -146,7 +162,11 @@ export const applications: Application[] = [
     name: 'WOODART',
     subtitle: 'A simple wordpress',
     logo: '',
-    pictures: [],
+    pictures: [
+      '../../content/images/portfolio/woodart/1.png',
+      '../../content/images/portfolio/woodart/2.png',
+      '../../content/images/portfolio/woodart/3.png',
+    ],
     description:
       "Realisation d'un wordpress simple pour mettre en avant les tableaux d'un artiste \
     (@passat_woodart) et lui permettre d'ajouter lui meme ces nouveaux tableau.",
@@ -167,7 +187,7 @@ export const applications: Application[] = [
   {
     name: 'CLEAN-APP',
     subtitle: 'A simple clean app',
-    logo: 'https://raw.githubusercontent.com/AlphaBril/clean-app/main/files/MrPropre.png',
+    logo: '../../content/images/portfolio/clean_app/1.png',
     pictures: [],
     description:
       "Un script bash, utiliser pour generer le squelette d'un application type MERN avec de \
