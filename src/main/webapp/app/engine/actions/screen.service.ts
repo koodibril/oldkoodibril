@@ -176,7 +176,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
         navigator.userAgent.substr(0, 4)
       )
     ) {
-      document.body.requestFullscreen();
+      // document.body.requestFullscreen();
       window.screen.orientation.lock('landscape-primary').then(
         success => console.log(success),
         failure => console.log(failure)

@@ -88,28 +88,35 @@
   padding-top: 20%;
 }
 @media screen and (max-height: 500px) {
+  .technos {
+    height: 15%;
+  }
   .tech {
     font-size: 40px;
   }
   .wrapper {
     font-size: 10px;
+    padding: 20px 40px 40px 40px;
   }
   .title {
     font-size: 20px;
   }
   .title-wrapper {
-    height: 20%;
+    height: 15%;
   }
   .content {
     height: 70%;
   }
   .pictures {
-    height: 30%;
+    height: 20%;
   }
   .picture {
-    height: 70%;
+    height: 90%;
   }
   .description {
     height: 40%;
+  }
+  .nopic {
+    padding: 5%;
   }
 }
