@@ -5,7 +5,7 @@ import { Account } from 'app/core/auth/account.model';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Application, applications } from 'app/engine/actions/text.service';
 import { pannelInfo } from 'app/engine/engine.component';
-import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'jhi-applications',

@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="content">
-    <div class="pictures row justify-content-center">
+    <div class="pictures">
       <div *ngIf="pictures.length === 0 && pdf === ''" class="nopic">No pictures are available.</div>
       <img
         *ngFor="let picture of pictures; let i = index"
@@ -18,7 +18,7 @@
         [attr.src]="picture"
         class="picture"
       />
-      <img *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" src="/content/images/pdf.svg" class="picture" />
+      <img *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" src="/content/images/pdf.svg" class="picture pdf" />
     </div>
     <div class="description">
       {{ description }}
@@ -48,7 +48,7 @@
     </div>
   </div>
   <div class="content">
-    <div class="pictures row justify-content-center">
+    <div class="pictures">
       <div *ngIf="pictures.length === 0 && pdf === ''" class="nopic">No pictures are available.</div>
       <img
         *ngFor="let picture of pictures; let i = index"
@@ -57,7 +57,7 @@
         [attr.src]="picture"
         class="picture"
       />
-      <img *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" src="/content/images/pdf.svg" class="picture" />
+      <img *ngIf="pictures.length < 4 && pdf !== ''" (click)="setModal(pdf)" src="/content/images/pdf.svg" class="picture pdf" />
     </div>
     <div class="description">
       {{ description }}
