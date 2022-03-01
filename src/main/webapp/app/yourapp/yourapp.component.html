@@ -1,0 +1,26 @@
+<div *ngIf="show && app.side" [@slideInOutRight] class="wrapper">
+  <div class="title-wrapper">
+    <div class="title row justify-content-center">
+      <img class="logo" src="/content/images/portfolio/koodibril/colibri.png" />
+      Your app
+    </div>
+    <div class="subtitle row justify-content-center">Realise what you have in mind</div>
+  </div>
+  coucou
+</div>
+
+<div *ngIf="show && !app.side" [@slideInOutLeft] class="wrapper left">
+  <div class="title-wrapper">
+    <div class="title row justify-content-center">
+      <img class="logo" src="/content/images/portfolio/koodibril/colibri.png" />
+      Your app
+    </div>
+    <div class="subtitle row justify-content-center">Realise what you have in mind</div>
+  </div>
+  coucou
+</div>
+
+<div *ngIf="showModal && image !== ''" class="modalImage" (click)="clearModal()">
+  <img *ngIf="image.slice(-1) !== 'f'" class="imgModal" [attr.src]="image" />
+  <iframe *ngIf="image.slice(-1) === 'f'" class="pdfModal" [src]="trustPdf"> </iframe>
+</div>

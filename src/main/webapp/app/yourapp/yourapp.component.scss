@@ -1,0 +1,144 @@
+.wrapper {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  width: 35%;
+  height: 100%;
+  font-family: 'Tommy';
+  font-size: 20px;
+  padding: 30px 50px 50px 50px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.left {
+  left: 0;
+}
+.close {
+  display: none;
+}
+.modalImage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  z-index: 6;
+}
+.imgModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.pdfModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+  width: 80%;
+}
+.title-wrapper {
+  height: 10%;
+}
+.title {
+  align-items: center;
+  width: 100%;
+  font-size: 50px;
+  font-family: 'jungleRoar';
+}
+.logo {
+  height: 50px;
+}
+.subtitle {
+  margin-top: -20px;
+  margin-bottom: 20px;
+}
+.content {
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.pictures {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  max-height: 50%;
+}
+.picture {
+  grid-column: span 2;
+  width: 100%;
+}
+.picture:hover {
+  cursor: pointer;
+}
+.pdf {
+  max-width: 3em;
+}
+.picture:last-child:nth-child(3n) {
+  grid-column-end: 4;
+}
+.description {
+  max-height: 30%;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  overflow-y: scroll;
+}
+.description::-webkit-scrollbar {
+  display: none;
+}
+.links {
+  max-height: 10%;
+}
+.technos {
+  height: 10%;
+  align-items: center;
+  justify-content: space-around;
+}
+.tech {
+  font-size: 100px;
+}
+.nopic {
+  padding-top: 20%;
+}
+@media screen and (max-height: 500px) {
+  .technos {
+    height: 15%;
+  }
+  .tech {
+    font-size: 40px;
+  }
+  .wrapper {
+    font-size: 10px;
+    padding: 20px 40px 40px 40px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .title-wrapper {
+    height: 15%;
+  }
+  .content {
+    height: 70%;
+  }
+  .pictures {
+    grid-template-columns: auto auto auto auto;
+    max-height: 20%;
+  }
+  .picture {
+    grid-column: span 1;
+  }
+  .description {
+    max-height: 40%;
+  }
+  .nopic {
+    padding: 5%;
+  }
+}
