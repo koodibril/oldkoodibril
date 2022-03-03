@@ -32,7 +32,7 @@ export class AlphabrilComponent implements OnDestroy {
   public showModal = false;
   private readonly destroy$ = new Subject<void>();
   constructor(private router: Router, protected _sanitizer: DomSanitizer) {
-    this.trustPdf = this._sanitizer.bypassSecurityTrustResourceUrl('');
+    this.trustPdf = this._sanitizer.bypassSecurityTrustResourceUrl('/content/images/portfolio/alphabril/CV.pdf');
   }
 
   login(): void {

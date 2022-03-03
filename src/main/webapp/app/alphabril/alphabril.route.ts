@@ -1,6 +1,6 @@
 import { Route } from '@angular/router';
 
-import { AlphabrilComponent } from './applications.component';
+import { AlphabrilComponent } from './alphabril.component';
 
 export const APPLICATIONS_ROUTE: Route = {
   path: '',

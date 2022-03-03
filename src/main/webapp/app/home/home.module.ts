@@ -6,7 +6,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { HOME_ROUTE } from './home.route';
 import { HomeComponent } from './home.component';
 import { ApplicationsComponent } from 'app/applications/applications.component';
-import { AlphabrilComponent } from 'app/alphabril/applications.component';
+import { AlphabrilComponent } from 'app/alphabril/alphabril.component';
 import { YourappComponent } from 'app/yourapp/yourapp.component';
 
 @NgModule({
