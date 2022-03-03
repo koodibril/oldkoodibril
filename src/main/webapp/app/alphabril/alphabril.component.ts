@@ -1,4 +1,4 @@
-import { Component, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnDestroy, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Account } from 'app/core/auth/account.model';
@@ -26,7 +26,6 @@ export class AlphabrilComponent implements OnDestroy {
 
   @Input() public show = false;
   @Input() public app: pannelInfo = { app: '', side: false };
-  @Output() newEvent = new EventEmitter<boolean>();
   public image = '';
   public trustPdf!: SafeResourceUrl;
   public showModal = false;
@@ -37,12 +36,6 @@ export class AlphabrilComponent implements OnDestroy {
 
   login(): void {
     this.router.navigate(['/login']);
-  }
-
-  reset(): void {
-    this.show = false;
-    this.app.app = '';
-    this.newEvent.emit(false);
   }
 
   setModal(img: string): void {

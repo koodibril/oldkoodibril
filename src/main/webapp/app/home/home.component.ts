@@ -28,7 +28,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         this.showApp = true;
         this.app = app;
-        console.log(this.app);
       }, 1);
     }
   }

@@ -24,9 +24,13 @@
       {{ description }}
     </div>
     <div class="links">
-      <div *ngIf="link !== ''" class="link">You can access a live demo <a [href]="link">here</a></div>
+      <div *ngIf="link !== ''" class="link">
+        You can access a live demo <a [href]="link" target="_blank" rel="noopener noreferrer">here</a>
+      </div>
       <div *ngIf="link === ''" class="link">No demo is actually available.</div>
-      <div *ngIf="git !== ''" class="link">This project is open-source, you can find it on <a [href]="git">Github</a></div>
+      <div *ngIf="git !== ''" class="link">
+        This project is open-source, you can find it on <a [href]="git" target="_blank" rel="noopener noreferrer">Github</a>
+      </div>
       <div *ngIf="git === ''" class="link">This project is private, no repository is available.</div>
     </div>
   </div>

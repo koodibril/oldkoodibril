@@ -214,6 +214,7 @@ export class EngineService {
 
       // observable for scroll in phone
       this.canvas.addEventListener('touchstart', event => {
+        this.appName.next({ app: 'wheel', side: false });
         this.touchY = event.touches[0].clientY;
       });
       this.canvas.addEventListener('touchend', event => {
