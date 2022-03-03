@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [ staging ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Build
+        run: |
+          cd ~/build/koodibril
+          git checkout staging
+          git pull
+          ./mvnw -Pprod -DskipTests -T 4 verify jib:dockerBuild
+      - name: Deploy
+        run: |
+          cd ~/websites/koodibril
+          docker-compose up -d
