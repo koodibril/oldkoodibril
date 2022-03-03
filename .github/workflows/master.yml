@@ -14,7 +14,7 @@ jobs:
       - name: Build
         run: |
           cd ~/build/koodibril
-          git checkout staging
+          git checkout master
           git pull
           ./mvnw -Pprod -DskipTests -T 4 verify jib:dockerBuild
           docker image tag koodibril koodibril:master
