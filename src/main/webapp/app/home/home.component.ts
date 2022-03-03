@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
+import { pannelInfo } from 'app/engine/engine.component';
 
 @Component({
   selector: 'jhi-home',
@@ -14,9 +15,29 @@ import { Account } from 'app/core/auth/account.model';
 export class HomeComponent implements OnInit, OnDestroy {
   account: Account | null = null;
 
+  public showApp = false;
+  public app: pannelInfo = { app: '', side: false };
   private readonly destroy$ = new Subject<void>();
 
   constructor(private accountService: AccountService, private router: Router) {}
+
+  setApp(app: pannelInfo): void {
+    if (this.showApp && app.app === 'wheel') {
+      this.resetApp();
+    } else if (!this.showApp && app.app !== 'wheel') {
+      setTimeout(() => {
+        this.showApp = true;
+        this.app = app;
+      }, 1);
+    }
+  }
+
+  resetApp(): void {
+    if (this.showApp) {
+      this.showApp = false;
+      this.app = { app: '', side: false };
+    }
+  }
 
   ngOnInit(): void {
     this.accountService

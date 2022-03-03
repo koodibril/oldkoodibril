@@ -1,0 +1,91 @@
+.wrapper {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  width: 35%;
+  height: 100%;
+  font-family: 'Tommy';
+  font-size: 20px;
+  padding: 30px 50px 50px 50px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.left {
+  left: 0;
+}
+.close {
+  display: none;
+}
+.title-wrapper {
+  height: 10%;
+}
+.title {
+  align-items: center;
+  width: 100%;
+  font-size: 50px;
+  font-family: 'jungleRoar';
+}
+.logo {
+  height: 50px;
+}
+.subtitle {
+  margin-top: -20px;
+  margin-bottom: 20px;
+}
+.content {
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.calendly {
+  max-height: 20%;
+}
+.malt {
+  max-height: 20%;
+}
+.notion {
+  max-height: 20%;
+}
+.picture {
+  width: 50%;
+}
+.picture:hover {
+  cursor: pointer;
+}
+.description {
+  max-height: 40%;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  overflow-y: scroll;
+}
+.description::-webkit-scrollbar {
+  display: none;
+}
+.footer {
+  height: 10%;
+}
+@media screen and (max-height: 500px) {
+  .wrapper {
+    font-size: 10px;
+    padding: 20px 40px 40px 40px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .title-wrapper {
+    height: 15%;
+  }
+  .content {
+    height: 70%;
+  }
+  .picture {
+    grid-column: span 1;
+  }
+  .description {
+    display: none;
+  }
+}

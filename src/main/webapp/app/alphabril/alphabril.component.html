@@ -1,0 +1,98 @@
+<div *ngIf="show && app.side" [@slideInOutRight] class="wrapper">
+  <div class="title-wrapper">
+    <div class="title row justify-content-center">
+      <img class="logo" src="/content/images/portfolio/koodibril/colibri.png" />
+      AlphaBril
+    </div>
+    <div class="subtitle row justify-content-center">Florian-marie doucet</div>
+  </div>
+  <br />
+  <div class="content">
+    <div class="pictures row justify-content-center">
+      <img
+        (click)="setModal('https://dam.malt.com/txnsh1cmtklme34ypjva?gravity=face&func=face&face_margin=60&w=440&h=440&force_format=webp')"
+        class="picture"
+        src="https://dam.malt.com/txnsh1cmtklme34ypjva?gravity=face&func=face&face_margin=60&w=440&h=440&force_format=webp"
+      />
+      <div class="pdf">
+        <img (click)="setModal('/content/images/portfolio/alphabril/cv.pdf')" src="/content/images/pdf.svg" class="picture" />
+        CV
+      </div>
+    </div>
+    <br />
+    <div class="description">
+      Bonjour, je suis Florian-Marie Doucet, Développeur Web, passionné par les nouvelles technologies et leurs facultés à améliorer la
+      productivité des entreprises.
+      <br />
+      <br />
+      Age: 25 ans
+      <br />
+      Formation: 42-Paris
+      <br />
+      Diplome: Expert informatique et systemes d'information
+      <br />
+      Ville: Paris 16eme
+      <br />
+      Job: Developpeur fullstack
+      <br />
+      Specialite: Web, React, Node, Docker
+    </div>
+  </div>
+  <div class="footer">
+    Retrouver moi sur <a href="https://github.com/AlphaBril" target="_blank" rel="noopener noreferrer">Github</a>, sur
+    <a href="https://www.malt.fr/profile/doucetflorianmarie" target="_blank" rel="noopener noreferrer">Malt</a> ou encore
+    <a href="https://fr.linkedin.com/in/florian-marie-doucet-0a62b918a" target="_blank" rel="noopener noreferrer">Linkedin</a>
+  </div>
+</div>
+
+<div *ngIf="show && !app.side" [@slideInOutLeft] class="wrapper left">
+  <div class="title-wrapper">
+    <div class="title row justify-content-center">
+      <img class="logo" src="/content/images/portfolio/koodibril/colibri.png" />
+      AlphaBril
+    </div>
+    <div class="subtitle row justify-content-center">Florian-marie doucet</div>
+  </div>
+  <br />
+  <div class="content">
+    <div class="pictures row justify-content-center">
+      <img
+        (click)="setModal('https://dam.malt.com/txnsh1cmtklme34ypjva?gravity=face&func=face&face_margin=60&w=440&h=440&force_format=webp')"
+        class="picture"
+        src="https://dam.malt.com/txnsh1cmtklme34ypjva?gravity=face&func=face&face_margin=60&w=440&h=440&force_format=webp"
+      />
+      <div class="pdf">
+        <img (click)="setModal('/content/images/portfolio/alphabril/CV.pdf')" src="/content/images/pdf.svg" class="picture" />
+        CV
+      </div>
+    </div>
+    <br />
+    <div class="description">
+      Bonjour, je suis Florian-Marie Doucet, Développeur Web, passionné par les nouvelles technologies et leurs facultés à améliorer la
+      productivité des entreprises.
+      <br />
+      <br />
+      Age: 25 ans
+      <br />
+      Formation: 42-Paris
+      <br />
+      Diplome: Expert informatique et systemes d'information
+      <br />
+      Ville: Paris 16eme
+      <br />
+      Job: Developpeur fullstack
+      <br />
+      Specialite: Web, React, Node, Docker
+    </div>
+  </div>
+  <div class="footer">
+    Retrouver moi sur <a href="https://github.com/AlphaBril" target="_blank" rel="noopener noreferrer">Github</a>, sur
+    <a href="https://www.malt.fr/profile/doucetflorianmarie" target="_blank" rel="noopener noreferrer">Malt</a> ou encore
+    <a href="https://fr.linkedin.com/in/florian-marie-doucet-0a62b918a" target="_blank" rel="noopener noreferrer">Linkedin</a>
+  </div>
+</div>
+
+<div *ngIf="showModal && image !== ''" class="modalImage" (click)="clearModal()">
+  <img *ngIf="image.slice(-1) !== 'f'" class="imgModal" [attr.src]="image" />
+  <iframe *ngIf="image.slice(-1) === 'f'" class="pdfModal" [src]="trustPdf"> </iframe>
+</div>

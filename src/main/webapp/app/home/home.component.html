@@ -1,3 +1,4 @@
-<div class="col">
-  <jhi-app-engine></jhi-app-engine>
-</div>
+<jhi-app-engine id="app-engine" [show]="showApp" (click)="resetApp()" (newEvent)="setApp($event)"></jhi-app-engine>
+<jhi-applications *ngIf="app.app !== 'AlphaBril' && app.app !== 'YOUR APP'" [show]="showApp" [app]="app"></jhi-applications>
+<jhi-alphabril *ngIf="app.app === 'AlphaBril'" [show]="showApp" [app]="app"></jhi-alphabril>
+<jhi-yourapp *ngIf="app.app === 'YOUR APP'" [show]="showApp" [app]="app"></jhi-yourapp>
