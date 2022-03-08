@@ -192,7 +192,10 @@ export class CustomLoadingScreen implements ILoadingScreen {
   public readyUIDiv(): void {
     let mobile = false;
     console.log(navigator.userAgent);
-    if (navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Safari') === -1) {
+    if (
+      (navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Safari') === -1) ||
+      navigator.userAgent.indexOf('Instagram') !== -1
+    ) {
       mobile = true;
     }
     this._loadingDiv!.removeChild(this.imgBack);
