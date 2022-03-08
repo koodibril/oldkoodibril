@@ -51,7 +51,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
     this._loadingDiv.id = 'babylonjsLoadingDiv';
     this._loadingDiv.style.opacity = '0';
     this._loadingDiv.style.position = 'fixed';
-    this._loadingDiv.style.transition = 'opacity 1.5s ease';
+    this._loadingDiv.style.transition = 'opacity 1s ease';
     this._loadingDiv.style.display = 'grid';
     this._loadingDiv.style.gridTemplateRows = '100%';
     this._loadingDiv.style.gridTemplateColumns = '100%';
@@ -220,7 +220,9 @@ export class CustomLoadingScreen implements ILoadingScreen {
     button.style.transform = 'translate(-50%, -50%)';
     button.style.position = 'absolute';
     button.style.zIndex = '10';
-    button.onclick = this.mobileChecker;
+    button.addEventListener('click', event => {
+      this.mobileChecker();
+    });
 
     const subleft = document.createElement('div');
     const imgleft = new Image();
