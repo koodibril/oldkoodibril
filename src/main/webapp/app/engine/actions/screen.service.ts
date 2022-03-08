@@ -214,9 +214,15 @@ export class CustomLoadingScreen implements ILoadingScreen {
     button.style.transform = 'translate(-50%, -50%)';
     button.style.position = 'absolute';
     button.style.zIndex = '10';
-    button.addEventListener('click', () => {
-      this.mobileChecker();
-    });
+    if (window.ontouchstart) {
+      button.addEventListener('touchend', () => {
+        this.mobileChecker();
+      });
+    } else {
+      button.addEventListener('click', () => {
+        this.mobileChecker();
+      });
+    }
 
     const subleft = document.createElement('div');
     const imgleft = new Image();
