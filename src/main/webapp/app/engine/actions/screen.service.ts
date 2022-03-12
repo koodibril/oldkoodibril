@@ -176,9 +176,11 @@ export class CustomLoadingScreen implements ILoadingScreen {
         navigator.userAgent.substr(0, 4)
       )
     ) {
-      const element = document.body;
+      const element = document.getElementById('renderCanvas');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore next-line
       if (element.requestFullscreen) {
-        element.requestFullscreen().then(
+        element!.requestFullscreen().then(
           () => {
             console.log('fullscreen success');
           },
