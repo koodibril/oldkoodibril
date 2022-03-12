@@ -176,7 +176,16 @@ export class CustomLoadingScreen implements ILoadingScreen {
         navigator.userAgent.substr(0, 4)
       )
     ) {
-      document.body.requestFullscreen();
+      const element = document.body;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore next-line
+      if (element.webkitRequestFullScreen) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore next-line
+        element.webkitRequestFullScreen();
+      } else {
+        element.requestFullscreen();
+      }
       window.screen.orientation.lock('landscape-primary').then(
         success => console.log(success),
         failure => console.log(failure)
@@ -191,7 +200,6 @@ export class CustomLoadingScreen implements ILoadingScreen {
 
   public readyUIDiv(): void {
     let mobile = false;
-    console.log(navigator.userAgent);
     if (
       (navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Safari') === -1) ||
       navigator.userAgent.indexOf('Instagram') !== -1
@@ -283,8 +291,7 @@ export class CustomLoadingScreen implements ILoadingScreen {
       subright.style.top = '50%';
       subright.style.transform = 'translate(-50%, -50%)';
       subright.style.fontSize = '25px';
-      subright.innerHTML =
-        'Only Safari and Chrome are supported.<br><br>Please, visit on those <a href="https://koodibril.com" target="_blank" rel="noreferrer noopener">browsers</a> for a full portfolio';
+      subright.innerHTML = 'Only Safari and Chrome are supported.<br><br>Please, visit on those browsers for a full portfolio';
       this._loadingDiv?.appendChild(subright);
     } else {
       this._loadingDiv?.appendChild(button);
