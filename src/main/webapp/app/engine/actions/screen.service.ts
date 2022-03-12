@@ -177,15 +177,17 @@ export class CustomLoadingScreen implements ILoadingScreen {
       )
     ) {
       const element = document.body;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore next-line
-      if (element.webkitRequestFullScreen) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore next-line
-        element.webkitRequestFullScreen();
-      } else {
-        element.requestFullscreen();
-      }
+      element.requestFullscreen().then(
+        () => {
+          console.log('fullscreen success');
+        },
+        () => {
+          console.log('fullscreen rejected, trying webkit');
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore next-line
+          element.webkitRequestFullScreen();
+        }
+      );
       window.screen.orientation.lock('landscape-primary').then(
         success => console.log(success),
         failure => console.log(failure)
