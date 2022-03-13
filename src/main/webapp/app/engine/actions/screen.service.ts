@@ -195,7 +195,13 @@ export class CustomLoadingScreen implements ILoadingScreen {
         console.log('function does not exist, trying webkit');
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore next-line
-        element.webkitRequestFullScreen();
+        if (element.webkitRequestFullScreen) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore next-line
+          element.webkitRequestFullScreen();
+        } else {
+          console.log('no fullscreen available on this device');
+        }
       }
       window.screen.orientation.lock('landscape-primary').then(
         success => console.log(success),
