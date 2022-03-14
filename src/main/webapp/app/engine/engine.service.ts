@@ -310,18 +310,18 @@ export class EngineService {
   public wheel(event: any): void {
     this.appName.next({ app: 'wheel', side: false });
     const delta = Math.sign(event.deltaY);
-    if (delta === 1) {
-      this.position = this.position === 0 ? 23 : this.position - 1;
-    } else {
-      this.position = this.position === 24 ? 1 : this.position + 1;
-    }
-    if (this.position === 24) {
-      this.position = 0;
-    }
     if (this.open && !this.animationsActions.loading) {
       this.reset();
     }
     if (!this.move && !this.animationsActions.loading) {
+      if (delta === 1) {
+        this.position = this.position === 0 ? 23 : this.position - 1;
+      } else {
+        this.position = this.position === 24 ? 1 : this.position + 1;
+      }
+      if (this.position === 24) {
+        this.position = 0;
+      }
       this.forestActions.addRow(delta);
       this.move = true;
       let rollOver: any;
