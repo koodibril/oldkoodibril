@@ -9,6 +9,7 @@ import {
   AnimationGroup,
   ParticleSystem,
   Texture,
+  BezierCurveEase,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import { Forest } from './forest.service';
@@ -88,6 +89,10 @@ export class AnimationsActions {
     xSlide.setKeys(xkeyFrames);
     ySlide.setKeys(ykeyFrames);
     zSlide.setKeys(zkeyFrames);
+    // const bezierEase = new BezierCurveEase(0.32, -0.73, 0.69, 1.59);
+    // xSlide.setEasingFunction(bezierEase);
+    // ySlide.setEasingFunction(bezierEase);
+    // zSlide.setEasingFunction(bezierEase);
     const animations = [xSlide, zSlide, ySlide];
     return this.scene.beginDirectAnimation(object, animations, 0, frameRate, false, speed);
   }

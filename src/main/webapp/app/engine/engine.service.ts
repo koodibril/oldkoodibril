@@ -48,6 +48,7 @@ export class EngineService {
   private guiAction!: GuiActions;
   private textActions!: textActions;
   private position!: number;
+  private wheely!: number;
 
   public constructor(private ngZone: NgZone, private windowRef: WindowRefService) {
     this.loading = false;
@@ -123,6 +124,7 @@ export class EngineService {
     this.timeout = false;
     this.open = false;
     this.position = 0;
+    this.wheely = 0;
     this.loadingState.next('');
     this.engine.loadingUIBackgroundColor = 'rgb(1, 1, 1, 0.7)';
   }
@@ -374,21 +376,21 @@ export class EngineService {
               element.meshe,
               position,
               new Vector3(position.x, -5, (position.z as number) + 4 * delta),
-              2
+              10
             );
           } else if (element.meshe.position.z === 12 && delta === -1) {
             rollOver = this.animationsActions.slideObject(
               element.meshe,
               position,
               new Vector3(position.x, element.meshe.name === 'flower' ? 1.5 : 0, (position.z as number) + 4 * delta),
-              2
+              10
             );
           } else {
             rollOver = this.animationsActions.slideObject(
               element.meshe,
               position,
               new Vector3(position.x, position.y, (position.z as number) + 4 * delta),
-              2
+              10
             );
           }
         });
