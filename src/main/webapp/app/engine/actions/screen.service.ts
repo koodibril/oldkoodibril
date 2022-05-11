@@ -230,7 +230,8 @@ export class CustomLoadingScreen implements ILoadingScreen {
     }
     if (
       (navigator.userAgent.indexOf('Chrome') === -1 && navigator.userAgent.indexOf('Safari') === -1) ||
-      navigator.userAgent.indexOf('Instagram') !== -1
+      navigator.userAgent.indexOf('Instagram') !== -1 ||
+      navigator.userAgent.indexOf('Facebook') !== -1
     ) {
       nav = true;
     }
@@ -314,20 +315,20 @@ export class CustomLoadingScreen implements ILoadingScreen {
     imgright.style.transform = 'translate(-50%, -75%)';
     imgright.style.position = 'absolute';
 
-    if (nav) {
-      // mobile is supported but instagran browser is shitty
+    if (mobile) {
+      // mobile is not supported, lets say this
       subright.style.top = '50%';
       subright.style.transform = 'translate(-50%, -50%)';
       subright.style.fontSize = '25px';
-      subright.innerHTML = 'Instagram and Facebook browsers are not supported.<br><br>Please, visit on chrome for a full portfolio';
+      subright.innerHTML = 'Currently mobile is not supported. Please visit on a desktop for a full experience';
       this._loadingDiv?.appendChild(subright);
-    } else if (mobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      // for now apple isn't supported, because they don't have scree lock and scree rotation
-      subright.style.top = '50%';
-      subright.style.transform = 'translate(-50%, -50%)';
-      subright.style.fontSize = '25px';
-      subright.innerHTML = 'Only Safari desktop is supported for apple software.<br><br>Please, visit on this device for a full portfolio';
-      this._loadingDiv?.appendChild(subright);
+      // } else if (mobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      //   // for now apple isn't supported, because they don't have scree lock and scree rotation
+      //   subright.style.top = '50%';
+      //   subright.style.transform = 'translate(-50%, -50%)';
+      //   subright.style.fontSize = '25px';
+      //   subright.innerHTML = 'Only Safari desktop is supported for apple software.<br><br>Please, visit on this device for a full portfolio';
+      //   this._loadingDiv?.appendChild(subright);
     } else {
       this._loadingDiv?.appendChild(button);
       this._loadingDiv?.appendChild(imgleft);
